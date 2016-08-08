@@ -13,7 +13,7 @@ class MacroscopicParam : public Matrix<T>
 public:
 	MacroscopicParam();
 	MacroscopicParam(unsigned rows, unsigned colls);
-	~MacroscopicParam();
+	virtual ~MacroscopicParam() {}
 
 private:
 

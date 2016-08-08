@@ -58,6 +58,47 @@ inline void DistributionFunction<T>::fill(T const value)
 }
 
 template<typename T>
+inline void DistributionFunction<T>::fill_boundaries(T const value)
+{
+//#pragma omp parallel for
+	for (int q = 1; q < kQ; ++q) {	// Начинаем с 1 так как f[0] никуда не двигается
+		switch (q)
+		{
+		case 1:
+			dfunc_body_.at(1).fill_coll_with(colls_ - 1, value);
+			break;
+		case 2:
+			dfunc_body_.at(2).fill_row_with(0, value);
+			break;
+		case 3:
+			dfunc_body_.at(3).fill_coll_with(0, value);
+			break;
+		case 4:
+			dfunc_body_.at(4).fill_row_with(rows_ - 1, value);
+			break;
+		case 5:
+			dfunc_body_.at(5).fill_coll_with(colls_ - 1, value);
+			dfunc_body_.at(5).fill_row_with(0, value);
+			break;
+		case 6:
+			dfunc_body_.at(6).fill_coll_with(0, value);
+			dfunc_body_.at(6).fill_row_with(0, value);
+			break;
+		case 7:
+			dfunc_body_.at(7).fill_coll_with(0, value);
+			dfunc_body_.at(7).fill_row_with(rows_ - 1, value);
+			break;
+		case 8:
+			dfunc_body_.at(8).fill_coll_with(colls_ - 1, value);
+			dfunc_body_.at(8).fill_row_with(rows_ - 1, value);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+template<typename T>
 inline void DistributionFunction<T>::resize(unsigned rows, unsigned colls)
 {
 	rows_ = rows;
@@ -69,76 +110,90 @@ inline void DistributionFunction<T>::resize(unsigned rows, unsigned colls)
 }
 
 template<typename T>
-inline std::array<Matrix<T>, kQ> DistributionFunction<T>::get_values_on_upper_boundary() const
+inline std::pair<unsigned int, unsigned int> DistributionFunction<T>::size() const
 {
-	std::array<Matrix<T>, kQ> result;
-#pragma omp parallel for
-	for (int q = 0; q < kQ; ++q) {
-		result.at(q).resize(1, colls_);
-	}
+	return std::make_pair(rows_, colls_);
+}
+
+template<typename T>
+inline std::vector<T> DistributionFunction<T>::get_top_boundary_val(int const q) const
+{
+	return dfunc_body_.at(q).get_row(1);
+}
+
+template<typename T>
+inline std::vector<T> DistributionFunction<T>::get_bottom_boundary_val(int const q) const
+{
+	return dfunc_body_.at(q).get_row(rows_ - 2);
+}
+
+template<typename T>
+inline std::vector<T> DistributionFunction<T>::get_left_boundary_val(int const q) const
+{
+	return dfunc_body_.at(q).get_coll(1);
+}
+
+template<typename T>
+inline std::vector<T> DistributionFunction<T>::get_right_boundary_val(int const q) const
+{
+	return dfunc_body_.at(q).get_coll(colls_ - 2);
+}
+
+template<typename T>
+inline void DistributionFunction<T>::set_top_boundary_value(int const q, std::vector<T> const & row)
+{
+	dfunc_body_.at(q).set_row(1, row);
+}
+
+template<typename T>
+inline void DistributionFunction<T>::set_bottom_boundary_value(int const q, std::vector<T> const & row)
+{
+	dfunc_body_.at(q).set_row(rows_ - 2, row);
+}
+
+template<typename T>
+inline void DistributionFunction<T>::set_left_boundary_value(int const q, std::vector<T> const & coll)
+{
+	dfunc_body_.at(q).set_coll(1, coll);
+}
+
+template<typename T>
+inline void DistributionFunction<T>::set_right_boundary_value(int const q, std::vector<T> const & coll)
+{
+	dfunc_body_.at(q).set_coll(colls_ - 2, coll);
+}
+
+template<typename T>
+inline MacroscopicParam<T> DistributionFunction<T>::get_density() const
+{
+	MacroscopicParam<T> result(rows_, colls_);
+	result.fill_with(0.0);
 
 #pragma omp parallel for
-	for (int q = 0; q < kQ; ++q) {
-		result.at(q) = dfunc_body_.at(q).get_row(1);
-		//std::cout << "f[" << q << "] = " << result.at(q);
-	}
+	for (int q = 0; q < kQ; ++q)
+		result += dfunc_body_.at(q);
 
 	return result;
 }
 
 template<typename T>
-inline std::array<Matrix<T>, kQ> DistributionFunction<T>::get_values_on_bottom_boundary() const
+inline MacroscopicParam<T> DistributionFunction<T>::get_velocity(const double mas[kQ], MacroscopicParam<T> const & density) const
 {
-	std::array<Matrix<T>, kQ> result;
-#pragma omp parallel for
-	for (int q = 0; q < kQ; ++q) {
-		result.at(q).resize(1, colls_);
-	}
+	MacroscopicParam<T> result(rows_, colls_);
+	result.fill_with(0.0);
 
 #pragma omp parallel for
-	for (int q = 0; q < kQ; ++q) {
-		result.at(q) = dfunc_body_.at(q).get_row(rows_ - 2);
-		//std::cout << "f[" << q << "] = " << result.at(q);
-	}
+	for (int q = 0; q < kQ; ++q)
+		result += dfunc_body_.at(q) * mas[q];
 
+	// Переписать сразу в return, тк лишнее копирование НО выпадает error
+	result.times_divide(density);
 	return result;
+	
 }
 
-template<typename T>
-inline std::array<Matrix<T>, kQ> DistributionFunction<T>::get_values_on_left_boundary() const
-{
-	std::array<Matrix<T>, kQ> result;
-#pragma omp parallel for
-	for (int q = 0; q < kQ; ++q) {
-		result.at(q).resize(1, rows_ - 2);
-	}
 
-#pragma omp parallel for
-	for (int q = 0; q < kQ; ++q) {
-		result.at(q) = dfunc_body_.at(q).get_coll(1);
-		//std::cout << "f[" << q << "] = " << result.at(q);
-	}
 
-	return result;
-}
-
-template<typename T>
-inline std::array<Matrix<T>, kQ> DistributionFunction<T>::get_values_on_right_boundary() const
-{
-	std::array<Matrix<T>, kQ> result;
-#pragma omp parallel for
-	for (int q = 0; q < kQ; ++q) {
-		result.at(q).resize(1, rows_ - 2);
-	}
-
-#pragma omp parallel for
-	for (int q = 0; q < kQ; ++q) {
-		result.at(q) = dfunc_body_.at(q).get_coll(colls_ - 2);
-		std::cout << "f[" << q << "] = " << result.at(q);
-	}
-
-	return result;
-}
 
 template<typename T1>
 std::ostream & operator<<(std::ostream & os, DistributionFunction<T1> const & dist_func) {

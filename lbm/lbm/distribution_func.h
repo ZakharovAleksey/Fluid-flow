@@ -3,7 +3,7 @@
 #include<array>
 
 #include"my_matrix.h"
-
+#include"macroscopic_param.h"
 
 /*!
 	Возможное число направлений, в которых могут перемещаться
@@ -36,6 +36,8 @@ public:
 		}
 		return *this;
 	}
+
+#pragma region opeartors
 
 	DistributionFunction<T> & operator+=(DistributionFunction<T> const & other) {
 	#pragma omp parallel for
@@ -95,40 +97,49 @@ public:
 		return result;
 	}
 
+#pragma endregion
+
+#pragma region function
+
 	//! Возвращвет q-ую компоненту функции распределения
 	Matrix<T> & operator[](unsigned q);
 
 	//! Заполняетя все элементы массивов функций распределения кроме элементов на границе величиной value
 	void fill(T const value);
 
+	//! Заполняет границы для каждой из kQ функций распределения значениями value
+	void fill_boundaries(T const value);
+
 	//! Изменяет размер каждой из компонент функции распределения на rows и colls соответственно
 	void resize(unsigned rows, unsigned colls);
 
+	//! Возвращает пару в которой first = rows_, second = colls_
+	std::pair<unsigned int, unsigned int> size() const;
 
-	/*! 
-		В q-yю строку возвращаемой матрицы записывает величины q-ой компоненты функции распределения 
-		находящейся на верхней границе.
-	*/
-	std::array<Matrix<T>, kQ> get_values_on_upper_boundary() const;
+	//! Возвращает значения функции распределения на верхней стенке
+	std::vector<T> get_top_boundary_val(int const q) const;	
+	//! Возвращает значения функции распределения на нижней стенке
+	std::vector<T> get_bottom_boundary_val(int const q) const;
+	//! Возвращает значения функции распределения на левой стенке
+	std::vector<T> get_left_boundary_val(int const q) const;
+	//! Возвращает значения функции распределения на правой стенке
+	std::vector<T> get_right_boundary_val(int const q) const;
+	
+	//! Назначет значения функции распределения на верхней стенке равными значению масива colls
+	void set_top_boundary_value(int const q, std::vector<T> const & row);
+	//! Назначет значения функции распределения на нижней стенке равными значению масива colls
+	void set_bottom_boundary_value(int const q, std::vector<T> const & row);
+	//! Назначет значения функции распределения на левой стенке равными значению масива colls
+	void set_left_boundary_value(int const q, std::vector<T> const & coll);
+	//! Назначет значения функции распределения на правой стенке равными значению масива colls
+	void set_right_boundary_value(int const q, std::vector<T> const & coll);
 
-	/*!
-	В q-yю строку возвращаемой матрицы записывает величины q-ой компоненты функции распределения
-	находящейся на нижней границе.
-	*/
-	std::array<Matrix<T>, kQ> get_values_on_bottom_boundary() const;
+	//! Считает плотность в кажой из ячеек области
+	MacroscopicParam<T> get_density() const;
+	//! Считает скорость в кажой из ячеек области
+	MacroscopicParam<T> get_velocity(const double mas[kQ], MacroscopicParam<T> const & density) const;
 
-	/*!
-	В q-yю строку возвращаемой матрицы записывает величины q-ой компоненты функции распределения
-	находящейся на левой границе.
-	*/
-	std::array<Matrix<T>, kQ> get_values_on_left_boundary() const;
-
-	/*!
-	В q-yю строку возвращаемой матрицы записывает величины q-ой компоненты функции распределения
-	находящейся на правой границе.
-	*/
-	std::array<Matrix<T>, kQ> get_values_on_right_boundary() const;
-
+#pragma endregion
 
 	template<typename T1>
 	friend std::ostream & operator<<(std::ostream & os, DistributionFunction<T1> const & distr_func);

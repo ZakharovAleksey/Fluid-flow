@@ -5,7 +5,6 @@
 
 #include<map>
 
-
 //! Указатель на DistriputionFunction
 typedef std::unique_ptr<DistributionFunction<double>> distr_func_ptr;
 
@@ -16,11 +15,13 @@ enum class BCType {
 };
 
 enum class Boundary {
-	UP,
+	TOP,
 	BOTTOM,
 	RIGHT,
 	LEFT,
 };
+
+typedef std::pair<Boundary, BCType> Wall_info;
 
 class BCs
 {
@@ -28,48 +29,43 @@ class BCs
 public:
 	BCs(unsigned rows, unsigned colls, DistributionFunction<double> & dfunc);
 	~BCs();
-
-	//! Метод, заполняющий поля класса BCs соответствующими значениями функций распределения
-	bool get_boundady_values();
-
+	
 	/*!
-		Периодические граничные условия.
+		Записывает необходимые для применения boundary_condition_type ГУ функции распределения
+		в соответствующие BC поля класса.
 
-		Простейший тип ГУ, при котором каждая из kQ омпонент скорости при достижении границы области
-	моделирования перемещается на противоположную границу.
+		Пример: get_values(TOP, PERIODIC) - заполнит top_boundary_ 2, 5, 6 компонентой с верхней
+		границы.
+	*/ 
+	bool get_values(Boundary const BC, BCType const boundary_condition_type);
+	
+	//! Подгатавливает все значения для дальнейшего рассчета ГУ
+	//! Порядок заполнения типа ОБЯЗАТЕЛЬНО (TOR, BOTTOM, LEFT, RIGHT)
+	void prepair_bc_values(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
 
-	Пример: при достижениии правой грницы компоненты f[1], f[5], f[8] переходят в те-же компоненты
-	на левой границе и f[3], f[6], f[7] левой границы переходят в те-же компоненты правой
-	границы.
+	//! Заполняет соответствующие компоненты функции распределения вычисленными в BC значениями
+	void set_values(Boundary const BC, BCType const boundary_condition_type);
+	
+	//! 
+	void recording_bc_values(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
 
-	*/
-	void set_periodic_bc(Boundary first, Boundary second);
+#pragma region different_BC_implementation
+	//! Периодические ГУ
+	void periodic_bc(Boundary const first, Boundary const second);
+	//! ГУ типа отскока
+	void bounce_back_bc(Boundary const first);
+	//! ГУ типа Фон-Неймана (постоянный поток вдоль поверхности)
+	void von_neuman_bc(Boundary const first, Fluid & fluid, double const v);
 
-	/*!
-		Граничные условия типа отскока.
+	void apply_bc(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
 
-		ГУ при которых каждая из kQ компонент функции распределения при достижении границы области
-		модлирования заменяется на противоположную.
-
-		Пример: На правой границе f[1] переходит в f[3], f[5]->f[6], f[8]->f[7] на той-же границе.
-	*/
-	void set_bounce_back_bc(Boundary first);
-
-	/*
-		Граничные условия Фон-Неймана.
-
-		ГУ при которых сохраняется постоянным значение потока на выбранной поверхности. Скорость
-		потока v передается в качстве аргумента функции. 
-
-		Требует передачу Fluid по ссылке, так как при этом типе ГУ изменяется плотность и скорость.
-		НА ДАННЫЙ МОМЕНТ ГУ РЕАЛИЗОВАННО ТОЛЬКО ДЛЯ ЛЕВОЙ СТЕНКИ.
-	*/
-	void set_von_neumann_bc(Boundary first, Fluid & fluid, double const v);
+#pragma endregion
 
 	friend std::ostream & operator<<(std::ostream & os, BCs const & BC);
+
 private:
-	//! Метод, заполняющий одно из полей класса BCs соответствующими значениями функции распределения 
-	bool get_values(Boundary BC);
+	//! Меняет в std::map<> first аргумент с from на to не изменяя second
+	void swap_id(std::map<int, std::vector<double> > & map, int const from, int const to);
 
 private:
 	//! Число строк в матрице, хранящий значения на верхней и нижней стенке [= rows_ матрицы]
@@ -78,29 +74,15 @@ private:
 	unsigned height_;
 
 	//! Указатель на исползуемую в Fluid функцию распределения, чтобы работать с границами
-	distr_func_ptr f_ptr_;
+	DistributionFunction<double>* f_ptr_;
 
-	/*!
-		Массив матриц у которой в q-ой строке лежит q-ая функция распределения на верхней стенке
-
-		f[0]( на верхней границе )
-		f[1]( на верхней границе )
-		...
-		f[8]( на верхней границе )
-
-	*/
-	std::array<Matrix<double>, kQ> up_boundary_;
-
-	std::map<unsigned, Matrix<double> > top_;
-	
-
-	//!	Массив матриц у которой в q-ой строке лежит q-ая функция распределения на нижней стенке	
-	std::array<Matrix<double>, kQ> bottom_boundary_;
-	
-	//!	Массив матриц у которой в q-ой строке лежит q-ая функция распределения на правой стенке
-	std::array<Matrix<double>, kQ> right_boundary_;
-
-	//!	Массив матриц у которой в q-ой строке лежит q-ая функция распределения на левой стенке	
-	std::array<Matrix<double>, kQ> left_boundary_;
-
+	//! Хранит индекс компоненты функции распределения и ее значения на верхней стенке
+	//!	Пример: top_boundary_[1] = { Значения f[1] на верхней границе }
+	std::map<int, std::vector<double> > top_boundary_;
+	//! Хранит индекс компоненты функции распределения и ее значения на нижней стенке
+	std::map<int, std::vector<double> > bottom_boundary_;
+	//! Хранит индекс компоненты функции распределения и ее значения на левой стенке
+	std::map<int, std::vector<double> > left_boundary_;
+	//! Хранит индекс компоненты функции распределения и ее значения на правой стенке
+	std::map<int, std::vector<double> > right_boundary_;
 };

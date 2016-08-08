@@ -8,8 +8,6 @@
 
 #include"bc.h"
 
-typedef std::unique_ptr<Medium> Medium_ptr;
-typedef std::unique_ptr<Fluid> Fluid_ptr;
 
 /*!
 	Класс реализующий алгоритмы для расчета жидкости в рамках SRT подхода.
@@ -27,13 +25,14 @@ public:
 	virtual void streaming();
 	virtual void collision();
 
-	virtual void solve();
+	virtual void solve(int iteration_number);
+	virtual void recalculate();
 
 private:
 	//! Время релаксации
 	double const tau_;
 
-	Medium_ptr medium_;
-	Fluid_ptr fluid_;
+	Medium* medium_;
+	Fluid* fluid_;
 };
 

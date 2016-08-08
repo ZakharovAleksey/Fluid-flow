@@ -1,20 +1,19 @@
 #pragma once
 
-#include<vector>
-#include <functional>
+#include<iostream>
 #include<ostream>
-
 #include <cassert> // setw()
 
+#include<vector>
+#include <functional>
 
 #include<omp.h>
 
-//#define TEST_INCLUDE 
+#define TEST_INCLUDE 
 
 #ifndef TEST_INCLUDE 
  	#include<cstdlib>
  	#include<ctime>
- 	#include<iostream>
 #endif // !TEST_INCLUDE
 
 
@@ -31,12 +30,13 @@ class Matrix
 public:
 	Matrix();
 	Matrix(unsigned rows, unsigned colls);
-	// Попробуем сделать его виртуальным
 	virtual ~Matrix();
 
 	Matrix(Matrix<T> const & other);	// Проверить все ли хорошо при вызове функции отсюда
 
 	void swap(Matrix<T> & other);
+
+#pragma region operator+
 
 	Matrix<T> & operator=(Matrix<T> const & other) 
 	{
@@ -88,6 +88,9 @@ public:
 	template<typename T1>
 	friend Matrix<T1> operator+(T1 const left, Matrix<T1> const & right);
 
+#pragma endregion
+
+#pragma region operator-
 
 	Matrix<T> & operator-=(Matrix<T> const & other) {
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
@@ -125,6 +128,9 @@ public:
 		return result;
 	}
 
+#pragma endregion
+
+#pragma region operator*
 
 	Matrix<T> & operator*=(T other) {
 	#pragma omp parallel for
@@ -146,6 +152,15 @@ public:
 	template<typename T1>
 	friend Matrix<T1> operator*(T1 const left, Matrix<T1> const & right);
 
+	/*!
+	Скалярное произведение двух матриц то есть соответсвующий элемент первой матрицы
+	умножается на соответствующий элемент второй матрицы.
+	*/
+	Matrix<T> scalar_multiplication(Matrix<T> const & other);
+
+#pragma endregion
+
+#pragma region operator/
 
 	Matrix<T> & operator/=(T other) {
 	#pragma omp parallel for
@@ -164,12 +179,10 @@ public:
 		return result;
 	}
 
-	/*! 
-		Скалярное произведение двух матриц то есть соответсвующий элемент первой матрицы
-		умножается на соответствующий элемент второй матрицы.
-	*/
-	Matrix<T> scalar_multiplication(Matrix<T> const & other);
+	//! Почленное деление на матрицу в аргументе
+	Matrix<T> times_divide(Matrix<T> const & other);
 
+#pragma endregion
 
 	T & operator()(unsigned y, unsigned x) {
 		return body_.at(y * colls_ + x);
@@ -179,23 +192,25 @@ public:
 		return body_.at(y * colls_ + x);
 	}
 
+#pragma region functions
+
 	//! Возвращает пару в которой first = rows_, second = colls_
 	std::pair<unsigned int, unsigned int> size() const;
 
 	//! Возвращает сумму элементов матрицы
 	long double get_sum() const;
 
-	//! Возвращает матрицу, в которой хранятся все элементы строки с номером y
-	Matrix<T> get_row(unsigned const y) const;
+	//! Возвращает std::vector<T>, в которой хранятся все элементы строки с номером y
+	std::vector<T> get_row(unsigned const y) const;
 
-	//! Задает элементы матрицы строки y равными элементам матрицы row
-	void set_row(unsigned const y, Matrix<T> const & row);
+	//! Задает элементы матрицы строки y равными элементам std::vector<T> row
+	void set_row(unsigned const y, std::vector<T> const & row);
 
-	//! Возвращает матрицу, в которой хранятся все элементы диапазона [1 : rows_ - 2] столбца с номером x
-	Matrix<T> get_coll(unsigned const x) const;
+	//! Возвращает std::vector<T>, в которой хранятся все элементы диапазона [1 : rows_ - 2] столбца с номером x
+	std::vector<T> get_coll(unsigned const x) const;
 
-	//! Задает элементы диапазона [1 : colls - 1] матрицы столбца x равными элементам матрицы coll
-	void set_coll(unsigned const x, Matrix<T> const & coll);
+	//! Задает элементы диапазона [1 : colls - 1] матрицы столбца x равными элементам std::vector<T> coll
+	void set_coll(unsigned const x, std::vector<T> const & coll);
 
 	//! Заполняет матрицу целиком значением value
 	void fill_with(T const value);
@@ -203,8 +218,16 @@ public:
 	//! Заполняет матрицу без граничных элементов значениями value
 	void fill_withought_boundary(T const value);
 
+	//! Заполняет столбец номер coll_id матрицы значениями value
+	void fill_coll_with(int const coll_id, T const value);
+
+	//! Заполняет строку номер row_id матрицы значениями value
+	void fill_row_with(int const row_id, T const value);
+
 	//! Изменяет размеры матрицы на rows и colls соответственно, заполняя при этом нулями
 	void resize(unsigned rows, unsigned colls);
+
+#pragma endregion
 
 	template<typename T1>
 	friend std::ostream & operator<<(std::ostream & os, Matrix<T1> const & matrix);
@@ -215,5 +238,10 @@ protected:
 
 	std::vector<T> body_;
 };
+
+#pragma region additional_functions
+	
+#pragma endregion
+
 
 #include"my_matrix_impl.h"
