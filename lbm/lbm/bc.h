@@ -21,8 +21,6 @@ enum class Boundary {
 	LEFT,
 };
 
-typedef std::pair<Boundary, BCType> Wall_info;
-
 class BCs
 {
 	friend class Fluid;
@@ -42,11 +40,11 @@ public:
 	//! Подгатавливает все значения для дальнейшего рассчета ГУ
 	//! Порядок заполнения типа ОБЯЗАТЕЛЬНО (TOR, BOTTOM, LEFT, RIGHT)
 	void prepair_bc_values(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
-
-	//! Заполняет соответствующие компоненты функции распределения вычисленными в BC значениями
-	void set_values(Boundary const BC, BCType const boundary_condition_type);
 	
-	//! 
+	//! Заполняет соответствующие компоненты функции распределения вычисленными в BC значениями
+	void set_values(Boundary const BC, BCType const boundary_condition_type);	
+	
+	//! Записыввет массивы ГУ-шных значений в соответствующие компоненты функции распределения
 	void recording_bc_values(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
 
 #pragma region different_BC_implementation
@@ -55,9 +53,8 @@ public:
 	//! ГУ типа отскока
 	void bounce_back_bc(Boundary const first);
 	//! ГУ типа Фон-Неймана (постоянный поток вдоль поверхности)
-	void von_neuman_bc(Boundary const first, Fluid & fluid, double const v);
-
-	void apply_bc(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
+	//! Пока не возвращем массив плотностей так как с ним меньшие погрешности
+	void von_neuman_bc(Boundary const first, Fluid & fluid, double const vx, std::vector<double> & velocity_x);
 
 #pragma endregion
 

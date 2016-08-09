@@ -232,26 +232,33 @@ void BCs::bounce_back_bc(Boundary const first)
 	}
 }
 
-void BCs::von_neuman_bc(Boundary const first, Fluid & fluid, double const v)
+void BCs::von_neuman_bc(Boundary const first, Fluid & fluid, double const vx, 
+	std::vector<double> & velocity_x)
 {
-	if (first == Boundary::LEFT) {
-		std::vector<double> rho_temp(fluid.size().first - 2, 0.0);
-		rho_temp = left_boundary_.at(0) + left_boundary_.at(2) + left_boundary_.at(4) +
-			(left_boundary_.at(3) + left_boundary_.at(6) + left_boundary_.at(7)) * 2.0 / (1.0 - v);
+	// Подготовка векторов, куда запишутся скорость и плотность на границе
+	if (vx != 0.0) {
+		if (velocity_x.empty())
+			velocity_x.resize(fluid.size().first - 2, vx);
+		else {
+			velocity_x.clear();
+			velocity_x.resize(fluid.size().first - 2, vx);
+		}
+	}
 
-		left_boundary_.insert(std::make_pair(1, left_boundary_.at(3) + (rho_temp * v * 2.0 / 3.0)));
+	if (first == Boundary::LEFT) {
+		std::vector<double> density(fluid.size().first - 2, 0.0);
+		density = left_boundary_.at(0) + left_boundary_.at(2) + left_boundary_.at(4) +
+			(left_boundary_.at(3) + left_boundary_.at(6) + left_boundary_.at(7)) * 2.0 / (1.0 - vx);
+
+		left_boundary_.insert(std::make_pair(1, left_boundary_.at(3) + (density * vx * 2.0 / 3.0)));
 
 		std::vector<double> value = (left_boundary_.at(4) - left_boundary_.at(2)) / 2.0;
 
-		left_boundary_.insert(std::make_pair(5, rho_temp * v / 6.0 + left_boundary_.at(7) + value));
-		left_boundary_.insert(std::make_pair(8, rho_temp * v / 6.0 + left_boundary_.at(6) - value));
+		left_boundary_.insert(std::make_pair(5, density * vx / 6.0 + left_boundary_.at(7) + value));
+		left_boundary_.insert(std::make_pair(8, density * vx / 6.0 + left_boundary_.at(6) - value));
 		
-		fluid.rho_.set_coll(1, rho_temp);
 
 		// Матрица которая хранит в себе все значения равные v чтобы заполнить скорости начальными знаениями
-		std::vector<double> v_temp(fluid.size().first - 2); 
-		std::fill(v_temp.begin(), v_temp.end(), v);
-		fluid.vx_.set_coll(1, v_temp);
 
 		// Теперь, когда вычесленны f[1], f[5], f[8], rho, v - удаляем ненужные поля
 		left_boundary_.erase(0);

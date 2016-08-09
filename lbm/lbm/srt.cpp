@@ -51,17 +51,7 @@ void SRTsolver::collision()
 
 void SRTsolver::solve(int iteration_number)
 {
-	Wall_info top{ Boundary::TOP, BCType::BOUNCE_BACK };
-	Wall_info bottom{ Boundary::BOTTOM, BCType::BOUNCE_BACK };
-	Wall_info left{ Boundary::LEFT, BCType::VON_NEUMAN };
-	Wall_info right{ Boundary::RIGHT, BCType::BOUNCE_BACK };
-
-	// check_bc()
-
-	//std::cout << "initial rho = " << fluid_->rho_.get_sum() << std::endl;
-	std::cout << fluid_->vx_;
 	feq_calculate();
-
 	for (int q = 0; q < kQ; ++q)
 		fluid_->f_[q] = fluid_->feq_[q];
 
@@ -69,29 +59,33 @@ void SRTsolver::solve(int iteration_number)
 
 	for (int iter = 0; iter < iteration_number; ++iter) {
 		collision();
-
 		BC.prepair_bc_values(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
 
 		streaming();
+
 		BC.bounce_back_bc(Boundary::TOP);
 		BC.bounce_back_bc(Boundary::BOTTOM);
 		BC.bounce_back_bc(Boundary::RIGHT);
-		BC.von_neuman_bc(Boundary::LEFT, *fluid_, 0.01);
+		std::vector<double> vx;
+		BC.von_neuman_bc(Boundary::LEFT, *fluid_, 0.01, vx);
 
 
 		BC.recording_bc_values(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
-
+		
 		recalculate();
-
-		std::vector<double> vel(fluid_->rows_ - 2, 0.01);
-		fluid_->vx_.set_coll(1, vel);
+		fluid_->vx_.set_coll(1, vx);
+		
 		feq_calculate();
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.get_sum() << std::endl;
 	}
 
-	/*for (int i = 0; i < fluid_->rows_; ++i)
-		std::cout << fluid_->vx_(i, 30) << "\n";*/
+	for (int i = 0; i < fluid_->rows_; ++i)
+		std::cout << fluid_->vx_(i, 5) << "\n";
+
+	fluid_->vx_.coll_to_file("vx", 5, 100);
+	fluid_->vx_.to_file("vx", iteration_number);
+	fluid_->vx_.row_to_file("vx", 5, 100);
 }
 
 void SRTsolver::recalculate()

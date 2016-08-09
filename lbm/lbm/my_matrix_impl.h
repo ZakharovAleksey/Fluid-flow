@@ -4,6 +4,8 @@
 #include<algorithm>
 #include<iomanip>	// setw()
 
+#include<fstream>
+
 #include"my_matrix.h"
 
 template<typename T>
@@ -188,6 +190,79 @@ inline void Matrix<T>::resize(unsigned rows, unsigned colls)
 	// Если заменяем на матрицу размера (y,0) или (0, x) то только освобождаем память.
 	if(rows_ != 0 && colls_ != 0)
 		body_.resize(rows_ * colls_, T());
+}
+
+template<typename T>
+inline void Matrix<T>::to_file(std::string value_name, int const time)
+{
+	using std::endl;
+	std::string full_name = "Data/" + value_name + "[" + std::to_string(rows_) + "x" + std::to_string(colls_) + "]_at_" + std::to_string(time) + "_time_steps.txt";
+	std::ofstream os;
+	os.open(full_name);
+
+	if (!os.good()){
+		std::cout << "Error! Can not open file to write.\n";
+		return;
+	}
+	else {
+		unsigned cur_position{ 1 };
+
+		for (unsigned y = 0; y < rows_; ++y) {
+			for (unsigned x = 0; x < colls_; ++x) {
+				os << body_.at(x + y * colls_);
+				if (x != colls_ - 1)
+					os << ' ';
+			}
+			os << endl;
+		}
+	}
+	os.close();
+}
+
+template<typename T>
+inline void Matrix<T>::coll_to_file(std::string value_name, int const coll_id, int const time)
+{
+	assert(coll_id < colls_);
+
+	using std::endl;
+	std::string full_name = "Data/" + value_name + "_coll(" + std::to_string(coll_id) +")[" + std::to_string(rows_) + "x" + std::to_string(colls_) + "]_at_" + std::to_string(time) + "_time_steps.txt";
+	std::ofstream os;
+	os.open(full_name);
+
+	if (!os.good()) {
+		std::cout << "Error! Can not open file to write.\n";
+		return;
+	}
+	else {
+		for (int y = 0; y < rows_; ++y)
+			os << body_.at(coll_id + y * colls_) << std::endl;
+	}
+	os.close();
+
+}
+
+template<typename T>
+inline void Matrix<T>::row_to_file(std::string value_name, int const row_id, int const time)
+{
+	assert(row_id < rows_);
+
+	using std::endl;
+	std::string full_name = "Data/" + value_name + "_row(" + std::to_string(row_id) + ")[" + std::to_string(rows_) + "x" + std::to_string(colls_) + "]_at_" + std::to_string(time) + "_time_steps.txt";
+	std::ofstream os;
+	os.open(full_name);
+
+	if (!os.good()) {
+		std::cout << "Error! Can not open file to write.\n";
+		return;
+	}
+	else {
+		for (int x = 0; x < colls_; ++x) {
+			os << body_.at(row_id * colls_ + x);
+			if (x != colls_ - 1)
+				os << ' ';
+		}
+	}
+	os.close();
 }
 
 template<typename T1>

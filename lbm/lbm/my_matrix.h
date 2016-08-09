@@ -6,6 +6,7 @@
 
 #include<vector>
 #include <functional>
+#include<string>
 
 #include<omp.h>
 
@@ -226,6 +227,19 @@ public:
 
 	//! Изменяет размеры матрицы на rows и colls соответственно, заполняя при этом нулями
 	void resize(unsigned rows, unsigned colls);
+
+#pragma endregion
+
+#pragma ostream_functions
+
+	//! Выводит объект типа матрица в файл
+	void to_file(std::string value_name, int const time);
+
+	//! Печатает столбец номер coll_id в файл
+	void coll_to_file(std::string value_name, int const coll_id, int const time);
+
+	//! Печатает столбец номер coll_id в файл
+	void row_to_file(std::string value_name, int const row_id, int const time);
 
 #pragma endregion
 
