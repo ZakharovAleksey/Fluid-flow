@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.5)
 
 set(PATH_MATH "math")
 set(PATH_AREA "modeling_area")
