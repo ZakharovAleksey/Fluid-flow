@@ -16,11 +16,12 @@
 #endif // !TEST_INCLUDE
 
 
-/*!
-	Класс матрицы на базе которой будут реализованны физические величины, такие как плотность, скорость, 
-	функция распределения плотности вероятности.
-
-	Перегрузка производилась ТОЛЬКО тех операторов, котрые применяются в методе.
+/*
+	Matrix class.
+	 - Base class to this project. All physical values, like density, velocity, distribution function
+	 will be implemented on the basis of this class.
+	 - Overloading only for operations witch we need in LBM implementation (This is not dial matrix,
+	 like in Matlab or Python - there are some unique methods)
 
 */
 template<typename T>
@@ -33,13 +34,15 @@ public:
 
 	Matrix(Matrix<T> const & other);	// Проверить все ли хорошо при вызове функции отсюда
 
+	// Swap left and right matrixes
 	void swap(Matrix<T> & other);
 
-#pragma region operator+
 
 	Matrix<T> & operator=(Matrix<T> const & other) 
 	{
+		// Check that rows or colls number of right and left matrix are equal
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
+
 		if (this != & other) {
 			Matrix<T> temp(other);
 			temp.swap(*this);
@@ -47,6 +50,9 @@ public:
 
 		return *this;
 	}
+
+	// Region in witch we overload +,+= and the same operations
+#pragma region operator+
 
 	Matrix<T> & operator+=(Matrix<T> const & other) {
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
@@ -57,6 +63,7 @@ public:
 		return *this;
 	}
 
+	//! Add to each left matrix element value other
 	Matrix<T> & operator+=(T const other) {
 		std::for_each(body_.begin(), body_.end(),
 			[&](T & value) {value += other; });
@@ -64,7 +71,9 @@ public:
 		return *this;
 	}
 
+	//! Add right matrix to left matrix
 	Matrix<T> operator+(Matrix<T> const & other) const {
+		// Check that rows or columns number of right and left matrix are equal
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
 
 		Matrix<T> result(*this);
@@ -75,6 +84,7 @@ public:
 		return result;
 	}
 
+	//! Add to each left matrix element value other
 	Matrix<T> operator+(T const other) const {
 		Matrix<T> result(*this);
 
@@ -84,14 +94,18 @@ public:
 		return result;
 	}
 
+	//! Add to each element of right matrix element with value left
 	template<typename T1>
 	friend Matrix<T1> operator+(T1 const left, Matrix<T1> const & right);
 
 #pragma endregion
 
+	// Region in witch we overload -,-= and the same operations
 #pragma region operator-
 
+	//! Subtraction right matrix from left matrix
 	Matrix<T> & operator-=(Matrix<T> const & other) {
+		// Check that rows or columns number of right and left matrix are equal
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
 	#pragma omp parallel for
 			for (int i = 0; i < body_.size(); ++i)
@@ -100,6 +114,7 @@ public:
 		return *this;
 	}
 
+	//! Subtraction right value from each element of left matrix
 	Matrix<T> & operator-=(T const other) {
 		std::for_each(body_.begin(), body_.end(),
 			[&](T & value) {value -= other; });
@@ -107,7 +122,9 @@ public:
 		return *this;
 	}
 
+	//! Subtraction right matrix from left matrix
 	Matrix<T> operator-(Matrix<T> const & other) const {
+		// Check that rows or colls number of right and left matrix are equal
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
 
 		Matrix<T> result(*this);
@@ -118,6 +135,7 @@ public:
 		return result;
 	}
 
+	//! Subtraction right value from each element of left matrix
 	Matrix<T> operator-(T const other) const {
 		Matrix<T> result(*this);
 
@@ -129,8 +147,10 @@ public:
 
 #pragma endregion
 
+	// Region in witch we overload *,*= and the same operations and scalar product function
 #pragma region operator*
 
+	//! Multiplication each element of right matrix on value other
 	Matrix<T> & operator*=(T other) {
 	#pragma omp parallel for
 		for (int i = 0; i < body_.size(); ++i)
@@ -139,6 +159,7 @@ public:
 		return *this;
 	}
 
+	//! Multiplication each element of right matrix on value other
 	Matrix<T> operator*(T other) const {
 		Matrix<T> result(*this);
 
@@ -151,17 +172,20 @@ public:
 	template<typename T1>
 	friend Matrix<T1> operator*(T1 const left, Matrix<T1> const & right);
 
-	/*!
-	Скалярное произведение двух матриц то есть соответсвующий элемент первой матрицы
-	умножается на соответствующий элемент второй матрицы.
-	*/
+	//! The scalar product of two matrices.
+	//! This means that each element of left matrix multiply on corresponding element of right matrix
 	Matrix<T> scalar_multiplication(Matrix<T> const & other);
 
 #pragma endregion
 
+	// Region in witch we overload /,/= and the same operations
 #pragma region operator/
 
+	//! Division each element of left matrix on value other
 	Matrix<T> & operator/=(T other) {
+		// Check that other value is not equal by zero
+		assert(other != 0);
+
 	#pragma omp parallel for
 		for (int i = 0; i < body_.size(); ++i)
 			body_.at(i) /= other;
@@ -169,7 +193,11 @@ public:
 		return *this;
 	}
 
+	//! Division each element of left matrix on value other
 	Matrix<T> operator/(T other) const {
+		// Check that other value is not equal by zero
+		assert(other != 0);
+
 		Matrix<T> result(*this);
 
 		std::for_each(result.body_.begin(), result.body_.end(),
@@ -178,65 +206,70 @@ public:
 		return result;
 	}
 
-	//! Почленное деление на матрицу в аргументе
+	//! Termwise division of the matrix argument
+	//! This means each element of right matrix divide on corresponding elemrnt of left matrix
 	Matrix<T> times_divide(Matrix<T> const & other);
 
 #pragma endregion
 
+	//! Get element at y row and x columns
 	T & operator()(unsigned y, unsigned x) {
 		return body_.at(y * colls_ + x);
 	}
 
+	//! Get element at y row and x columns
 	T const operator()(unsigned y, unsigned x) const {
 		return body_.at(y * colls_ + x);
 	}
 
 #pragma region functions
 
-	//! Возвращает пару в которой first = rows_, second = colls_
+	//! Returns values pair, in witch first = rows number, second = columns number
 	std::pair<unsigned int, unsigned int> size() const;
 
-	//! Возвращает сумму элементов матрицы
+	//! Returns the sum of elements of the matrix
 	long double get_sum() const;
 
-	//! Возвращает std::vector<T>, в которой хранятся все элементы строки с номером y
+	//! Returns std::vector<T>, with values from y ID row in matrix
 	std::vector<T> get_row(unsigned const y) const;
 
-	//! Задает элементы матрицы строки y равными элементам std::vector<T> row
+	//! Set elements of y ID row in matrix equal to values from std::vector<T> row
 	void set_row(unsigned const y, std::vector<T> const & row);
 
-	//! Возвращает std::vector<T>, в которой хранятся все элементы диапазона [1 : rows_ - 2] столбца с номером x
+	//! Returns std::vector<T>, with values in ID range [1 : rows_ - 2] column with x ID
 	std::vector<T> get_coll(unsigned const x) const;
 
-	//! Задает элементы диапазона [1 : colls - 1] матрицы столбца x равными элементам std::vector<T> coll
+	//! Set elements x ID column of matrix in ID range [1 : colls - 1] equal to values of std::vector<T> coll
 	void set_coll(unsigned const x, std::vector<T> const & coll);
 
-	//! Заполняет матрицу целиком значением value
+	//! Fill all matrix with value
+	//! This means, that after this operation all elements of matrix are equal to value
 	void fill_with(T const value);
 
-	//! Заполняет матрицу без граничных элементов значениями value
+	//! Fill elements withought boundary with value
+	//! This means, that after this operation all elements besides boundaries of matrix are equal to value
 	void fill_withought_boundary(T const value);
 
-	//! Заполняет столбец номер coll_id матрицы значениями value
+	//! Fill column with ID coll_id of matrix with value
 	void fill_coll_with(int const coll_id, T const value);
 
-	//! Заполняет строку номер row_id матрицы значениями value
+	//! Fill row with ID row_id of matrix with value
 	void fill_row_with(int const row_id, T const value);
 
-	//! Изменяет размеры матрицы на rows и colls соответственно, заполняя при этом нулями
+	//! Resize matrix and fill with zeros
 	void resize(unsigned rows, unsigned colls);
 
 #pragma endregion
 
 #pragma ostream_functions
 
-	//! Выводит объект типа матрица в файл
+	//! Print matrix with value_name name on time time step in file
 	void to_file(std::string value_name, int const time);
 
-	//! Печатает столбец номер coll_id в файл
+	//! Print coll_id column of matrix with value_name name on time time step in file
 	void coll_to_file(std::string value_name, int const coll_id, int const time);
 
-	//! Печатает столбец номер coll_id в файл
+	//! Print row_id row of matrix with value_name name on time time step in file
 	void row_to_file(std::string value_name, int const row_id, int const time);
 
 #pragma endregion
@@ -245,9 +278,12 @@ public:
 	friend std::ostream & operator<<(std::ostream & os, Matrix<T1> const & matrix);
 
 protected:
+	// Number of rows in matrix
 	unsigned rows_;
+	// Number of columns in matrix
 	unsigned colls_;
 
+	// Main body of matrix, wich contain all matrix elements
 	std::vector<T> body_;
 };
 

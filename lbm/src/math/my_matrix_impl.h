@@ -15,6 +15,7 @@ inline Matrix<T>::Matrix(): rows_(0), colls_(0) {
 template<class T>
 Matrix<T>::Matrix(unsigned rows, unsigned colls) : rows_(rows), colls_(colls)
 {
+	// Resize matrix body to contain all elements of matrix
 	body_.resize(rows_ * colls_, 0.0);
 
 	#ifndef TEST_INCLUDE
@@ -70,6 +71,7 @@ inline Matrix<T> Matrix<T>::scalar_multiplication(Matrix<T> const & other)
 template<typename T>
 inline Matrix<T> Matrix<T>::times_divide(Matrix<T> const & other)
 {
+	// Check that rows or columns number of right and left matrix are equal
 	assert(rows_ == other.rows_, colls_ == other.colls_);
 
 	Matrix<T> result(*this);
@@ -90,6 +92,7 @@ template<typename T>
 inline long double Matrix<T>::get_sum() const
 {
 	long double sum{ 0.0 };
+
 #pragma omp parallel for
 	for (int i = 0; i < body_.size(); ++i)
 		sum += static_cast<long double>(body_.at(i));
@@ -100,9 +103,10 @@ inline long double Matrix<T>::get_sum() const
 template<typename T>
 inline std::vector<T> Matrix<T>::get_row(unsigned const y) const
 {
+	// Check that row ID less than number of rows
 	assert(y < rows_);
 	std::vector<T> result(colls_, T());
-	//Matrix<T> result(1, colls_);
+	
 #pragma omp parallel for
 	for (int x = 0; x < colls_; ++x)
 		result.at(x) = body_.at(colls_ * y + x);
@@ -112,7 +116,9 @@ inline std::vector<T> Matrix<T>::get_row(unsigned const y) const
 template<typename T>
 inline void Matrix<T>::set_row(unsigned const y, std::vector<T> const & row)
 {
+	// Check that std::vector<T> row size is equal to columns number of matrix
 	assert(colls_ == row.size());
+
 #pragma omp parallel
 	for (int x = 0; x < colls_; ++x)
 		body_.at(colls_ * y + x) = row.at(x);
@@ -121,9 +127,10 @@ inline void Matrix<T>::set_row(unsigned const y, std::vector<T> const & row)
 template<typename T>
 inline std::vector<T> Matrix<T>::get_coll(unsigned const x) const
 {
+	// Check that coll ID less than number of column
 	assert(x < colls_);
 	std::vector<T> result(rows_ - 2, T());
-	//Matrix<T> result(1, rows_ - 2);
+	
 #pragma omp parallel for
 	for (int y = 1; y < rows_ - 1; ++y)
 		result.at(y - 1) = body_.at(x + y * colls_);
@@ -134,7 +141,9 @@ inline std::vector<T> Matrix<T>::get_coll(unsigned const x) const
 template<typename T>
 inline void Matrix<T>::set_coll(unsigned const x, std::vector<T> const & coll)
 {
+	// Check that std::vector<T> coll size is equal to rows number of matrix, bsides 2 (left and right boundary index)
 	assert(rows_ == coll.size() + 2);
+
 #pragma omp parallel for
 	for (int y = 1; y < rows_ - 1; ++y)
 		body_.at(x + y * colls_) = coll.at(y - 1);
@@ -162,7 +171,9 @@ inline void Matrix<T>::fill_withought_boundary(T const value)
 template<typename T>
 inline void Matrix<T>::fill_coll_with(int const coll_id, T const value)
 {
+	// Check that coll ID less than number of column
 	assert(coll_id < colls_);
+
 #pragma omp parallel for
 	for (int y = 0; y < rows_; ++y)
 		body_.at(coll_id + y * colls_) = value;
@@ -171,7 +182,9 @@ inline void Matrix<T>::fill_coll_with(int const coll_id, T const value)
 template<typename T>
 inline void Matrix<T>::fill_row_with(int const row_id, T const value)
 {
+	// Check that row ID less than number of rows
 	assert(row_id < rows_);
+
 #pragma omp parallel for
 	for (int x = 0; x < colls_; ++x)
 		body_.at(row_id * colls_ + x) = value;
@@ -186,7 +199,7 @@ inline void Matrix<T>::resize(unsigned rows, unsigned colls)
 	// Трюк с освобождением памяти под вектор | body_.clear() Не работает - проверка по body.capasity()
 	std::vector<T>().swap(body_);
 
-	// Если заменяем на матрицу размера (y,0) или (0, x) то только освобождаем память.
+	// If we swap on matrix size (y,0) or (0, x) we need onlly to allocate memory
 	if(rows_ != 0 && colls_ != 0)
 		body_.resize(rows_ * colls_, T());
 }
@@ -195,7 +208,11 @@ template<typename T>
 inline void Matrix<T>::to_file(std::string value_name, int const time)
 {
 	using std::endl;
-	std::string full_name = "Data/" + value_name + "[" + std::to_string(rows_) + "x" + std::to_string(colls_) + "]_at_" + std::to_string(time) + "_time_steps.txt";
+
+	// Set PATH and NAME of file
+	std::string path = "Data/";
+	std::string full_name = path + value_name + "[" + std::to_string(rows_) + "x" + std::to_string(colls_) + "]_at_" + std::to_string(time) + "_time_steps.txt";
+	
 	std::ofstream os;
 	os.open(full_name);
 
@@ -221,10 +238,14 @@ inline void Matrix<T>::to_file(std::string value_name, int const time)
 template<typename T>
 inline void Matrix<T>::coll_to_file(std::string value_name, int const coll_id, int const time)
 {
+	// Check that coll_id is less then columns number
 	assert(coll_id < colls_);
-
 	using std::endl;
-	std::string full_name = "Data/" + value_name + "_coll(" + std::to_string(coll_id) +")[" + std::to_string(rows_) + "x" + std::to_string(colls_) + "]_at_" + std::to_string(time) + "_time_steps.txt";
+
+	// Set PATH and NAME of file
+	std::string path = "Data/";
+	std::string full_name = path + value_name + "_coll(" + std::to_string(coll_id) +")[" + std::to_string(rows_) + "x" + std::to_string(colls_) + "]_at_" + std::to_string(time) + "_time_steps.txt";
+
 	std::ofstream os;
 	os.open(full_name);
 
@@ -243,10 +264,14 @@ inline void Matrix<T>::coll_to_file(std::string value_name, int const coll_id, i
 template<typename T>
 inline void Matrix<T>::row_to_file(std::string value_name, int const row_id, int const time)
 {
+	// Check that row_id is less then rows number
 	assert(row_id < rows_);
-
 	using std::endl;
-	std::string full_name = "Data/" + value_name + "_row(" + std::to_string(row_id) + ")[" + std::to_string(rows_) + "x" + std::to_string(colls_) + "]_at_" + std::to_string(time) + "_time_steps.txt";
+
+	// Set PATH and NAME of file
+	std::string path = "Data/";
+	std::string full_name = path + value_name + "_row(" + std::to_string(row_id) + ")[" + std::to_string(rows_) + "x" + std::to_string(colls_) + "]_at_" + std::to_string(time) + "_time_steps.txt";
+
 	std::ofstream os;
 	os.open(full_name);
 
@@ -277,8 +302,6 @@ std::ostream & operator<<(std::ostream & os, Matrix<T1> const & matrix) {
 		os << endl;
 	}
 	
-
-
 	//std::copy(matrix.body_.begin(), matrix.body_.end(), std::ostream_iterator<T1>(os, " "));
 	os << endl;
 	
