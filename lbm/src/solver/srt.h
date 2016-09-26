@@ -11,29 +11,52 @@
 
 
 /*!
-	Класс реализующий алгоритмы для расчета жидкости в рамках SRT подхода.
+	SRT approach implementation.
 
-	Время релаксации \tau >= 0.5 для сходимости. Лучше выбирать около 1.0
+	Relaxation parameter tau must be bigger then 0.5 to achive good results. 
+	It is better to choose it near 1.0;
+
 */
 class SRTsolver : iSolver
 {
 public:
+
+#pragma region Constructor
+
 	SRTsolver(double const tau, Medium & medium, Fluid & fluid);
 	virtual ~SRTsolver() {}
 
-	virtual void feq_calculate();
+#pragma endregion
 
+#pragma region Methods
+	
+	//! Equilibrium probability distribution function calculation in SRT implementation
+	virtual void feqCalculate();
+
+	//! Streaming of particles to neighbour nodes in SRT implementation
 	virtual void streaming();
+	//! Collision of particles in nodes in SRT implementation
 	virtual void collision();
 
+	//! Solver for modeling procedure in SRT implementation
 	virtual void solve(int iteration_number);
+
+	//! Recalculation procedure (recalculate density, velocity) in SRT implementation
 	virtual void recalculate();
 
+#pragma endregion
+
 private:
-	//! Время релаксации
+
+#pragma region Fields
+
+	//! Relaxation parameter
 	double const tau_;
 
 	Medium* medium_;
 	Fluid* fluid_;
+
+#pragma endregion
+
 };
 

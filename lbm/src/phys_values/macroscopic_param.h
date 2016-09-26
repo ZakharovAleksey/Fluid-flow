@@ -3,10 +3,9 @@
 #include"..\math\my_matrix.h"
 
 /*!
-	Класс для реализации макроскопических параметров, таких как плотность, скорость.
+	Macroscopic physical values implementation class.
 
-	Реализован на основе класса матрицы, то есть представляет из себя ПОЛЕ плотности,
-	и скорости соответственно.
+	Implemented on base of Matrix<T> class, i.e. represent Velocity field, or Density field!
 */
 template<typename T>
 class MacroscopicParam : public Matrix<T>

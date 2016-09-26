@@ -5,15 +5,17 @@
 
 #include"../../modeling_area/fluid.h"
 
-//! Указатель на DistriputionFunction
+//! SmartPoiner to DistriputionFunction
 typedef std::unique_ptr<DistributionFunction<double>> distr_func_ptr;
 
+//! Store Boundary Conditions type index
 enum class BCType {
 	PERIODIC,
 	BOUNCE_BACK,
 	VON_NEUMAN,
 };
 
+//! Store Boundary type index
 enum class Boundary {
 	TOP,
 	BOTTOM,
@@ -24,37 +26,51 @@ enum class Boundary {
 class BCs
 {
 	friend class Fluid;
+
 public:
+
+#pragma region Constructor
+
 	BCs(unsigned rows, unsigned colls, DistributionFunction<double> & dfunc);
 	~BCs();
-	
+
+#pragma endregion
+
+#pragma region Methods
+
 	/*!
-		Записывает необходимые для применения boundary_condition_type ГУ функции распределения
-		в соответствующие BC поля класса.
+		Store all needed probability distribution function values on chosen boundary before BC is applying in
+		aproppriate class field.
 
-		Пример: get_values(TOP, PERIODIC) - заполнит top_boundary_ 2, 5, 6 компонентой с верхней
-		границы.
+		Example: 
+			prepareValues(TOP, PERIODIC) - fill top_boundary_ with 2, 5, 6 component of probability distribution function from
+			TOP boundary
 	*/ 
-	bool get_values(Boundary const BC, BCType const boundary_condition_type);
+	bool prepareValuesOnCurrentBoundary(Boundary const BC, BCType const boundary_condition_type);
 	
-	//! Подгатавливает все значения для дальнейшего рассчета ГУ
+	//! Prepare ALL probability distribution function values for BC applying
 	//! Порядок заполнения типа ОБЯЗАТЕЛЬНО (TOR, BOTTOM, LEFT, RIGHT)
-	void prepair_bc_values(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
+	void prepareValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
 	
-	//! Заполняет соответствующие компоненты функции распределения вычисленными в BC значениями
-	void set_values(Boundary const BC, BCType const boundary_condition_type);	
+	//! Record appropriate boundary with already calculated BC distribution function values 
+	void recordValuesOnCurrentBoundary(Boundary const BC, BCType const boundary_condition_type);	
 	
-	//! Записыввет массивы ГУ-шных значений в соответствующие компоненты функции распределения
-	void recording_bc_values(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
+	//! Record ALL boundaries with already calculated BC distribution function values 
+	void recordValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
 
-#pragma region different_BC_implementation
-	//! Периодические ГУ
-	void periodic_bc(Boundary const first, Boundary const second);
-	//! ГУ типа отскока
-	void bounce_back_bc(Boundary const first);
-	//! ГУ типа Фон-Неймана (постоянный поток вдоль поверхности)
+#pragma region Boundary Conditions (BCs) implementation
+
+	//! Periodic Boundary conditions
+	void periodicBC(Boundary const first, Boundary const second);
+
+	//! Bounce Back Boundary conditions
+	void bounceBackBC(Boundary const first);
+
+	//! Von-Neumann Boundary conditions
 	//! Пока не возвращем массив плотностей так как с ним меньшие погрешности
-	void von_neuman_bc(Boundary const first, Fluid & fluid, double const vx, std::vector<double> & velocity_x);
+	void vonNeumannBC(Boundary const first, Fluid & fluid, double const vx, std::vector<double> & velocity_x);
+
+#pragma endregion
 
 #pragma endregion
 
@@ -65,21 +81,27 @@ private:
 	void swap_id(std::map<int, std::vector<double> > & map, int const from, int const to);
 
 private:
-	//! Число строк в матрице, хранящий значения на верхней и нижней стенке [= rows_ матрицы]
+
+#pragma region Fields
+
+	//! Rows length [equal to rows_ of matrix]  beacuse all nodes takes placr in BC
 	unsigned length_;
-	//! Число строк в матрице, хранящей значения на правой и левой стенке [= colls_ - 2 матрицы]
+	//! Columns height [equal to colls_ - 2 of matrix] because UP and DOWN nodes are already counted in TOP and BOTTOM BC
 	unsigned height_;
 
-	//! Указатель на исползуемую в Fluid функцию распределения, чтобы работать с границами
+	//! Poiner to Fluid distribution function to work with it's boundaries (Попробовать переделать через ссылку)
 	DistributionFunction<double>* f_ptr_;
 
-	//! Хранит индекс компоненты функции распределения и ее значения на верхней стенке
+	//! Store index of probability distribution function and it's values on TOP boundary
 	//!	Пример: top_boundary_[1] = { Значения f[1] на верхней границе }
 	std::map<int, std::vector<double> > top_boundary_;
-	//! Хранит индекс компоненты функции распределения и ее значения на нижней стенке
+	//! Store index of probability distribution function and it's values on BOTTOM boundary
 	std::map<int, std::vector<double> > bottom_boundary_;
-	//! Хранит индекс компоненты функции распределения и ее значения на левой стенке
+	//! Store index of probability distribution function and it's values on LEFT boundary
 	std::map<int, std::vector<double> > left_boundary_;
-	//! Хранит индекс компоненты функции распределения и ее значения на правой стенке
+	//! Store index of probability distribution function and it's values on RIGHT boundary
 	std::map<int, std::vector<double> > right_boundary_;
+
+#pragma endregion
+
 };

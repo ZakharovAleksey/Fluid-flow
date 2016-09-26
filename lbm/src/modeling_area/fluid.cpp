@@ -3,14 +3,13 @@
 Fluid::Fluid(unsigned rows, unsigned colls) : rows_(rows), colls_(colls) {
 
 	rho_.resize(rows_, colls_);
-	rho_.fill_withought_boundary(1.0);
+	rho_.fillWithoughtBoundary(1.0);
 	vx_.resize(rows_, colls_);
 	vy_.resize(rows_, colls_);
 
 	f_.resize(rows_, colls_);
 	feq_.resize(rows_, colls_);
 }
-
 
 Fluid::~Fluid() {}
 

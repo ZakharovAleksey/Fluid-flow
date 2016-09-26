@@ -50,47 +50,47 @@ inline Matrix<T>& DistributionFunction<T>::operator[](unsigned q)
 }
 
 template<typename T>
-inline void DistributionFunction<T>::fill(T const value)
+inline void DistributionFunction<T>::fillWithoutBoundaries(T const value)
 {
 #pragma omp parallel for
 	for (int q = 0; q < kQ; ++q)
-		dfunc_body_.at(q).fill_with(value);
+		dfunc_body_.at(q).fillWith(value);
 }
 
 template<typename T>
-inline void DistributionFunction<T>::fill_boundaries(T const value)
+inline void DistributionFunction<T>::fillBoundaries(T const value)
 {
 //#pragma omp parallel for
 	for (int q = 1; q < kQ; ++q) {	// Ќачинаем с 1 так как f[0] никуда не двигаетс€
 		switch (q)
 		{
 		case 1:
-			dfunc_body_.at(1).fill_coll_with(colls_ - 1, value);
+			dfunc_body_.at(1).fillColumnWith(colls_ - 1, value);
 			break;
 		case 2:
-			dfunc_body_.at(2).fill_row_with(0, value);
+			dfunc_body_.at(2).fillRowWith(0, value);
 			break;
 		case 3:
-			dfunc_body_.at(3).fill_coll_with(0, value);
+			dfunc_body_.at(3).fillColumnWith(0, value);
 			break;
 		case 4:
-			dfunc_body_.at(4).fill_row_with(rows_ - 1, value);
+			dfunc_body_.at(4).fillRowWith(rows_ - 1, value);
 			break;
 		case 5:
-			dfunc_body_.at(5).fill_coll_with(colls_ - 1, value);
-			dfunc_body_.at(5).fill_row_with(0, value);
+			dfunc_body_.at(5).fillColumnWith(colls_ - 1, value);
+			dfunc_body_.at(5).fillRowWith(0, value);
 			break;
 		case 6:
-			dfunc_body_.at(6).fill_coll_with(0, value);
-			dfunc_body_.at(6).fill_row_with(0, value);
+			dfunc_body_.at(6).fillColumnWith(0, value);
+			dfunc_body_.at(6).fillRowWith(0, value);
 			break;
 		case 7:
-			dfunc_body_.at(7).fill_coll_with(0, value);
-			dfunc_body_.at(7).fill_row_with(rows_ - 1, value);
+			dfunc_body_.at(7).fillColumnWith(0, value);
+			dfunc_body_.at(7).fillRowWith(rows_ - 1, value);
 			break;
 		case 8:
-			dfunc_body_.at(8).fill_coll_with(colls_ - 1, value);
-			dfunc_body_.at(8).fill_row_with(rows_ - 1, value);
+			dfunc_body_.at(8).fillColumnWith(colls_ - 1, value);
+			dfunc_body_.at(8).fillRowWith(rows_ - 1, value);
 			break;
 		default:
 			break;
@@ -116,58 +116,58 @@ inline std::pair<unsigned int, unsigned int> DistributionFunction<T>::size() con
 }
 
 template<typename T>
-inline std::vector<T> DistributionFunction<T>::get_top_boundary_val(int const q) const
+inline std::vector<T> DistributionFunction<T>::getTopBoundaryValues(int const q) const
 {
-	return dfunc_body_.at(q).get_row(1);
+	return dfunc_body_.at(q).getRow(1);
 }
 
 template<typename T>
-inline std::vector<T> DistributionFunction<T>::get_bottom_boundary_val(int const q) const
+inline std::vector<T> DistributionFunction<T>::getBottomBoundaryValue(int const q) const
 {
-	return dfunc_body_.at(q).get_row(rows_ - 2);
+	return dfunc_body_.at(q).getRow(rows_ - 2);
 }
 
 template<typename T>
-inline std::vector<T> DistributionFunction<T>::get_left_boundary_val(int const q) const
+inline std::vector<T> DistributionFunction<T>::getLeftBoundaryValue(int const q) const
 {
-	return dfunc_body_.at(q).get_coll(1);
+	return dfunc_body_.at(q).getColumn(1);
 }
 
 template<typename T>
-inline std::vector<T> DistributionFunction<T>::get_right_boundary_val(int const q) const
+inline std::vector<T> DistributionFunction<T>::getRightBoundaryValue(int const q) const
 {
-	return dfunc_body_.at(q).get_coll(colls_ - 2);
+	return dfunc_body_.at(q).getColumn(colls_ - 2);
 }
 
 template<typename T>
-inline void DistributionFunction<T>::set_top_boundary_value(int const q, std::vector<T> const & row)
+inline void DistributionFunction<T>::setTopBoundaryValue(int const q, std::vector<T> const & row)
 {
-	dfunc_body_.at(q).set_row(1, row);
+	dfunc_body_.at(q).setRow(1, row);
 }
 
 template<typename T>
-inline void DistributionFunction<T>::set_bottom_boundary_value(int const q, std::vector<T> const & row)
+inline void DistributionFunction<T>::setBottomBoundaryValue(int const q, std::vector<T> const & row)
 {
-	dfunc_body_.at(q).set_row(rows_ - 2, row);
+	dfunc_body_.at(q).setRow(rows_ - 2, row);
 }
 
 template<typename T>
-inline void DistributionFunction<T>::set_left_boundary_value(int const q, std::vector<T> const & coll)
+inline void DistributionFunction<T>::setLeftBoundaryValue(int const q, std::vector<T> const & coll)
 {
-	dfunc_body_.at(q).set_coll(1, coll);
+	dfunc_body_.at(q).setColumn(1, coll);
 }
 
 template<typename T>
-inline void DistributionFunction<T>::set_right_boundary_value(int const q, std::vector<T> const & coll)
+inline void DistributionFunction<T>::setRightBoundaryValue(int const q, std::vector<T> const & coll)
 {
-	dfunc_body_.at(q).set_coll(colls_ - 2, coll);
+	dfunc_body_.at(q).setColumn(colls_ - 2, coll);
 }
 
 template<typename T>
-inline MacroscopicParam<T> DistributionFunction<T>::get_density() const
+inline MacroscopicParam<T> DistributionFunction<T>::calculateDensity() const
 {
 	MacroscopicParam<T> result(rows_, colls_);
-	result.fill_with(0.0);
+	result.fillWith(0.0);
 
 #pragma omp parallel for
 	for (int q = 0; q < kQ; ++q)
@@ -177,10 +177,10 @@ inline MacroscopicParam<T> DistributionFunction<T>::get_density() const
 }
 
 template<typename T>
-inline MacroscopicParam<T> DistributionFunction<T>::get_velocity(const double mas[kQ], MacroscopicParam<T> const & density) const
+inline MacroscopicParam<T> DistributionFunction<T>::calculateVelocity(const double mas[kQ], MacroscopicParam<T> const & density) const
 {
 	MacroscopicParam<T> result(rows_, colls_);
-	result.fill_with(0.0);
+	result.fillWith(0.0);
 
 #pragma omp parallel for
 	for (int q = 0; q < kQ; ++q)
@@ -191,9 +191,6 @@ inline MacroscopicParam<T> DistributionFunction<T>::get_velocity(const double ma
 	return result;
 	
 }
-
-
-
 
 template<typename T1>
 std::ostream & operator<<(std::ostream & os, DistributionFunction<T1> const & dist_func) {

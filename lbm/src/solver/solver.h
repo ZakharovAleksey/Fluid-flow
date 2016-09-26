@@ -3,13 +3,13 @@
 #include"..\phys_values\distribution_func.h"
 
 
-//! Весовые коэффиценты для рассчета равновесной функции распределения
+//! Weigth for probability distribution function calculation
 const double kW[kQ]{ 4.0 / 9.0, 1.0 / 9.0, 1.0 / 9.0, 1.0 / 9.0, 1.0 / 9.0,
  				   1.0 / 36.0, 1.0 / 36.0, 1.0 / 36.0, 1.0 / 36.0 };
 
 
 /*
-	Направления в модели скоростей D2Q9.
+	Directions in D2Q9 model
 	  6   2   5
 	   \  |  /
 	3 --  0  -- 1
@@ -17,36 +17,45 @@ const double kW[kQ]{ 4.0 / 9.0, 1.0 / 9.0, 1.0 / 9.0, 1.0 / 9.0, 1.0 / 9.0,
 	  7   4   8
 */
 
-//! X-компоненты определеяющие направления распространения псевдочастиц
+//! X-components witch determ particle movement
 const double kEx[kQ]{ 0.0, 1.0, 0.0, -1.0, 0.0, 1.0, -1.0, -1.0, 1.0 };
+
+//! Y-components witch determ particle movement
+const double kEy[kQ]{ 0.0, 0.0, 1.0, 0.0, -1.0, 1.0, 1.0, -1.0, -1.0 };
 
 //! Y-компоненты определеяющие направления распространения псевдочастиц (умножеди на -1 чтобы up = 0, boottom = rows)
 //const double kEy[kQ]{ 0.0, 0.0, -1.0, 0.0, 1.0, -1.0, -1.0, 1.0, 1.0 };
 
-const double kEy[kQ]{ 0.0, 0.0, 1.0, 0.0, -1.0, 1.0, 1.0, -1.0, -1.0 };
 /*!
-	Интерфейс для работы с различными методами.
-
-	Наследники SRT, MRT, IbSRT
+	Interface for different simulation aproaches:
+		- SRT
+		- MRT
+		- Immersed Boundary SRT
 */
 class iSolver
 {
 public:
+
 	virtual ~iSolver() {}
 
-	//! Расчет равновесной функции распределения
-	virtual void feq_calculate() = 0;
+#pragma region Methods
 
-	//! Распространения псевдочастиц вдоль направлений модели
+	//! Equilibrium probability distribution function calculation
+	virtual void feqCalculate() = 0;
+
+	//! Streaming of particles to neighbour nodes
 	virtual void streaming() = 0;
-	//! Столкновение псевдочастиц мадели в узлах решетки
+	//! Collision of particles in nodes
 	virtual void collision() = 0;
 
-	//! Процедура производящая процесс моделирования течения жидкости
+	//! Solver for modeling procedure
 	virtual void solve(int iteration_number) = 0;
 
-	//! Процедура пересчета плотностей и скоростей жидкости
+	//! Recalculation procedure (recalculate density, velocity)
 	virtual void recalculate() = 0;
+
+#pragma endregion
+
 private:
 
 };

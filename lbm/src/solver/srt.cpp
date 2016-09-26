@@ -9,10 +9,10 @@ SRTsolver::SRTsolver(double const tau, Medium & medium, Fluid & fluid) :
 		medium_->size().second == fluid_->size().second);
 }
 
-void SRTsolver::feq_calculate()
+void SRTsolver::feqCalculate()
 {
 	// Проверить надо ли, или без нее все нормально
-	fluid_->feq_.fill(0.0);
+	fluid_->feq_.fillWithoutBoundaries(0.0);
 
 #pragma omp parallel for
 	for (int q = 0; q < kQ; ++q) {
@@ -30,7 +30,7 @@ void SRTsolver::streaming()
 {
 	for (int q = 0; q < kQ; ++q) {
 		Matrix<double> temp = fluid_->f_[q];
-		fluid_->f_[q].fill_with(0.0);
+		fluid_->f_[q].fillWith(0.0);
 
 		for (unsigned y = 0; y < fluid_->size().first; ++y)
 			for (unsigned x = 0; x < fluid_->size().second; ++x)
@@ -39,7 +39,7 @@ void SRTsolver::streaming()
 	}
 
 	// Очищаем значения попавшие на границу, так как они уже сохранены в BCs
-	fluid_->f_.fill_boundaries(0.0);
+	fluid_->f_.fillBoundaries(0.0);
 }
 
 void SRTsolver::collision()
@@ -51,7 +51,7 @@ void SRTsolver::collision()
 
 void SRTsolver::solve(int iteration_number)
 {
-	feq_calculate();
+	feqCalculate();
 	for (int q = 0; q < kQ; ++q)
 		fluid_->f_[q] = fluid_->feq_[q];
 
@@ -59,40 +59,40 @@ void SRTsolver::solve(int iteration_number)
 
 	for (int iter = 0; iter < iteration_number; ++iter) {
 		collision();
-		BC.prepair_bc_values(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		BC.prepareValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
 
 		streaming();
 
-		BC.bounce_back_bc(Boundary::TOP);
-		BC.bounce_back_bc(Boundary::BOTTOM);
-		BC.bounce_back_bc(Boundary::RIGHT);
+		BC.bounceBackBC(Boundary::TOP);
+		BC.bounceBackBC(Boundary::BOTTOM);
+		BC.bounceBackBC(Boundary::RIGHT);
 		std::vector<double> vx;
-		BC.von_neuman_bc(Boundary::LEFT, *fluid_, 0.01, vx);
+		BC.vonNeumannBC(Boundary::LEFT, *fluid_, 0.01, vx);
 
 
-		BC.recording_bc_values(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		BC.recordValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
 		
 		recalculate();
-		fluid_->vx_.set_coll(1, vx);
+		fluid_->vx_.setColumn(1, vx);
 		
-		feq_calculate();
+		feqCalculate();
 
-		std::cout << iter << " Total rho = " << fluid_->rho_.get_sum() << std::endl;
+		std::cout << iter << " Total rho = " << fluid_->rho_.getSum() << std::endl;
 	}
 
 	for (int i = 0; i < fluid_->rows_; ++i)
 		std::cout << fluid_->vx_(i, 5) << "\n";
 
-	fluid_->vx_.coll_to_file("vx", 5, 100);
-	fluid_->vx_.to_file("vx", iteration_number);
-	fluid_->vx_.row_to_file("vx", 5, 100);
+	fluid_->vx_.writeColumnToFile("vx", 5, 100);
+	fluid_->vx_.writeToFile("vx", iteration_number);
+	fluid_->vx_.writeRowToFile("vx", 5, 100);
 }
 
 void SRTsolver::recalculate()
 {
-	fluid_->rho_ = fluid_->f_.get_density();
-	fluid_->vx_ = fluid_->f_.get_velocity(kEx, fluid_->rho_);
-	fluid_->vy_ = fluid_->f_.get_velocity(kEy, fluid_->rho_);
+	fluid_->rho_ = fluid_->f_.calculateDensity();
+	fluid_->vx_ = fluid_->f_.calculateVelocity(kEx, fluid_->rho_);
+	fluid_->vy_ = fluid_->f_.calculateVelocity(kEy, fluid_->rho_);
 }
 
 

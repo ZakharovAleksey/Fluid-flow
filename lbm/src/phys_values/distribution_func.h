@@ -5,27 +5,36 @@
 #include"..\math\my_matrix.h"
 #include"..\phys_values\macroscopic_param.h"
 
-/*!
-	Возможное число направлений, в которых могут перемещаться
-	псевдочастицы. Следует из размерности задачи D2Q3 D2Q9.
-*/
+//! Possible Count of directions in which particles would move
 unsigned const kQ{ 9 };
 
 /*!
-	Функция распределения плотности вероятности f.
-		- массив размера kQ в каждой ячейке которого хранятся значения функции распределения для q = 0...kQ
-		  направления.
+	Probability distribution function implementation class.
+	
+	- Implemented as an array of size kQ each element of witch store probability distribution function field for apprpriate
+	component of direction. 
+
+	Example:
+		DistributionFunction f[1] - stores probability distribution function field in right direction.
 */
 template<typename T>
 class DistributionFunction
 {
 public:
+
+#pragma region Constructor
+
+
 	DistributionFunction();
 	DistributionFunction(unsigned rows, unsigned colls);
 	~DistributionFunction();
 	
 	DistributionFunction(DistributionFunction<T> const & other);
-	
+
+#pragma endregion
+
+#pragma region Overload operators
+
 	void swap(DistributionFunction & dist_func);
 
 	DistributionFunction<T> & operator=(DistributionFunction<T> const & other) {
@@ -37,60 +46,63 @@ public:
 		return *this;
 	}
 
-#pragma region opeartors
+#pragma region Operator +, += overload
 
-	DistributionFunction<T> & operator+=(DistributionFunction<T> const & other) {
-	#pragma omp parallel for
+	DistributionFunction<T> & operator+=(DistributionFunction<T> const & other) 
+	{
 		for (int q = 0; q < kQ; ++q)
 			dfunc_body_.at(q) += other.dfunc_body_.at(q);
 
 		return *this;
 	}
 
-	DistributionFunction<T> operator+(DistributionFunction<T> const & other) {
-		assert(rows_ == other.rows_ && colls_ == other.colls_);
-
+	DistributionFunction<T> operator+(DistributionFunction<T> const & other) 
+	{
 		DistributionFunction<T> result(*this);
-	#pragma omp parallel for
 		for (int q = 0; q < kQ; ++q)
 			result.dfunc_body_.at(q) += other.dfunc_body_.at(q);
 
 		return result;
 	}
 
+#pragma endregion
 
-	DistributionFunction<T> & operator-=(DistributionFunction<T> const & other) {
-	#pragma omp parallel for
+#pragma region  Operator -, -= overload
+
+	DistributionFunction<T> & operator-=(DistributionFunction<T> const & other) 
+	{
 		for (int q = 0; q < kQ; ++q)
 			dfunc_body_.at(q) -= other.dfunc_body_.at(q);
 
 		return *this;
 	}
 
-	DistributionFunction<T> operator-(DistributionFunction<T> const & other) {
-		assert(rows_ == other.rows_ && colls_ == other.colls_);
-
+	DistributionFunction<T> operator-(DistributionFunction<T> const & other) 
+	{
 		DistributionFunction<T> result(*this);
-	#pragma omp parallel for
+
 		for (int q = 0; q < kQ; ++q)
 			result.dfunc_body_.at(q) -= other.dfunc_body_.at(q);
 
 		return result;
 	}
 
+#pragma endregion
 
-	DistributionFunction<T> & operator/=(T const & other) {
-	#pragma omp parallel for
+#pragma region Operator / , /= overload
+	
+	DistributionFunction<T> & operator/=(T const & other) 
+	{
 		for (int q = 0; q < kQ; ++q)
 			dfunc_body_.at(q) /= other;
 
 		return *this;
 	}
 
-	DistributionFunction<T> operator/(T const & other) {
-		
+	DistributionFunction<T> operator/(T const & other) 
+	{
 		DistributionFunction<T> result(*this);
-	#pragma omp parallel for
+
 		for (int q = 0; q < kQ; ++q)
 			result.dfunc_body_.at(q) /= other;
 
@@ -99,45 +111,52 @@ public:
 
 #pragma endregion
 
-#pragma region function
+#pragma endregion
 
-	//! Возвращвет q-ую компоненту функции распределения
+#pragma region Proprerties (Get/Set)
+
+	//! Get q-component of probability distribution function
 	Matrix<T> & operator[](unsigned q);
-
-	//! Заполняетя все элементы массивов функций распределения кроме элементов на границе величиной value
-	void fill(T const value);
-
-	//! Заполняет границы для каждой из kQ функций распределения значениями value
-	void fill_boundaries(T const value);
-
-	//! Изменяет размер каждой из компонент функции распределения на rows и colls соответственно
-	void resize(unsigned rows, unsigned colls);
-
-	//! Возвращает пару в которой first = rows_, second = colls_
+	
+	//! Get pair in witch: first = rows_, second = colls_
 	std::pair<unsigned int, unsigned int> size() const;
 
-	//! Возвращает значения функции распределения на верхней стенке
-	std::vector<T> get_top_boundary_val(int const q) const;	
-	//! Возвращает значения функции распределения на нижней стенке
-	std::vector<T> get_bottom_boundary_val(int const q) const;
-	//! Возвращает значения функции распределения на левой стенке
-	std::vector<T> get_left_boundary_val(int const q) const;
-	//! Возвращает значения функции распределения на правой стенке
-	std::vector<T> get_right_boundary_val(int const q) const;
-	
-	//! Назначет значения функции распределения на верхней стенке равными значению масива colls
-	void set_top_boundary_value(int const q, std::vector<T> const & row);
-	//! Назначет значения функции распределения на нижней стенке равными значению масива colls
-	void set_bottom_boundary_value(int const q, std::vector<T> const & row);
-	//! Назначет значения функции распределения на левой стенке равными значению масива colls
-	void set_left_boundary_value(int const q, std::vector<T> const & coll);
-	//! Назначет значения функции распределения на правой стенке равными значению масива colls
-	void set_right_boundary_value(int const q, std::vector<T> const & coll);
+	//! Get probability distribution function values on TOP boundary
+	std::vector<T> getTopBoundaryValues(int const q) const;
+	//! Get probability distribution function values on BOTTOM boundary
+	std::vector<T> getBottomBoundaryValue(int const q) const;
+	//! Get probability distribution function values on LEFT boundary
+	std::vector<T> getLeftBoundaryValue(int const q) const;
+	//! Get probability distribution function values on RIGHT boundary
+	std::vector<T> getRightBoundaryValue(int const q) const;
+
+	//! Set probability distribution function values on TOP boundary equal to parameter array
+	void setTopBoundaryValue(int const q, std::vector<T> const & row);
+	//! Set probability distribution function values on BOTTOM boundary equal to parameter array
+	void setBottomBoundaryValue(int const q, std::vector<T> const & row);
+	//! Set probability distribution function values on LEFT boundary equal to parameter array
+	void setLeftBoundaryValue(int const q, std::vector<T> const & coll);
+	//! Set probability distribution function values on RIGHT boundary equal to parameter array
+	void setRightBoundaryValue(int const q, std::vector<T> const & coll);
+
+#pragma endregion
+
+#pragma region Methods
+
+	//! Fill each of kQ component of probability distribution function except boundaries with value
+	void fillWithoutBoundaries(T const value);
+
+	//! Fill each of kQ component of probability distribution function boundaries with value
+	void fillBoundaries(T const value);
+
+	//! Resize each of kQ component of probability distribution function 
+	void resize(unsigned rows, unsigned colls);
 
 	//! Считает плотность в кажой из ячеек области
-	MacroscopicParam<T> get_density() const;
+	MacroscopicParam<T> calculateDensity() const;
+
 	//! Считает скорость в кажой из ячеек области
-	MacroscopicParam<T> get_velocity(const double mas[kQ], MacroscopicParam<T> const & density) const;
+	MacroscopicParam<T> calculateVelocity(const double mas[kQ], MacroscopicParam<T> const & density) const;
 
 #pragma endregion
 
@@ -145,16 +164,18 @@ public:
 	friend std::ostream & operator<<(std::ostream & os, DistributionFunction<T1> const & distr_func);
 
 private:
+
+#pragma region Fields
+	//! Rows count for distribution function
 	unsigned rows_;
+	//! Columns count for distribution function
 	unsigned colls_;
 	
-	/*!
-		Хранит значения функции распределения плотности вероятности вдоль q = 1...kQ направления движения
-		псевдочастицы.
-
-		Реализован как массив матриц фиксированного рамера kQ.
-	*/
+	//! Array witch store all kQ components of probability distribution function
 	std::array<Matrix<T>, kQ> dfunc_body_;
+
+#pragma endregion
+
 };
 
 

@@ -47,7 +47,7 @@ int main()
 	f.Poiseuille_IC(0.01);
 
 	SRTsolver solver(1.0, m, f);
-	solver.solve(100);
+	solver.solve(50);
 
 	/*
 		- Продумать структуру для BC!

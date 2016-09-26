@@ -14,13 +14,13 @@ BCs::BCs(unsigned rows, unsigned colls, DistributionFunction<double> & dfunc):
 
 BCs::~BCs() {}
 
-bool BCs::get_values(Boundary const BC, BCType const boundary_condition_type)
+bool BCs::prepareValuesOnCurrentBoundary(Boundary const BC, BCType const boundary_condition_type)
 {
 	if (BC == Boundary::TOP) {
 		if (boundary_condition_type == BCType::PERIODIC || boundary_condition_type == BCType::BOUNCE_BACK) {
-			top_boundary_.insert(std::make_pair(2, f_ptr_->get_top_boundary_val(2)));
-			top_boundary_.insert(std::make_pair(5, f_ptr_->get_top_boundary_val(5)));
-			top_boundary_.insert(std::make_pair(6, f_ptr_->get_top_boundary_val(6)));
+			top_boundary_.insert(std::make_pair(2, f_ptr_->getTopBoundaryValues(2)));
+			top_boundary_.insert(std::make_pair(5, f_ptr_->getTopBoundaryValues(5)));
+			top_boundary_.insert(std::make_pair(6, f_ptr_->getTopBoundaryValues(6)));
 		}
 		else if (boundary_condition_type == BCType::VON_NEUMAN) {
 			// Пока что не реализовано исполькование ГУ типа Фон-Неймана
@@ -31,9 +31,9 @@ bool BCs::get_values(Boundary const BC, BCType const boundary_condition_type)
 	}
 	else if (BC == Boundary::BOTTOM) {
 		if (boundary_condition_type == BCType::PERIODIC || boundary_condition_type == BCType::BOUNCE_BACK) {
-			bottom_boundary_.insert(std::make_pair(4, f_ptr_->get_bottom_boundary_val(4)));
-			bottom_boundary_.insert(std::make_pair(7, f_ptr_->get_bottom_boundary_val(7)));
-			bottom_boundary_.insert(std::make_pair(8, f_ptr_->get_bottom_boundary_val(8)));
+			bottom_boundary_.insert(std::make_pair(4, f_ptr_->getBottomBoundaryValue(4)));
+			bottom_boundary_.insert(std::make_pair(7, f_ptr_->getBottomBoundaryValue(7)));
+			bottom_boundary_.insert(std::make_pair(8, f_ptr_->getBottomBoundaryValue(8)));
 		}
 		else if (boundary_condition_type == BCType::VON_NEUMAN) {
 			// Пока что не реализовано исполькование ГУ типа Фон-Неймана
@@ -44,26 +44,26 @@ bool BCs::get_values(Boundary const BC, BCType const boundary_condition_type)
 	}
 	else if (BC == Boundary::LEFT) {
 		if (boundary_condition_type == BCType::PERIODIC || boundary_condition_type == BCType::BOUNCE_BACK) {
-			left_boundary_.insert(std::make_pair(3, f_ptr_->get_left_boundary_val(3)));
-			left_boundary_.insert(std::make_pair(6, f_ptr_->get_left_boundary_val(6)));
-			left_boundary_.insert(std::make_pair(7, f_ptr_->get_left_boundary_val(7)));
+			left_boundary_.insert(std::make_pair(3, f_ptr_->getLeftBoundaryValue(3)));
+			left_boundary_.insert(std::make_pair(6, f_ptr_->getLeftBoundaryValue(6)));
+			left_boundary_.insert(std::make_pair(7, f_ptr_->getLeftBoundaryValue(7)));
 		}
 		else if (boundary_condition_type == BCType::VON_NEUMAN) {
-			left_boundary_.insert(std::make_pair(0, f_ptr_->get_left_boundary_val(0)));
-			left_boundary_.insert(std::make_pair(2, f_ptr_->get_left_boundary_val(2)));
-			left_boundary_.insert(std::make_pair(3, f_ptr_->get_left_boundary_val(3)));
-			left_boundary_.insert(std::make_pair(4, f_ptr_->get_left_boundary_val(4)));
-			left_boundary_.insert(std::make_pair(6, f_ptr_->get_left_boundary_val(6)));
-			left_boundary_.insert(std::make_pair(7, f_ptr_->get_left_boundary_val(7)));
+			left_boundary_.insert(std::make_pair(0, f_ptr_->getLeftBoundaryValue(0)));
+			left_boundary_.insert(std::make_pair(2, f_ptr_->getLeftBoundaryValue(2)));
+			left_boundary_.insert(std::make_pair(3, f_ptr_->getLeftBoundaryValue(3)));
+			left_boundary_.insert(std::make_pair(4, f_ptr_->getLeftBoundaryValue(4)));
+			left_boundary_.insert(std::make_pair(6, f_ptr_->getLeftBoundaryValue(6)));
+			left_boundary_.insert(std::make_pair(7, f_ptr_->getLeftBoundaryValue(7)));
 		}
 
 		return true;
 	}
 	else if (BC == Boundary::RIGHT) {
 		if (boundary_condition_type == BCType::PERIODIC || boundary_condition_type == BCType::BOUNCE_BACK) {
-			right_boundary_.insert(std::make_pair(1, f_ptr_->get_right_boundary_val(1)));
-			right_boundary_.insert(std::make_pair(5, f_ptr_->get_right_boundary_val(5)));
-			right_boundary_.insert(std::make_pair(8, f_ptr_->get_right_boundary_val(8)));
+			right_boundary_.insert(std::make_pair(1, f_ptr_->getRightBoundaryValue(1)));
+			right_boundary_.insert(std::make_pair(5, f_ptr_->getRightBoundaryValue(5)));
+			right_boundary_.insert(std::make_pair(8, f_ptr_->getRightBoundaryValue(8)));
 		}
 		else if (boundary_condition_type == BCType::VON_NEUMAN) {
 			// Пока что не реализовано исполькование ГУ типа Фон-Неймана
@@ -76,12 +76,12 @@ bool BCs::get_values(Boundary const BC, BCType const boundary_condition_type)
 		return false;
 }
 
-void BCs::prepair_bc_values(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc)
+void BCs::prepareValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc)
 {
-	if (get_values(Boundary::TOP, top_bc) &&
-		get_values(Boundary::BOTTOM, bottm_bc) &&
-		get_values(Boundary::LEFT, left_bc) &&
-		get_values(Boundary::RIGHT, right_bc)) 
+	if (prepareValuesOnCurrentBoundary(Boundary::TOP, top_bc) &&
+		prepareValuesOnCurrentBoundary(Boundary::BOTTOM, bottm_bc) &&
+		prepareValuesOnCurrentBoundary(Boundary::LEFT, left_bc) &&
+		prepareValuesOnCurrentBoundary(Boundary::RIGHT, right_bc)) 
 	{
 		// Лог что все значения получилось взять
 	}
@@ -91,7 +91,7 @@ void BCs::prepair_bc_values(BCType const top_bc, BCType const bottm_bc, BCType c
 	}
 }
 
-void BCs::set_values(Boundary const BC, BCType const boundary_condition_type)
+void BCs::recordValuesOnCurrentBoundary(Boundary const BC, BCType const boundary_condition_type)
 {
 	if (BC == Boundary::TOP) {
 		if (boundary_condition_type == BCType::PERIODIC) {
@@ -100,18 +100,18 @@ void BCs::set_values(Boundary const BC, BCType const boundary_condition_type)
 			auto f_5 = top_boundary_.find(5);
 			auto f_6 = top_boundary_.find(6);
 
-			f_ptr_->set_bottom_boundary_value(f_2->first, f_2->second);
-			f_ptr_->set_bottom_boundary_value(f_5->first, f_5->second);
-			f_ptr_->set_bottom_boundary_value(f_6->first, f_6->second);
+			f_ptr_->setBottomBoundaryValue(f_2->first, f_2->second);
+			f_ptr_->setBottomBoundaryValue(f_5->first, f_5->second);
+			f_ptr_->setBottomBoundaryValue(f_6->first, f_6->second);
 		}
 		else if (boundary_condition_type == BCType::BOUNCE_BACK) {
 			auto f_4 = top_boundary_.find(4);
 			auto f_7 = top_boundary_.find(7);
 			auto f_8 = top_boundary_.find(8);
 
-			f_ptr_->set_top_boundary_value(f_4->first, f_4->second);
-			f_ptr_->set_top_boundary_value(f_7->first, f_7->second);
-			f_ptr_->set_top_boundary_value(f_8->first, f_8->second);
+			f_ptr_->setTopBoundaryValue(f_4->first, f_4->second);
+			f_ptr_->setTopBoundaryValue(f_7->first, f_7->second);
+			f_ptr_->setTopBoundaryValue(f_8->first, f_8->second);
 		}
 		else if (boundary_condition_type == BCType::VON_NEUMAN) {
 			// Пока еще не реализованно
@@ -124,18 +124,18 @@ void BCs::set_values(Boundary const BC, BCType const boundary_condition_type)
 			auto f_7 = bottom_boundary_.find(7);
 			auto f_8 = bottom_boundary_.find(8);
 
-			f_ptr_->set_top_boundary_value(f_4->first, f_4->second);
-			f_ptr_->set_top_boundary_value(f_7->first, f_7->second);
-			f_ptr_->set_top_boundary_value(f_8->first, f_8->second);
+			f_ptr_->setTopBoundaryValue(f_4->first, f_4->second);
+			f_ptr_->setTopBoundaryValue(f_7->first, f_7->second);
+			f_ptr_->setTopBoundaryValue(f_8->first, f_8->second);
 		}
 		else if (boundary_condition_type == BCType::BOUNCE_BACK) {
 			auto f_2 = bottom_boundary_.find(2);
 			auto f_5 = bottom_boundary_.find(5);
 			auto f_6 = bottom_boundary_.find(6);
 
-			f_ptr_->set_bottom_boundary_value(f_2->first, f_2->second);
-			f_ptr_->set_bottom_boundary_value(f_5->first, f_5->second);
-			f_ptr_->set_bottom_boundary_value(f_6->first, f_6->second);
+			f_ptr_->setBottomBoundaryValue(f_2->first, f_2->second);
+			f_ptr_->setBottomBoundaryValue(f_5->first, f_5->second);
+			f_ptr_->setBottomBoundaryValue(f_6->first, f_6->second);
 		}
 		else if (boundary_condition_type == BCType::VON_NEUMAN) {
 			// Пока еще не реализованно
@@ -148,9 +148,9 @@ void BCs::set_values(Boundary const BC, BCType const boundary_condition_type)
 			auto f_6 = left_boundary_.find(6);
 			auto f_7 = left_boundary_.find(7);
 
-			f_ptr_->set_right_boundary_value(f_3->first, f_3->second);
-			f_ptr_->set_right_boundary_value(f_6->first, f_6->second);
-			f_ptr_->set_right_boundary_value(f_7->first, f_7->second);
+			f_ptr_->setRightBoundaryValue(f_3->first, f_3->second);
+			f_ptr_->setRightBoundaryValue(f_6->first, f_6->second);
+			f_ptr_->setRightBoundaryValue(f_7->first, f_7->second);
 		}
 		else if (boundary_condition_type == BCType::BOUNCE_BACK || 
 				 boundary_condition_type == BCType::VON_NEUMAN) 
@@ -159,9 +159,9 @@ void BCs::set_values(Boundary const BC, BCType const boundary_condition_type)
 			auto f_5 = left_boundary_.find(5);
 			auto f_8 = left_boundary_.find(8);
 
-			f_ptr_->set_left_boundary_value(f_1->first, f_1->second);
-			f_ptr_->set_left_boundary_value(f_5->first, f_5->second);
-			f_ptr_->set_left_boundary_value(f_8->first, f_8->second);
+			f_ptr_->setLeftBoundaryValue(f_1->first, f_1->second);
+			f_ptr_->setLeftBoundaryValue(f_5->first, f_5->second);
+			f_ptr_->setLeftBoundaryValue(f_8->first, f_8->second);
 		}
 	}
 	else if (BC == Boundary::RIGHT) {
@@ -170,18 +170,18 @@ void BCs::set_values(Boundary const BC, BCType const boundary_condition_type)
 			auto f_5 = right_boundary_.find(5);
 			auto f_8 = right_boundary_.find(8);
 
-			f_ptr_->set_left_boundary_value(f_1->first, f_1->second);
-			f_ptr_->set_left_boundary_value(f_5->first, f_5->second);
-			f_ptr_->set_left_boundary_value(f_8->first, f_8->second);
+			f_ptr_->setLeftBoundaryValue(f_1->first, f_1->second);
+			f_ptr_->setLeftBoundaryValue(f_5->first, f_5->second);
+			f_ptr_->setLeftBoundaryValue(f_8->first, f_8->second);
 		}
 		else if (boundary_condition_type == BCType::BOUNCE_BACK) {
 			auto f_3 = right_boundary_.find(3);
 			auto f_6 = right_boundary_.find(6);
 			auto f_7 = right_boundary_.find(7);
 
-			f_ptr_->set_right_boundary_value(f_3->first, f_3->second);
-			f_ptr_->set_right_boundary_value(f_6->first, f_6->second);
-			f_ptr_->set_right_boundary_value(f_7->first, f_7->second);
+			f_ptr_->setRightBoundaryValue(f_3->first, f_3->second);
+			f_ptr_->setRightBoundaryValue(f_6->first, f_6->second);
+			f_ptr_->setRightBoundaryValue(f_7->first, f_7->second);
 		}
 		else if (boundary_condition_type == BCType::VON_NEUMAN) {
 			// Пока еще не реализованно
@@ -190,15 +190,15 @@ void BCs::set_values(Boundary const BC, BCType const boundary_condition_type)
 	}
 }
 
-void BCs::recording_bc_values(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc)
+void BCs::recordValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc)
 {
-	set_values(Boundary::TOP, top_bc);
-	set_values(Boundary::BOTTOM, bottm_bc);
-	set_values(Boundary::LEFT, left_bc);
-	set_values(Boundary::RIGHT, right_bc);
+	recordValuesOnCurrentBoundary(Boundary::TOP, top_bc);
+	recordValuesOnCurrentBoundary(Boundary::BOTTOM, bottm_bc);
+	recordValuesOnCurrentBoundary(Boundary::LEFT, left_bc);
+	recordValuesOnCurrentBoundary(Boundary::RIGHT, right_bc);
 }
 
-void BCs::periodic_bc(Boundary const first, Boundary const second)
+void BCs::periodicBC(Boundary const first, Boundary const second)
 {
 	if (first == Boundary::LEFT && second == Boundary::RIGHT)
 		left_boundary_.swap(right_boundary_);
@@ -208,7 +208,7 @@ void BCs::periodic_bc(Boundary const first, Boundary const second)
 		throw;
 }
 
-void BCs::bounce_back_bc(Boundary const first)
+void BCs::bounceBackBC(Boundary const first)
 {
 	if (first == Boundary::TOP) {
 		swap_id(top_boundary_, 2, 4);
@@ -232,7 +232,7 @@ void BCs::bounce_back_bc(Boundary const first)
 	}
 }
 
-void BCs::von_neuman_bc(Boundary const first, Fluid & fluid, double const vx, 
+void BCs::vonNeumannBC(Boundary const first, Fluid & fluid, double const vx, 
 	std::vector<double> & velocity_x)
 {
 	// Подготовка векторов, куда запишутся скорость и плотность на границе
@@ -270,7 +270,6 @@ void BCs::von_neuman_bc(Boundary const first, Fluid & fluid, double const vx,
 	}
 }
 
-
 void BCs::swap_id(std::map<int, std::vector<double>> & map, int const from, int const to)
 {
 	std::vector<double> temp;
@@ -278,7 +277,6 @@ void BCs::swap_id(std::map<int, std::vector<double>> & map, int const from, int 
 	temp.swap(iter->second);
 	map.erase(iter);
 	map.insert(std::make_pair(to, temp));
-
 }
 
 std::ostream & operator<<(std::ostream & os, BCs const & BC)

@@ -89,7 +89,7 @@ inline std::pair<unsigned int, unsigned int> Matrix<T>::size() const
 }
 
 template<typename T>
-inline long double Matrix<T>::get_sum() const
+inline long double Matrix<T>::getSum() const
 {
 	long double sum{ 0.0 };
 
@@ -101,7 +101,7 @@ inline long double Matrix<T>::get_sum() const
 }
 
 template<typename T>
-inline std::vector<T> Matrix<T>::get_row(unsigned const y) const
+inline std::vector<T> Matrix<T>::getRow(unsigned const y) const
 {
 	// Check that row ID less than number of rows
 	assert(y < rows_);
@@ -114,7 +114,7 @@ inline std::vector<T> Matrix<T>::get_row(unsigned const y) const
 }
 
 template<typename T>
-inline void Matrix<T>::set_row(unsigned const y, std::vector<T> const & row)
+inline void Matrix<T>::setRow(unsigned const y, std::vector<T> const & row)
 {
 	// Check that std::vector<T> row size is equal to columns number of matrix
 	assert(colls_ == row.size());
@@ -125,7 +125,7 @@ inline void Matrix<T>::set_row(unsigned const y, std::vector<T> const & row)
 }
 
 template<typename T>
-inline std::vector<T> Matrix<T>::get_coll(unsigned const x) const
+inline std::vector<T> Matrix<T>::getColumn(unsigned const x) const
 {
 	// Check that coll ID less than number of column
 	assert(x < colls_);
@@ -139,7 +139,7 @@ inline std::vector<T> Matrix<T>::get_coll(unsigned const x) const
 }
 
 template<typename T>
-inline void Matrix<T>::set_coll(unsigned const x, std::vector<T> const & coll)
+inline void Matrix<T>::setColumn(unsigned const x, std::vector<T> const & coll)
 {
 	// Check that std::vector<T> coll size is equal to rows number of matrix, bsides 2 (left and right boundary index)
 	assert(rows_ == coll.size() + 2);
@@ -150,7 +150,7 @@ inline void Matrix<T>::set_coll(unsigned const x, std::vector<T> const & coll)
 }
 
 template<typename T>
-inline void Matrix<T>::fill_with(T const value)
+inline void Matrix<T>::fillWith(T const value)
 {
 #pragma omp parallel for
 	for (int i = 0; i < body_.size(); ++i)
@@ -158,7 +158,7 @@ inline void Matrix<T>::fill_with(T const value)
 }
 
 template<typename T>
-inline void Matrix<T>::fill_withought_boundary(T const value)
+inline void Matrix<T>::fillWithoughtBoundary(T const value)
 {
 #pragma omp parallel for
 	for (int i = colls_; i < colls_ * (rows_ - 1); ++i) {
@@ -169,7 +169,7 @@ inline void Matrix<T>::fill_withought_boundary(T const value)
 }
 
 template<typename T>
-inline void Matrix<T>::fill_coll_with(int const coll_id, T const value)
+inline void Matrix<T>::fillColumnWith(int const coll_id, T const value)
 {
 	// Check that coll ID less than number of column
 	assert(coll_id < colls_);
@@ -180,7 +180,7 @@ inline void Matrix<T>::fill_coll_with(int const coll_id, T const value)
 }
 
 template<typename T>
-inline void Matrix<T>::fill_row_with(int const row_id, T const value)
+inline void Matrix<T>::fillRowWith(int const row_id, T const value)
 {
 	// Check that row ID less than number of rows
 	assert(row_id < rows_);
@@ -205,7 +205,7 @@ inline void Matrix<T>::resize(unsigned rows, unsigned colls)
 }
 
 template<typename T>
-inline void Matrix<T>::to_file(std::string value_name, int const time)
+inline void Matrix<T>::writeToFile(std::string value_name, int const time)
 {
 	using std::endl;
 
@@ -236,7 +236,7 @@ inline void Matrix<T>::to_file(std::string value_name, int const time)
 }
 
 template<typename T>
-inline void Matrix<T>::coll_to_file(std::string value_name, int const coll_id, int const time)
+inline void Matrix<T>::writeColumnToFile(std::string value_name, int const coll_id, int const time)
 {
 	// Check that coll_id is less then columns number
 	assert(coll_id < colls_);
@@ -262,7 +262,7 @@ inline void Matrix<T>::coll_to_file(std::string value_name, int const coll_id, i
 }
 
 template<typename T>
-inline void Matrix<T>::row_to_file(std::string value_name, int const row_id, int const time)
+inline void Matrix<T>::writeRowToFile(std::string value_name, int const row_id, int const time)
 {
 	// Check that row_id is less then rows number
 	assert(row_id < rows_);
