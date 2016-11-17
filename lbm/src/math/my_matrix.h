@@ -16,12 +16,14 @@
 #endif // !TEST_INCLUDE
 
 
-/*
-	Basic class to this project.  Represent simple matrix object.
-
-	All physical values (density, velocity, distribution function) will be implemented on the basis of this class.
-	Overloading implemetation only for operations witch we need in LBM implementation.
-*/
+/// <summary>
+/// The template class of 2D matrix.
+/// <remarks>
+/// Basic class for LBM project.
+/// All physical values (density, velocity, distribution function) will be implemented as derived clases from Matrx class.
+/// Overloading implemetation only for operations witch we need in LBM implementation.
+/// </remarks>
+/// </summary>
 template<typename T>
 class Matrix
 {
@@ -29,17 +31,39 @@ public:
 
 #pragma region Constructor
 
+	/// <summary>
+	/// Allocates an uninitialized matrix that holds zero elements.
+	/// </summary>
 	Matrix();
+
+	/// <summary>
+	/// Allocates an matrix with rows number is equal to "rows" and column number is equal to "cells", which is filled with zeros.
+	/// </summary>
+	/// <param name="rows"> Number of rows in matrix. </param>
+	/// <param name="colls"> Number of columns in matrix.</param>
 	Matrix(unsigned rows, unsigned colls);
+
 	virtual ~Matrix();
 
+	/// <summary>
+	/// Allocates an matrix with rows number is equal to the "other" matrix rows and column number is equal to the "other" matrix cells, which is filled with 
+	/// the "other" matrix values.
+	/// </summary>
 	Matrix(Matrix<T> const & other);	// Проверить все ли хорошо при вызове функции отсюда
 
-	// Swap left and right matrixes
-	void swap(Matrix<T> & other);
+	/// <summary>
+	/// Swap current matrix (Swap includes rows number, columns number and all elements) with the "other" matrix.
+	/// </summary>
+	/// <param name="other"> The matrix which is swapped with the current </param>
+	void Swap(Matrix<T> & other);
 
 #pragma endregion
 
+	/// <summary>
+	/// The assignment operator.
+	/// </summary>
+	/// <param name="other"> Matirix from the rigth side of the assigment operator. </param>
+	/// <returns> New assigment matrix. </returns>
 	Matrix<T> & operator=(Matrix<T> const & other) 
 	{
 		// Check that rows or colls number of right and left matrix are equal
@@ -48,7 +72,7 @@ public:
 		if (this != & other) 
 		{
 			Matrix<T> temp(other);
-			temp.swap(*this);
+			temp.Swap(*this);
 		}
 
 		return *this;
@@ -56,6 +80,11 @@ public:
 
 #pragma region Operator +, += and its overloading
 
+	/// <summary>
+	/// A computed assignment operator. Adds the matrix "other" expression to the matrix.
+	/// </summary>
+	/// <param name="other"> Matrix that we add to the current matrix. </param>
+	/// <returns>  The result of adding two matrices. </returns>
 	Matrix<T> & operator+=(Matrix<T> const & other) {
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
 	#pragma omp parallel for
@@ -65,7 +94,11 @@ public:
 		return *this;
 	}
 
-	//! Add to each left matrix element value other
+	/// <summary>
+	/// A computed assignment operator. Adds the to each matrix element "other" value.
+	/// </summary>
+	/// <param name="other"> Value, we add to the each element of the current matrix. </param>
+	/// <returns>  The result of adding the matrix and the value.  </returns>
 	Matrix<T> & operator+=(T const other) {
 		std::for_each(body_.begin(), body_.end(),
 			[&](T & value) {value += other; });
@@ -73,7 +106,11 @@ public:
 		return *this;
 	}
 
-	//! Add right matrix to left matrix
+	/// <summary>
+	/// A computed assignment operator. Adds the current matrix with the "other" matrix.
+	/// </summary>
+	/// <param name="other"> Matrix that we add to the current matrix. </param>
+	/// <returns>  The result of adding two matrices. </returns>
 	Matrix<T> operator+(Matrix<T> const & other) const {
 		// Check that rows or columns number of right and left matrix are equal
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
@@ -86,7 +123,11 @@ public:
 		return result;
 	}
 
-	//! Add to each left matrix element value other
+	/// <summary>
+	/// A computed assignment operator. Adds the to each element of the current matrix element "other" value.
+	/// </summary>
+	/// <param name="other"> Value, we add to the each element of the current matrix. </param>
+	/// <returns> The result of adding the matrix and the value. </returns>
 	Matrix<T> operator+(T const other) const {
 		Matrix<T> result(*this);
 
@@ -96,15 +137,25 @@ public:
 		return result;
 	}
 
-	//! Add to each element of right matrix element with value left
+	
 	template<typename T1>
+	/// <summary>
+	/// A computed assignment operator. Adds the to each element of the current matrix element "other" value.
+	/// </summary>
+	/// <param name="left"> Value, we add to the each element of the current matrix. </param>
+	/// <param name="right"> the current matrix.</param>
+	/// <returns> The result of adding the value and the matrix. </returns>
 	friend Matrix<T1> operator+(T1 const left, Matrix<T1> const & right);
 
 #pragma endregion
 
 #pragma region Operator -, -= and its overloading
 
-	//! Subtraction right matrix from left matrix
+	/// <summary>
+	/// A computed assignment operator. Substract the matrix "other" expression to the matrix.
+	/// </summary>
+	/// <param name="other"> Matrix that we substract from the current matrix. </param>
+	/// <returns>  The result of subctract two matrices. </returns>
 	Matrix<T> & operator-=(Matrix<T> const & other) {
 		// Check that rows or columns number of right and left matrix are equal
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
@@ -115,7 +166,11 @@ public:
 		return *this;
 	}
 
-	//! Subtraction right value from each element of left matrix
+	/// <summary>
+	/// A computed assignment operator. Subctract the to each matrix element "other" value.
+	/// </summary>
+	/// <param name="other"> Value, we substract from the each element of the current matrix. </param>
+	/// <returns>  The result of subctracting the matrix and the value.  </returns>
 	Matrix<T> & operator-=(T const other) {
 		std::for_each(body_.begin(), body_.end(),
 			[&](T & value) {value -= other; });
@@ -123,7 +178,11 @@ public:
 		return *this;
 	}
 
-	//! Subtraction right matrix from left matrix
+	/// <summary>
+	/// A computed assignment operator. Substract the "other" matrix from the current matrix.
+	/// </summary>
+	/// <param name="other"> Matrix that we substract from the current matrix. </param>
+	/// <returns>  The result of substracting two matrices. </returns>
 	Matrix<T> operator-(Matrix<T> const & other) const {
 		// Check that rows or colls number of right and left matrix are equal
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
@@ -136,7 +195,11 @@ public:
 		return result;
 	}
 
-	//! Subtraction right value from each element of left matrix
+	/// <summary>
+	/// A computed assignment operator. Substract from the each element of the current matrix element "other" value.
+	/// </summary>
+	/// <param name="other"> Value, we substract from the each element of the current matrix. </param>
+	/// <returns> The result of adding the matrix and the value. </returns>
 	Matrix<T> operator-(T const other) const {
 		Matrix<T> result(*this);
 
@@ -150,7 +213,11 @@ public:
 
 #pragma region Operator *, *= and its overloading
 
-	//! Multiplication each element of right matrix on value other
+	/// <summary>
+	/// A computed assignment operator. Multiplies each element of the matrix with "other" value.
+	/// </summary>
+	/// <param name="other"> Value that we multiply on the current matrix. </param>
+	/// <returns>  The result of multiplying matrix with value. </returns>
 	Matrix<T> & operator*=(T other) {
 	#pragma omp parallel for
 		for (int i = 0; i < body_.size(); ++i)
@@ -159,7 +226,11 @@ public:
 		return *this;
 	}
 
-	//! Multiplication each element of right matrix on value other
+	/// <summary>
+	///  A computed assignment operator. Multiplies each element of the matrix with "other" value.
+	/// </summary>
+	/// <param name="other"> Value that we multiply to the current matrix. </param>
+	/// <returns>  The result of multiplying the matrix with value. </returns>
 	Matrix<T> operator*(T other) const {
 		Matrix<T> result(*this);
 
@@ -170,17 +241,30 @@ public:
 	}
 
 	template<typename T1>
+	/// <summary>
+	/// A computed assignment operator. Multiplies each element of the matrix "other" expression with "other" value.
+	/// </summary>
+	/// <param name="left"> Value that we multiply to the current matrix. </param>
+	/// <param name="right"> The current matrix. </param>
+	/// <returns> The result of multiplying the matrix with value. </returns>
 	friend Matrix<T1> operator*(T1 const left, Matrix<T1> const & right);
 
-	//! The scalar product of two matrices.
-	//! This means that each element of left matrix multiply on corresponding element of right matrix
+	/// <summary>
+	/// The scalar product of current matrix and "other" matrix.
+	/// </summary>
+	/// <param name="other"> Right part of scalar product matrix. </param>
+	/// <returns> The scalar product of two matrix. </returns>
 	Matrix<T> scalar_multiplication(Matrix<T> const & other);
 
 #pragma endregion
 
 #pragma region Operator /, /= and its overloading
 
-	//! Division each element of left matrix on value other
+	/// <summary>
+	/// A computed assignment operator. Divide each element of the matrix on "other" value.
+	/// </summary>
+	/// <param name="other"> Matrix that we divide on the current matrix. </param>
+	/// <returns>  The result of divideing two matrices. </returns>
 	Matrix<T> & operator/=(T other) {
 		// Check that other value is not equal by zero
 		assert(other != 0);
@@ -192,7 +276,11 @@ public:
 		return *this;
 	}
 
-	//! Division each element of left matrix on value other
+	/// <summary>
+	/// A computed assignment operator. Divide each element of the matrix on "other" value.
+	/// </summary>
+	/// <param name="other"> Value by which we divide each element of the matrix. </param>
+	/// <returns>  The result of divideing two matrices. </returns>
 	Matrix<T> operator/(T other) const {
 		// Check that other value is not equal by zero
 		assert(other != 0);
@@ -205,33 +293,56 @@ public:
 		return result;
 	}
 
-	//! Termwise division of the matrix argument
-	//! This means each element of right matrix divide on corresponding elemrnt of left matrix
+	/// <summary>
+	/// Termwise division of the matrix on "other" argument.
+	/// </summary>
+	/// <param name="other"> Matrix by which we divide aproppriate element of the current matrix. </param>
+	/// <returns> Termwise division of the two matrix. </returns>
 	Matrix<T> times_divide(Matrix<T> const & other);
 
 #pragma endregion
 
 #pragma region Properties (Get/Set methods)
 
-	//! Get element at y row and x columns
+	/// <summary>
+	/// Get element at choosen row and column respectively
+	/// </summary>
+	/// <param name="y"> Row index </param>
+	/// <param name="x"> Column index </param>
+	/// <returns> Value in matrix at [y][x] position</returns>
 	T & operator()(unsigned y, unsigned x) 
 	{
 		return body_.at(y * colls_ + x);
 	}
 
-	//! Get element at y row and x columns
+	/// <summary>
+	/// Get element at choosen row and column respectively as a constant
+	/// </summary>
+	/// <param name="y"> Row index </param>
+	/// <param name="x"> Column index </param>
+	/// <returns></returns>
 	T const operator()(unsigned y, unsigned x) const 
 	{
 		return body_.at(y * colls_ + x);
 	}
 
-	//! Returns values pair, in witch first = rows number, second = columns number
+	/// <summary>
+	/// Returns values pair, in witch first = rows number, second = columns number
+	/// </summary>
+	/// <returns> Pair, where first element is row number and second is column number </returns>
 	std::pair<unsigned int, unsigned int> size() const;
 
-	//! Returns the sum of elements of the matrix
+	/// <summary>
+	/// Returns the sum of elements of the matrix
+	/// </summary>
+	/// <returns></returns>
 	long double getSum() const;
 
-	//! Returns std::vector<T>, with values from y ID row in matrix
+	/// <summary>
+	/// Returns vector, with values from row with choosen index from matrix
+	/// </summary>
+	/// <param name="y"> Index of row </param>
+	/// <returns> vector with values from choosen row </returns>
 	std::vector<T> getRow(unsigned const y) const;
 
 	//! Set elements of y ID row in matrix equal to values from std::vector<T> row
@@ -247,33 +358,66 @@ public:
 
 #pragma region Methods
 
-	//! Fill all matrix with value
-	//! This means, that after this operation all elements of matrix are equal to value
-	void fillWith(T const value);
+	/// <summary>
+	/// Fills the matrix values with "value" parameter.
+	/// </summary>
+	/// <param name="value"> The value that is filled elements of the the matrix. </param>
+	void FillWith(T const value);
 
-	//! Fill elements withought boundary with value
-	//! This means, that after this operation all elements besides boundaries of matrix are equal to value
-	void fillWithoughtBoundary(T const value);
+	/// <summary>
+	/// Fills the matrix values withought boundary with "value" parameter. 
+	/// This means, that after this operation all elements besides boundaries of the matrix are equal to "value" parameter.
+	/// </summary>
+	/// 
+	/// <param name="value"> The value that is filled elements of the the matrix. </param>
+	void FillWithoughtBoundary(T const value);
 
-	//! Fill column with ID coll_id of matrix with value
-	void fillColumnWith(int const coll_id, T const value);
+	/// <summary>
+	/// Fill "coll_id" column in the matrix with "value" parameter.
+	/// </summary>
+	/// <param name="coll_id"> Сolumn index in the matrix to be filled with "value" parameter. </param>
+	/// <param name="value"> The value that is filled elements of the the matrix. </param>
+	void FillColumnWith(int const coll_id, T const value);
 
-	//! Fill row with ID row_id of matrix with value
-	void fillRowWith(int const row_id, T const value);
+	/// <summary>
+	/// Fill "row_id" row in the matrix with "value" parameter.
+	/// </summary>
+	/// <param name="row_id"> Row index in the matrix to be filled with "value" parameter. </param>
+	/// <param name="value"> The value that is filled elements of the the matrix. </param>
+	void FillRowWith(int const row_id, T const value);
 
-	//! Resize matrix and fill with zeros
-	void resize(unsigned rows, unsigned colls);
+	/// <summary>
+	/// Removes current version of the matrix. After that allocates an matrix with rows 
+	/// number is equal to "rows" and column number is equal to "cells", which is filled with zeros.
+	/// </summary>
+	/// <param name="rows"> Number of rows in new matrix. </param>
+	/// <param name="colls"> Number of columns in new matrix. </param>
+	void Resize(unsigned rows, unsigned colls);
 
 #pragma region Ostream Methods
 
-	//! Print matrix with value_name name on time time step in file
-	void writeToFile(std::string value_name, int const time);
+	/// <summary>
+	/// Write down selected macroscopic physical value "value_type" at iteration number "time" to *.txt file.
+	/// </summary>
+	/// <param name="value_name"> Selected macroscopic physical value (density or velocity). </param>
+	/// <param name="time"> Selected iteration number. </param>
+	void WriteToFile(std::string value_name, int const time);
 
-	//! Print coll_id column of matrix with value_name name on time time step in file
-	void writeColumnToFile(std::string value_name, int const coll_id, int const time);
+	/// <summary>
+	/// Write down "coll_id" column of selected macroscopic physical value "value_type" at iteration number "time" to *.txt file.
+	/// </summary>
+	/// <param name="value_name">  Selected macroscopic physical value (density or velocity). </param>
+	/// <param name="coll_id"> The selected column index. </param>
+	/// <param name="time"> Selected iteration number. </param>
+	void WriteColumnToFile(std::string value_name, int const coll_id, int const time);
 
-	//! Print row_id row of matrix with value_name name on time time step in file
-	void writeRowToFile(std::string value_name, int const row_id, int const time);
+	/// <summary>
+	/// Write down "coll_id" row of selected macroscopic physical value "value_type" at iteration number "time" to *.txt file.
+	/// </summary>
+	/// <param name="value_name">  Selected macroscopic physical value (density or velocity). </param>
+	/// <param name="row_id"> The selected column index. </param>
+	/// <param name="time"> Selected iteration number. </param>
+	void WriteRowToFile(std::string value_name, int const row_id, int const time);
 
 	template<typename T1>
 	friend std::ostream & operator<<(std::ostream & os, Matrix<T1> const & matrix);
@@ -288,21 +432,25 @@ protected:
 
 #pragma region Fields
 
-	// Number of rows in matrix
+	/// <summary>
+	/// Number of rows in matrix
+	/// </summary>
 	unsigned rows_;
-	// Number of columns in matrix
+	
+	/// <summary>
+	/// Number of columns in matrix
+	/// </summary>
 	unsigned colls_;
 
-	// Main body of matrix, wich contain all matrix elements
+	/// <summary>
+	/// Main body of matrix, wich contain all matrix elements
+	/// </summary>
 	std::vector<T> body_;
 
 #pragma endregion
 
 };
 
-#pragma region additional_functions
-	
-#pragma endregion
 
 
 #include"my_matrix_impl.h"

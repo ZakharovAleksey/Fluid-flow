@@ -30,7 +30,7 @@ void SRTsolver::streaming()
 {
 	for (int q = 0; q < kQ; ++q) {
 		Matrix<double> temp = fluid_->f_[q];
-		fluid_->f_[q].fillWith(0.0);
+		fluid_->f_[q].FillWith(0.0);
 
 		for (unsigned y = 0; y < fluid_->size().first; ++y)
 			for (unsigned x = 0; x < fluid_->size().second; ++x)
@@ -83,9 +83,9 @@ void SRTsolver::solve(int iteration_number)
 	for (int i = 0; i < fluid_->rows_; ++i)
 		std::cout << fluid_->vx_(i, 5) << "\n";
 
-	fluid_->vx_.writeColumnToFile("vx", 5, 100);
-	fluid_->vx_.writeToFile("vx", iteration_number);
-	fluid_->vx_.writeRowToFile("vx", 5, 100);
+	fluid_->vx_.WriteColumnToFile("vx", 5, 100);
+	fluid_->vx_.WriteToFile("vx", iteration_number);
+	fluid_->vx_.WriteRowToFile("vx", 5, 100);
 }
 
 void SRTsolver::recalculate()

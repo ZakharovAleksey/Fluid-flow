@@ -2,10 +2,10 @@
 
 Fluid::Fluid(unsigned rows, unsigned colls) : rows_(rows), colls_(colls) {
 
-	rho_.resize(rows_, colls_);
-	rho_.fillWithoughtBoundary(1.0);
-	vx_.resize(rows_, colls_);
-	vy_.resize(rows_, colls_);
+	rho_.Resize(rows_, colls_);
+	rho_.FillWithoughtBoundary(1.0);
+	vx_.Resize(rows_, colls_);
+	vy_.Resize(rows_, colls_);
 
 	f_.resize(rows_, colls_);
 	feq_.resize(rows_, colls_);

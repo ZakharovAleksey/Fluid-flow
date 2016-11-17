@@ -6,7 +6,7 @@ template<typename T>
 inline DistributionFunction<T>::DistributionFunction() : rows_(0), colls_(0) {
 #pragma omp parallel for
 	for (int q = 0; q < kQ; ++q)
-		dfunc_body_.at(q).resize(rows_, colls_);
+		dfunc_body_.at(q).Resize(rows_, colls_);
 }
 
 template<typename T>
@@ -54,7 +54,7 @@ inline void DistributionFunction<T>::fillWithoutBoundaries(T const value)
 {
 #pragma omp parallel for
 	for (int q = 0; q < kQ; ++q)
-		dfunc_body_.at(q).fillWith(value);
+		dfunc_body_.at(q).FillWith(value);
 }
 
 template<typename T>
@@ -65,32 +65,32 @@ inline void DistributionFunction<T>::fillBoundaries(T const value)
 		switch (q)
 		{
 		case 1:
-			dfunc_body_.at(1).fillColumnWith(colls_ - 1, value);
+			dfunc_body_.at(1).FillColumnWith(colls_ - 1, value);
 			break;
 		case 2:
-			dfunc_body_.at(2).fillRowWith(0, value);
+			dfunc_body_.at(2).FillRowWith(0, value);
 			break;
 		case 3:
-			dfunc_body_.at(3).fillColumnWith(0, value);
+			dfunc_body_.at(3).FillColumnWith(0, value);
 			break;
 		case 4:
-			dfunc_body_.at(4).fillRowWith(rows_ - 1, value);
+			dfunc_body_.at(4).FillRowWith(rows_ - 1, value);
 			break;
 		case 5:
-			dfunc_body_.at(5).fillColumnWith(colls_ - 1, value);
-			dfunc_body_.at(5).fillRowWith(0, value);
+			dfunc_body_.at(5).FillColumnWith(colls_ - 1, value);
+			dfunc_body_.at(5).FillRowWith(0, value);
 			break;
 		case 6:
-			dfunc_body_.at(6).fillColumnWith(0, value);
-			dfunc_body_.at(6).fillRowWith(0, value);
+			dfunc_body_.at(6).FillColumnWith(0, value);
+			dfunc_body_.at(6).FillRowWith(0, value);
 			break;
 		case 7:
-			dfunc_body_.at(7).fillColumnWith(0, value);
-			dfunc_body_.at(7).fillRowWith(rows_ - 1, value);
+			dfunc_body_.at(7).FillColumnWith(0, value);
+			dfunc_body_.at(7).FillRowWith(rows_ - 1, value);
 			break;
 		case 8:
-			dfunc_body_.at(8).fillColumnWith(colls_ - 1, value);
-			dfunc_body_.at(8).fillRowWith(rows_ - 1, value);
+			dfunc_body_.at(8).FillColumnWith(colls_ - 1, value);
+			dfunc_body_.at(8).FillRowWith(rows_ - 1, value);
 			break;
 		default:
 			break;
@@ -106,7 +106,7 @@ inline void DistributionFunction<T>::resize(unsigned rows, unsigned colls)
 
 #pragma omp parallel for
 	for (int q = 0; q < kQ; ++q)
-		dfunc_body_.at(q).resize(rows_, colls_);
+		dfunc_body_.at(q).Resize(rows_, colls_);
 }
 
 template<typename T>
@@ -167,7 +167,7 @@ template<typename T>
 inline MacroscopicParam<T> DistributionFunction<T>::calculateDensity() const
 {
 	MacroscopicParam<T> result(rows_, colls_);
-	result.fillWith(0.0);
+	result.FillWith(0.0);
 
 #pragma omp parallel for
 	for (int q = 0; q < kQ; ++q)
@@ -180,7 +180,7 @@ template<typename T>
 inline MacroscopicParam<T> DistributionFunction<T>::calculateVelocity(const double mas[kQ], MacroscopicParam<T> const & density) const
 {
 	MacroscopicParam<T> result(rows_, colls_);
-	result.fillWith(0.0);
+	result.FillWith(0.0);
 
 #pragma omp parallel for
 	for (int q = 0; q < kQ; ++q)

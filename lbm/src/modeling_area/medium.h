@@ -19,11 +19,11 @@ enum class NodeType : int
 	RIGHT_BOUNDARY		= 4,
 };
 
-/*!
-	Класс реализующий область моделирования.
+/// <summary>
+/// Класс реализующий область моделирования.
 
-	Представляет собой матрицу NodeType-ов в которой отмечена информация о типе ячейки.
-*/
+/// Представляет собой матрицу NodeType - ов в которой отмечена информация о типе ячейки.
+/// </summary>
 class Medium
 {
 public:
@@ -38,6 +38,11 @@ public:
 	bool is_left_boundary(unsigned y, unsigned x) const;
 	bool is_right_boundary(unsigned y, unsigned x) const;*/
 
+	/// <summary>
+	/// Resize current Medium with values !!!!!
+	/// </summary>
+	/// <param name="rows"> lol </param>
+	/// <param name="colls"> hah </param>
 	void resize(unsigned rows, unsigned colls);
 
 	friend std::ostream & operator<<(std::ostream & os, Medium const & medium);
@@ -46,7 +51,13 @@ public:
 	std::pair<unsigned int, unsigned int> size() const;
 
 private:
+	/// <summary>
+	/// Rows in modaling area
+	/// </summary>
 	unsigned rows_;
+	/// <summary>
+	/// Columns in modaling area
+	/// </summary>
 	unsigned colls_;
 
 	Matrix<NodeType> medium_;

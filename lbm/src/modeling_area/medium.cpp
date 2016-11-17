@@ -25,7 +25,7 @@ Medium::Medium(unsigned rows, unsigned colls):
 
 	assert(rows_ > 2 && colls_ > 2);
 
-	medium_.resize(rows_, colls_);
+	medium_.Resize(rows_, colls_);
 
 #pragma omp parallel for
 	for (int x = 0; x < colls_; ++x) {
@@ -53,12 +53,12 @@ void Medium::resize(unsigned rows, unsigned colls)
 	rows_ = rows;
 	colls_ = colls;
 
-	medium_.resize(rows_, colls_);
+	medium_.Resize(rows_, colls_);
 
 	// Потом выделить это в отдельную функцию и реализовать через нее конструктор и resize()
 	assert(rows_ > 2 && colls_ > 2);
 
-	medium_.resize(rows_, colls_);
+	medium_.Resize(rows_, colls_);
 
 #pragma omp parallel for
 	for (int x = 0; x < colls_; ++x) {
