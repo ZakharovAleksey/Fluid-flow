@@ -18,12 +18,12 @@
 
 /// <summary>
 /// The template class of 2D matrix.
+/// </summary>
 /// <remarks>
 /// Basic class for LBM project.
 /// All physical values (density, velocity, distribution function) will be implemented as derived clases from Matrx class.
 /// Overloading implemetation only for operations witch we need in LBM implementation.
 /// </remarks>
-/// </summary>
 template<typename T>
 class Matrix
 {
@@ -345,13 +345,25 @@ public:
 	/// <returns> vector with values from choosen row </returns>
 	std::vector<T> getRow(unsigned const y) const;
 
-	//! Set elements of y ID row in matrix equal to values from std::vector<T> row
+	/// <summary>
+	/// Set elements of "y" row in the current matrix equal to values from std::vector "row"
+	/// </summary>
+	/// <param name="y"> Index of matrix row for insertion operation. </param>
+	/// <param name="row"> Vector for for insertion operation. </param>
 	void setRow(unsigned const y, std::vector<T> const & row);
 
-	//! Returns std::vector<T>, with values in ID range [1 : rows_ - 2] column with x ID
+	/// <summary>
+	/// Returns std::vector, with values in range [1 : rows_ - 2] from column with "x" index.
+	/// </summary>
+	/// <param name="x"> Index of column from witch method extract values. </param>
+	/// <returns> Vector filled with values from apropriate column of the current matrix. </returns>
 	std::vector<T> getColumn(unsigned const x) const;
 
-	//! Set elements x ID column of matrix in ID range [1 : colls - 1] equal to values of std::vector<T> coll
+	/// <summary>
+	/// Set elements of "x" column in the current matrix equal to values from std::vector "coll"
+	/// </summary>
+	/// <param name="x"> Index of matrix column for insertion operation. </param>
+	/// <param name="coll">  Vector for for insertion operation. </param>
 	void setColumn(unsigned const x, std::vector<T> const & coll);
 
 #pragma endregion

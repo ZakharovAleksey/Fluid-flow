@@ -5,25 +5,36 @@
 #include"..\math\my_matrix.h"
 #include"..\phys_values\macroscopic_param.h"
 
-//! Possible Count of directions in which particles would move
+/// <summary>
+/// Possible number of directions in which pseudo-particles could move.
+/// </summary>
 unsigned const kQ{ 9 };
 
-/*!
-	Probability distribution function implementation class.
-	
-	- Implemented as an array of size kQ each element of witch store probability distribution function field for apprpriate
-	component of direction. 
-
-	Example:
-		DistributionFunction f[1] - stores probability distribution function field in right direction.
-*/
+/// <summary>
+/// Template class for probability distribution function field for all modeling area representation.
+/// <remarks> 
+/// Let us assume, we deal with velocity model D2Q9 for Lattice Boltzmann method.
+/// 
+/// This means we have 2D model with 9 directions in which pseudo-particles could move.
+/// So, for this velocity model current class field represent from itself an array of 9 
+/// elements. 
+/// Each of this 9 elements represent from itself appropriate component of probability 
+/// distribution function field (size of each is equal to modeling area size).
+/// This means:
+///  - body[0] - store 0-distribution function component field.
+///  - dfunc_body[1] - store 1-distribution function component field.
+///  ... and so on.
+/// </remarks>
+/// <example>
+/// blah blah
+/// </example>
+/// </summary>
 template<typename T>
 class DistributionFunction
 {
 public:
 
 #pragma region Constructor
-
 
 	DistributionFunction();
 	DistributionFunction(unsigned rows, unsigned colls);
@@ -166,12 +177,20 @@ public:
 private:
 
 #pragma region Fields
-	//! Rows count for distribution function
+
+	/// <summary>
+	/// Height of modeling area across Y axis direction.
+	/// </summary>
 	unsigned rows_;
-	//! Columns count for distribution function
-	unsigned colls_;
 	
-	//! Array witch store all kQ components of probability distribution function
+	/// <summary>
+	/// Lenght of modeling area across X axis direction.
+	/// </summary>
+	unsigned colls_;
+
+	/// <summary>
+	/// Array which store all components of probability distribution function.
+	/// </summary>
 	std::array<Matrix<T>, kQ> dfunc_body_;
 
 #pragma endregion
