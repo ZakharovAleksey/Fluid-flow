@@ -97,7 +97,10 @@ inline long double Matrix<T>::getSum() const
 
 #pragma omp parallel for
 	for (int i = 0; i < body_.size(); ++i)
+	{
+		#pragma omp atomic
 		sum += static_cast<long double>(body_.at(i));
+	}
 
 	return sum;
 }
@@ -108,7 +111,7 @@ inline std::vector<T> Matrix<T>::getRow(unsigned const y) const
 	// Check that row ID less than number of rows
 	assert(y < rows_);
 	std::vector<T> result(colls_, T());
-	
+
 #pragma omp parallel for
 	for (int x = 0; x < colls_; ++x)
 		result.at(x) = body_.at(colls_ * y + x);

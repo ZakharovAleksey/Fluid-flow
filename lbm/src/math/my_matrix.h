@@ -6,6 +6,8 @@
 #include<vector>
 #include <functional>
 #include<string>
+
+#include<ppl.h>
 #include<omp.h>
 
 #define TEST_INCLUDE 
@@ -85,9 +87,11 @@ public:
 	/// </summary>
 	/// <param name="other"> Matrix that we add to the current matrix. </param>
 	/// <returns>  The result of adding two matrices. </returns>
-	Matrix<T> & operator+=(Matrix<T> const & other) {
+	Matrix<T> & operator+=(Matrix<T> const & other) 
+	{
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
-	#pragma omp parallel for
+	
+		#pragma omp parallel for
 			for (int i = 0; i < body_.size(); ++i)
 				body_.at(i) += other.body_.at(i);
 
@@ -99,10 +103,9 @@ public:
 	/// </summary>
 	/// <param name="other"> Value, we add to the each element of the current matrix. </param>
 	/// <returns>  The result of adding the matrix and the value.  </returns>
-	Matrix<T> & operator+=(T const other) {
-		std::for_each(body_.begin(), body_.end(),
-			[&](T & value) {value += other; });
-
+	Matrix<T> & operator+=(T const other) 
+	{
+		std::for_each(body_.begin(), body_.end(), [&](T & value) {value += other; });
 		return *this;
 	}
 
@@ -111,7 +114,8 @@ public:
 	/// </summary>
 	/// <param name="other"> Matrix that we add to the current matrix. </param>
 	/// <returns>  The result of adding two matrices. </returns>
-	Matrix<T> operator+(Matrix<T> const & other) const {
+	Matrix<T> operator+(Matrix<T> const & other) const 
+	{
 		// Check that rows or columns number of right and left matrix are equal
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
 
@@ -128,11 +132,11 @@ public:
 	/// </summary>
 	/// <param name="other"> Value, we add to the each element of the current matrix. </param>
 	/// <returns> The result of adding the matrix and the value. </returns>
-	Matrix<T> operator+(T const other) const {
+	Matrix<T> operator+(T const other) const 
+	{
 		Matrix<T> result(*this);
 
-		std::for_each(result.body_.begin(), result.body_.end(),
-			[&](T & value) {value += other; });
+		std::for_each(result.body_.begin(), result.body_.end(), [&](T & value) {value += other; });
 
 		return result;
 	}
@@ -327,7 +331,7 @@ public:
 	}
 
 	/// <summary>
-	/// Returns values pair, in witch first = rows number, second = columns number
+	/// Returns values pair, in witch first isequal to rows number, second is equal to columns number
 	/// </summary>
 	/// <returns> Pair, where first element is row number and second is column number </returns>
 	std::pair<unsigned int, unsigned int> size() const;

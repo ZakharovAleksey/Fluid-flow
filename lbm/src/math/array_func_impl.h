@@ -17,7 +17,7 @@ std::vector<T> operator+(std::vector<T> const & left, std::vector<T> const & rig
 	assert(left.size() == right.size());
 
 	std::vector<T> result(left);
-#pragma omp parallel for
+
 	for (int i = 0; i < result.size(); ++i)
 		result.at(i) += right.at(i);
 
@@ -30,7 +30,7 @@ std::vector<T> operator-(std::vector<T> const & left, std::vector<T> const & rig
 	assert(left.size() == right.size());
 
 	std::vector<T> result(left);
-#pragma omp parallel for
+
 	for (int i = 0; i < result.size(); ++i)
 		result.at(i) -= right.at(i);
 
@@ -41,7 +41,7 @@ template <typename T>
 std::vector<T> operator*(T const left, std::vector<T> const & right)
 {
 	std::vector<T> result(right);
-#pragma omp parallel for
+
 	for (int i = 0; i < right.size(); ++i)
 		result.at(i) *= left;
 	return result;
@@ -51,7 +51,7 @@ template <typename T>
 std::vector<T> operator*(std::vector<T> const & left, T const right)
 {
 	std::vector<T> result(left);
-#pragma omp parallel for
+
 	for (int i = 0; i < left.size(); ++i)
 		result.at(i) *= right;
 
@@ -62,7 +62,7 @@ template <typename T>
 std::vector<T> operator/(std::vector<T> const & left, T const right)
 {
 	std::vector<T> result(left);
-#pragma omp parallel for
+
 	for (int i = 0; i < left.size(); ++i)
 		result.at(i) /= right;
 	return result;
