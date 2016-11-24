@@ -14,7 +14,6 @@ void SRTsolver::feqCalculate()
 	// ѕроверить надо ли, или без нее все нормально
 	fluid_->feq_.fillWithoutBoundaries(0.0);
 
-#pragma omp parallel for
 	for (int q = 0; q < kQ; ++q) {
 		Matrix<double> v(fluid_->size().first, fluid_->size().second);
 		v = fluid_->vx_ * kEx[q] + fluid_->vy_ * kEy[q];
@@ -44,7 +43,6 @@ void SRTsolver::streaming()
 
 void SRTsolver::collision()
 {
-#pragma omp parallel for
 	for (int q = 0; q < kQ; ++q)
 		fluid_->f_[q] += (fluid_->feq_[q] - fluid_->f_[q]) / tau_;
 }

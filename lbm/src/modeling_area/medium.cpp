@@ -21,20 +21,21 @@ Medium::Medium() : rows_(0), colls_(0), medium_() {}
 
 
 Medium::Medium(unsigned rows, unsigned colls):
-	rows_(rows), colls_(colls) { 
+	rows_(rows), colls_(colls) 
+{ 
 
 	assert(rows_ > 2 && colls_ > 2);
 
 	medium_.Resize(rows_, colls_);
 
-#pragma omp parallel for
-	for (int x = 0; x < colls_; ++x) {
+	for (int x = 0; x < colls_; ++x) 
+	{
 		medium_(0, x) = NodeType::UPPER_BOUNDARY;
 		medium_(rows_ - 1, x) = NodeType::BOTTOM_BOUNDARY;
 	}
 
-#pragma omp parallel for
-	for (int y = 1; y < rows_ - 1; ++y) {
+	for (int y = 1; y < rows_ - 1; ++y) 
+	{
 		medium_(y, 0) = NodeType::LEFT_BOUNDARY;
 		medium_(y, colls_ - 1) = NodeType::RIGHT_BOUNDARY;
 	}
@@ -60,14 +61,14 @@ void Medium::resize(unsigned rows, unsigned colls)
 
 	medium_.Resize(rows_, colls_);
 
-#pragma omp parallel for
-	for (int x = 0; x < colls_; ++x) {
+	for (int x = 0; x < colls_; ++x) 
+	{
 		medium_(0, x) = NodeType::UPPER_BOUNDARY;
 		medium_(rows_ - 1, x) = NodeType::BOTTOM_BOUNDARY;
 	}
 
-#pragma omp parallel for
-	for (int y = 1; y < colls_ - 2; ++y) {
+	for (int y = 1; y < colls_ - 2; ++y) 
+	{
 		medium_(y, 0) = NodeType::LEFT_BOUNDARY;
 		medium_(y, colls_ - 1) = NodeType::RIGHT_BOUNDARY;
 	}

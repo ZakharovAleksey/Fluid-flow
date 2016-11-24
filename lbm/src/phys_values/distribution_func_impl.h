@@ -3,16 +3,15 @@
 #include"distribution_func.h"
 
 template<typename T>
-inline DistributionFunction<T>::DistributionFunction() : rows_(0), colls_(0) {
-#pragma omp parallel for
+inline DistributionFunction<T>::DistributionFunction() : rows_(0), colls_(0) 
+{
 	for (int q = 0; q < kQ; ++q)
 		dfunc_body_.at(q).Resize(rows_, colls_);
 }
 
 template<typename T>
-DistributionFunction<T>::DistributionFunction(unsigned rows, unsigned colls): rows_(rows), colls_(colls) {
-
-#pragma omp parallel for
+DistributionFunction<T>::DistributionFunction(unsigned rows, unsigned colls): rows_(rows), colls_(colls) 
+{
 	for (int q = 0; q < kQ; ++q)
 		dfunc_body_.at(q).resize(rows_, colls_);
 }
@@ -24,8 +23,8 @@ template<typename T>
 inline DistributionFunction<T>::DistributionFunction(DistributionFunction const & other) :
 	rows_(other.rows_), colls_(other.colls_)
 {
-#pragma omp parallel for
-	for (int q = 0; q < kQ; ++q) {
+	for (int q = 0; q < kQ; ++q) 
+	{
 		dfunc_body_.at(q).resize(rows_, colls_);
 		dfunc_body_.at(q) = other.dfunc_body_.at(q);
 	}
@@ -37,7 +36,6 @@ inline void DistributionFunction<T>::swap(DistributionFunction & dist_func)
 	std::swap(rows_, dist_func.rows_);
 	std::swap(colls_, dist_func.colls_);
 
-#pragma omp parallel for
 	for (int q = 0; q < kQ; ++q)
 		dfunc_body_.at(q).swap(dist_func.dfunc_body_.at(q));
 }
@@ -52,7 +50,6 @@ inline Matrix<T>& DistributionFunction<T>::operator[](unsigned q)
 template<typename T>
 inline void DistributionFunction<T>::fillWithoutBoundaries(T const value)
 {
-#pragma omp parallel for
 	for (int q = 0; q < kQ; ++q)
 		dfunc_body_.at(q).FillWith(value);
 }
@@ -60,7 +57,6 @@ inline void DistributionFunction<T>::fillWithoutBoundaries(T const value)
 template<typename T>
 inline void DistributionFunction<T>::fillBoundaries(T const value)
 {
-//#pragma omp parallel for
 	for (int q = 1; q < kQ; ++q) {	// Ќачинаем с 1 так как f[0] никуда не двигаетс€
 		switch (q)
 		{
@@ -104,7 +100,6 @@ inline void DistributionFunction<T>::resize(unsigned rows, unsigned colls)
 	rows_ = rows;
 	colls_ = colls;
 
-#pragma omp parallel for
 	for (int q = 0; q < kQ; ++q)
 		dfunc_body_.at(q).Resize(rows_, colls_);
 }
@@ -169,7 +164,6 @@ inline MacroscopicParam<T> DistributionFunction<T>::calculateDensity() const
 	MacroscopicParam<T> result(rows_, colls_);
 	result.FillWith(0.0);
 
-#pragma omp parallel for
 	for (int q = 0; q < kQ; ++q)
 		result += dfunc_body_.at(q);
 
@@ -182,7 +176,6 @@ inline MacroscopicParam<T> DistributionFunction<T>::calculateVelocity(const doub
 	MacroscopicParam<T> result(rows_, colls_);
 	result.FillWith(0.0);
 
-#pragma omp parallel for
 	for (int q = 0; q < kQ; ++q)
 		result += dfunc_body_.at(q) * mas[q];
 

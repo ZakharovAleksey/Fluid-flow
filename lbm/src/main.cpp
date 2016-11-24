@@ -15,10 +15,12 @@
 int main()
 {
 	srand(time(NULL));
+
 	using std::cout;
 	using std::endl;
 
-	omp_set_num_threads(1);
+
+	omp_set_num_threads(5);
 
 	// Тестирование функционала матриц ------ Реализовать через тесты
 
