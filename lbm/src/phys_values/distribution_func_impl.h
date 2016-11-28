@@ -113,49 +113,49 @@ inline std::pair<unsigned int, unsigned int> DistributionFunction<T>::size() con
 template<typename T>
 inline std::vector<T> DistributionFunction<T>::getTopBoundaryValues(int const q) const
 {
-	return dfunc_body_.at(q).getRow(1);
+	return dfunc_body_.at(q).GetRow(1);
 }
 
 template<typename T>
 inline std::vector<T> DistributionFunction<T>::getBottomBoundaryValue(int const q) const
 {
-	return dfunc_body_.at(q).getRow(rows_ - 2);
+	return dfunc_body_.at(q).GetRow(rows_ - 2);
 }
 
 template<typename T>
 inline std::vector<T> DistributionFunction<T>::getLeftBoundaryValue(int const q) const
 {
-	return dfunc_body_.at(q).getColumn(1);
+	return dfunc_body_.at(q).GetColumn(1);
 }
 
 template<typename T>
 inline std::vector<T> DistributionFunction<T>::getRightBoundaryValue(int const q) const
 {
-	return dfunc_body_.at(q).getColumn(colls_ - 2);
+	return dfunc_body_.at(q).GetColumn(colls_ - 2);
 }
 
 template<typename T>
 inline void DistributionFunction<T>::setTopBoundaryValue(int const q, std::vector<T> const & row)
 {
-	dfunc_body_.at(q).setRow(1, row);
+	dfunc_body_.at(q).SetRow(1, row);
 }
 
 template<typename T>
 inline void DistributionFunction<T>::setBottomBoundaryValue(int const q, std::vector<T> const & row)
 {
-	dfunc_body_.at(q).setRow(rows_ - 2, row);
+	dfunc_body_.at(q).SetRow(rows_ - 2, row);
 }
 
 template<typename T>
 inline void DistributionFunction<T>::setLeftBoundaryValue(int const q, std::vector<T> const & coll)
 {
-	dfunc_body_.at(q).setColumn(1, coll);
+	dfunc_body_.at(q).SetColumn(1, coll);
 }
 
 template<typename T>
 inline void DistributionFunction<T>::setRightBoundaryValue(int const q, std::vector<T> const & coll)
 {
-	dfunc_body_.at(q).setColumn(colls_ - 2, coll);
+	dfunc_body_.at(q).SetColumn(colls_ - 2, coll);
 }
 
 template<typename T>
@@ -180,7 +180,7 @@ inline MacroscopicParam<T> DistributionFunction<T>::calculateVelocity(const doub
 		result += dfunc_body_.at(q) * mas[q];
 
 	// Переписать сразу в return, тк лишнее копирование НО выпадает error
-	result.times_divide(density);
+	result.TimesDivide(density);
 	return result;
 	
 }

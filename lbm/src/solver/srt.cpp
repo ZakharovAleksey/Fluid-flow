@@ -18,9 +18,9 @@ void SRTsolver::feqCalculate()
 		Matrix<double> v(fluid_->size().first, fluid_->size().second);
 		v = fluid_->vx_ * kEx[q] + fluid_->vy_ * kEy[q];
 
-		fluid_->feq_[q] = kW[q] * fluid_->rho_.scalar_multiplication(
-			(1.0 + 3.0 * v + 4.5 * v.scalar_multiplication(v) - 1.5 * 
-			(fluid_->vx_.scalar_multiplication(fluid_->vx_) + fluid_->vy_.scalar_multiplication(fluid_->vy_)))
+		fluid_->feq_[q] = kW[q] * fluid_->rho_.ScalarMultiplication(
+			(1.0 + 3.0 * v + 4.5 * v.ScalarMultiplication(v) - 1.5 * 
+			(fluid_->vx_.ScalarMultiplication(fluid_->vx_) + fluid_->vy_.ScalarMultiplication(fluid_->vy_)))
 			);
 	}
 }
@@ -71,11 +71,11 @@ void SRTsolver::solve(int iteration_number)
 		BC.recordValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
 		
 		recalculate();
-		fluid_->vx_.setColumn(1, vx);
+		fluid_->vx_.SetColumn(1, vx);
 		
 		feqCalculate();
 
-		std::cout << iter << " Total rho = " << fluid_->rho_.getSum() << std::endl;
+		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 	}
 
 	for (int i = 0; i < fluid_->rows_; ++i)
