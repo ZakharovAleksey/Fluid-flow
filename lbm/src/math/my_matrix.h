@@ -258,7 +258,7 @@ public:
 	/// </summary>
 	/// <param name="other"> Right part of scalar product matrix. </param>
 	/// <returns> The scalar product of two matrix. </returns>
-	Matrix<T> scalar_multiplication(Matrix<T> const & other);
+	Matrix<T> ScalarMultiplication(Matrix<T> const & other);
 
 #pragma endregion
 
@@ -302,7 +302,7 @@ public:
 	/// </summary>
 	/// <param name="other"> Matrix by which we divide aproppriate element of the current matrix. </param>
 	/// <returns> Termwise division of the two matrix. </returns>
-	Matrix<T> times_divide(Matrix<T> const & other);
+	Matrix<T> TimesDivide(Matrix<T> const & other);
 
 #pragma endregion
 
@@ -334,41 +334,41 @@ public:
 	/// Returns values pair, in witch first isequal to rows number, second is equal to columns number
 	/// </summary>
 	/// <returns> Pair, where first element is row number and second is column number </returns>
-	std::pair<unsigned int, unsigned int> size() const;
+	std::pair<unsigned int, unsigned int> Size() const;
 
 	/// <summary>
-	/// Returns the sum of elements of the matrix
+	/// Returns the sum of all elements of the matrix
 	/// </summary>
 	/// <returns></returns>
-	long double getSum() const;
+	long double GetSum() const;
 
 	/// <summary>
 	/// Returns vector, with values from row with choosen index from matrix
 	/// </summary>
 	/// <param name="y"> Index of row </param>
 	/// <returns> vector with values from choosen row </returns>
-	std::vector<T> getRow(unsigned const y) const;
+	std::vector<T> GetRow(unsigned const y) const;
 
 	/// <summary>
 	/// Set elements of "y" row in the current matrix equal to values from std::vector "row"
 	/// </summary>
 	/// <param name="y"> Index of matrix row for insertion operation. </param>
 	/// <param name="row"> Vector for for insertion operation. </param>
-	void setRow(unsigned const y, std::vector<T> const & row);
+	void SetRow(unsigned const y, std::vector<T> const & row);
 
 	/// <summary>
 	/// Returns std::vector, with values in range [1 : rows_ - 2] from column with "x" index.
 	/// </summary>
 	/// <param name="x"> Index of column from witch method extract values. </param>
 	/// <returns> Vector filled with values from apropriate column of the current matrix. </returns>
-	std::vector<T> getColumn(unsigned const x) const;
+	std::vector<T> GetColumn(unsigned const x) const;
 
 	/// <summary>
 	/// Set elements of "x" column in the current matrix equal to values from std::vector "coll"
 	/// </summary>
 	/// <param name="x"> Index of matrix column for insertion operation. </param>
 	/// <param name="coll">  Vector for for insertion operation. </param>
-	void setColumn(unsigned const x, std::vector<T> const & coll);
+	void SetColumn(unsigned const x, std::vector<T> const & coll);
 
 #pragma endregion
 

@@ -60,7 +60,7 @@ inline Matrix<T1> operator*(T1 const left, Matrix<T1> const & right)
 }
 
 template<typename T>
-inline Matrix<T> Matrix<T>::scalar_multiplication(Matrix<T> const & other)
+inline Matrix<T> Matrix<T>::ScalarMultiplication(Matrix<T> const & other)
 {
 	Matrix<T> result(*this);
 #pragma omp parallel for
@@ -71,7 +71,7 @@ inline Matrix<T> Matrix<T>::scalar_multiplication(Matrix<T> const & other)
 }
 
 template<typename T>
-inline Matrix<T> Matrix<T>::times_divide(Matrix<T> const & other)
+inline Matrix<T> Matrix<T>::TimesDivide(Matrix<T> const & other)
 {
 	// Check that rows or columns number of right and left matrix are equal
 	assert(rows_ == other.rows_, colls_ == other.colls_);
@@ -85,13 +85,13 @@ inline Matrix<T> Matrix<T>::times_divide(Matrix<T> const & other)
 }
 
 template<typename T>
-inline std::pair<unsigned int, unsigned int> Matrix<T>::size() const
+inline std::pair<unsigned int, unsigned int> Matrix<T>::Size() const
 {
 	return std::make_pair(rows_, colls_);
 }
 
 template<typename T>
-inline long double Matrix<T>::getSum() const
+inline long double Matrix<T>::GetSum() const
 {
 	long double sum{ 0.0 };
 
@@ -106,7 +106,7 @@ inline long double Matrix<T>::getSum() const
 }
 
 template<typename T>
-inline std::vector<T> Matrix<T>::getRow(unsigned const y) const
+inline std::vector<T> Matrix<T>::GetRow(unsigned const y) const
 {
 	// Check that row ID less than number of rows
 	assert(y < rows_);
@@ -119,7 +119,7 @@ inline std::vector<T> Matrix<T>::getRow(unsigned const y) const
 }
 
 template<typename T>
-inline void Matrix<T>::setRow(unsigned const y, std::vector<T> const & row)
+inline void Matrix<T>::SetRow(unsigned const y, std::vector<T> const & row)
 {
 	// Check that std::vector<T> row size is equal to columns number of matrix
 	assert(colls_ == row.size());
@@ -130,7 +130,7 @@ inline void Matrix<T>::setRow(unsigned const y, std::vector<T> const & row)
 }
 
 template<typename T>
-inline std::vector<T> Matrix<T>::getColumn(unsigned const x) const
+inline std::vector<T> Matrix<T>::GetColumn(unsigned const x) const
 {
 	// Check that coll ID less than number of column
 	assert(x < colls_);
@@ -144,7 +144,7 @@ inline std::vector<T> Matrix<T>::getColumn(unsigned const x) const
 }
 
 template<typename T>
-inline void Matrix<T>::setColumn(unsigned const x, std::vector<T> const & coll)
+inline void Matrix<T>::SetColumn(unsigned const x, std::vector<T> const & coll)
 {
 	// Check that std::vector<T> coll size is equal to rows number of matrix, bsides 2 (left and right boundary index)
 	assert(rows_ == coll.size() + 2);
