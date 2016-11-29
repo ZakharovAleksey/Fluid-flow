@@ -5,16 +5,16 @@
 #include<iomanip>	// setw()
 #include<fstream>
 
-#include"my_matrix.h"
+#include"my_matrix_2d.h"
 
 template<typename T>
-inline Matrix<T>::Matrix(): rows_(0), colls_(0) 
+inline Matrix2D<T>::Matrix2D(): rows_(0), colls_(0) 
 {
 	std::vector<T>().swap(body_);
 }
 
 template<class T>
-Matrix<T>::Matrix(unsigned rows, unsigned colls) : rows_(rows), colls_(colls)
+Matrix2D<T>::Matrix2D(unsigned rows, unsigned colls) : rows_(rows), colls_(colls)
 {
 	// Resize matrix body to contain all elements of matrix
 	body_.resize(rows_ * colls_, 0.0);
@@ -26,17 +26,17 @@ Matrix<T>::Matrix(unsigned rows, unsigned colls) : rows_(rows), colls_(colls)
 }
 
 template<class T>
-Matrix<T>::~Matrix() {}
+Matrix2D<T>::~Matrix2D() {}
 
 template<typename T>
-inline Matrix<T>::Matrix(Matrix<T> const & other) : rows_(other.rows_), colls_(other.colls_)
+inline Matrix2D<T>::Matrix2D(Matrix2D<T> const & other) : rows_(other.rows_), colls_(other.colls_)
 {
 	body_.resize(rows_ * colls_);
 	body_ = other.body_;
 }
 
 template<typename T>
-inline void Matrix<T>::Swap(Matrix<T> & other)
+inline void Matrix2D<T>::Swap(Matrix2D<T> & other)
 {
 	using std::swap;
 
@@ -48,21 +48,21 @@ inline void Matrix<T>::Swap(Matrix<T> & other)
 
 
 template<typename T1>
-inline Matrix<T1> operator+(T1 const left, Matrix<T1> const & right)
+inline Matrix2D<T1> operator+(T1 const left, Matrix2D<T1> const & right)
 {
-	return Matrix<T1>(right + left);
+	return Matrix2D<T1>(right + left);
 }
 
 template<typename T1>
-inline Matrix<T1> operator*(T1 const left, Matrix<T1> const & right)
+inline Matrix2D<T1> operator*(T1 const left, Matrix2D<T1> const & right)
 {
-	return Matrix<T1>(right * left);
+	return Matrix2D<T1>(right * left);
 }
 
 template<typename T>
-inline Matrix<T> Matrix<T>::ScalarMultiplication(Matrix<T> const & other)
+inline Matrix2D<T> Matrix2D<T>::ScalarMultiplication(Matrix2D<T> const & other)
 {
-	Matrix<T> result(*this);
+	Matrix2D<T> result(*this);
 #pragma omp parallel for
 	for (int i = 0; i < rows_ * colls_; ++i)
 		result.body_.at(i) *= other.body_.at(i);
@@ -71,12 +71,12 @@ inline Matrix<T> Matrix<T>::ScalarMultiplication(Matrix<T> const & other)
 }
 
 template<typename T>
-inline Matrix<T> Matrix<T>::TimesDivide(Matrix<T> const & other)
+inline Matrix2D<T> Matrix2D<T>::TimesDivide(Matrix2D<T> const & other)
 {
 	// Check that rows or columns number of right and left matrix are equal
 	assert(rows_ == other.rows_, colls_ == other.colls_);
 
-	Matrix<T> result(*this);
+	Matrix2D<T> result(*this);
 #pragma omp parallel for
 	for (int i = 0; i < result.body_.size(); ++i)
 		result.body_.at(i) /= other.body_.at(i);
@@ -85,13 +85,13 @@ inline Matrix<T> Matrix<T>::TimesDivide(Matrix<T> const & other)
 }
 
 template<typename T>
-inline std::pair<unsigned int, unsigned int> Matrix<T>::Size() const
+inline std::pair<unsigned int, unsigned int> Matrix2D<T>::Size() const
 {
 	return std::make_pair(rows_, colls_);
 }
 
 template<typename T>
-inline long double Matrix<T>::GetSum() const
+inline long double Matrix2D<T>::GetSum() const
 {
 	long double sum{ 0.0 };
 
@@ -106,7 +106,7 @@ inline long double Matrix<T>::GetSum() const
 }
 
 template<typename T>
-inline std::vector<T> Matrix<T>::GetRow(unsigned const y) const
+inline std::vector<T> Matrix2D<T>::GetRow(unsigned const y) const
 {
 	// Check that row ID less than number of rows
 	assert(y < rows_);
@@ -119,7 +119,7 @@ inline std::vector<T> Matrix<T>::GetRow(unsigned const y) const
 }
 
 template<typename T>
-inline void Matrix<T>::SetRow(unsigned const y, std::vector<T> const & row)
+inline void Matrix2D<T>::SetRow(unsigned const y, std::vector<T> const & row)
 {
 	// Check that std::vector<T> row size is equal to columns number of matrix
 	assert(colls_ == row.size());
@@ -130,7 +130,7 @@ inline void Matrix<T>::SetRow(unsigned const y, std::vector<T> const & row)
 }
 
 template<typename T>
-inline std::vector<T> Matrix<T>::GetColumn(unsigned const x) const
+inline std::vector<T> Matrix2D<T>::GetColumn(unsigned const x) const
 {
 	// Check that coll ID less than number of column
 	assert(x < colls_);
@@ -144,7 +144,7 @@ inline std::vector<T> Matrix<T>::GetColumn(unsigned const x) const
 }
 
 template<typename T>
-inline void Matrix<T>::SetColumn(unsigned const x, std::vector<T> const & coll)
+inline void Matrix2D<T>::SetColumn(unsigned const x, std::vector<T> const & coll)
 {
 	// Check that std::vector<T> coll size is equal to rows number of matrix, bsides 2 (left and right boundary index)
 	assert(rows_ == coll.size() + 2);
@@ -155,7 +155,7 @@ inline void Matrix<T>::SetColumn(unsigned const x, std::vector<T> const & coll)
 }
 
 template<typename T>
-inline void Matrix<T>::FillWith(T const value)
+inline void Matrix2D<T>::FillWith(T const value)
 {
 #pragma omp parallel for
 	for (int i = 0; i < body_.size(); ++i)
@@ -163,7 +163,7 @@ inline void Matrix<T>::FillWith(T const value)
 }
 
 template<typename T>
-inline void Matrix<T>::FillWithoughtBoundary(T const value)
+inline void Matrix2D<T>::FillWithoughtBoundary(T const value)
 {
 #pragma omp parallel for
 	for (int i = colls_; i < colls_ * (rows_ - 1); ++i) {
@@ -174,7 +174,7 @@ inline void Matrix<T>::FillWithoughtBoundary(T const value)
 }
 
 template<typename T>
-inline void Matrix<T>::FillColumnWith(int const coll_id, T const value)
+inline void Matrix2D<T>::FillColumnWith(int const coll_id, T const value)
 {
 	// Check that coll ID less than number of column
 	assert(coll_id < colls_);
@@ -185,7 +185,7 @@ inline void Matrix<T>::FillColumnWith(int const coll_id, T const value)
 }
 
 template<typename T>
-inline void Matrix<T>::FillRowWith(int const row_id, T const value)
+inline void Matrix2D<T>::FillRowWith(int const row_id, T const value)
 {
 	// Check that row ID less than number of rows
 	assert(row_id < rows_);
@@ -196,7 +196,7 @@ inline void Matrix<T>::FillRowWith(int const row_id, T const value)
 }
 
 template<typename T>
-inline void Matrix<T>::Resize(unsigned rows, unsigned colls)
+inline void Matrix2D<T>::Resize(unsigned rows, unsigned colls)
 {
 	rows_ = rows;
 	colls_ = colls;
@@ -210,7 +210,7 @@ inline void Matrix<T>::Resize(unsigned rows, unsigned colls)
 }
 
 template<typename T>
-inline void Matrix<T>::WriteToFile(std::string value_name, int const time)
+inline void Matrix2D<T>::WriteToFile(std::string value_name, int const time)
 {
 	using std::endl;
 
@@ -241,7 +241,7 @@ inline void Matrix<T>::WriteToFile(std::string value_name, int const time)
 }
 
 template<typename T>
-inline void Matrix<T>::WriteColumnToFile(std::string value_name, int const coll_id, int const time)
+inline void Matrix2D<T>::WriteColumnToFile(std::string value_name, int const coll_id, int const time)
 {
 	// Check that coll_id is less then columns number
 	assert(coll_id < colls_);
@@ -267,7 +267,7 @@ inline void Matrix<T>::WriteColumnToFile(std::string value_name, int const coll_
 }
 
 template<typename T>
-inline void Matrix<T>::WriteRowToFile(std::string value_name, int const row_id, int const time)
+inline void Matrix2D<T>::WriteRowToFile(std::string value_name, int const row_id, int const time)
 {
 	// Check that row_id is less then rows number
 	assert(row_id < rows_);
@@ -295,7 +295,7 @@ inline void Matrix<T>::WriteRowToFile(std::string value_name, int const row_id, 
 }
 
 template<typename T1>
-std::ostream & operator<<(std::ostream & os, Matrix<T1> const & matrix) {
+std::ostream & operator<<(std::ostream & os, Matrix2D<T1> const & matrix) {
 	using std::endl;
 
 	os.precision(3);

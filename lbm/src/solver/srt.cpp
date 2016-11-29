@@ -15,7 +15,7 @@ void SRTsolver::feqCalculate()
 	fluid_->feq_.fillWithoutBoundaries(0.0);
 
 	for (int q = 0; q < kQ; ++q) {
-		Matrix<double> v(fluid_->size().first, fluid_->size().second);
+		Matrix2D<double> v(fluid_->size().first, fluid_->size().second);
 		v = fluid_->vx_ * kEx[q] + fluid_->vy_ * kEy[q];
 
 		fluid_->feq_[q] = kW[q] * fluid_->rho_.ScalarMultiplication(
@@ -28,7 +28,7 @@ void SRTsolver::feqCalculate()
 void SRTsolver::streaming()
 {
 	for (int q = 0; q < kQ; ++q) {
-		Matrix<double> temp = fluid_->f_[q];
+		Matrix2D<double> temp = fluid_->f_[q];
 		fluid_->f_[q].FillWith(0.0);
 
 		for (unsigned y = 0; y < fluid_->size().first; ++y)

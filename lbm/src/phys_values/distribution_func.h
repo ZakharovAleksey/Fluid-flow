@@ -2,7 +2,7 @@
 
 #include<array>
 
-#include"..\math\my_matrix.h"
+#include"..\math\my_matrix_2d.h"
 #include"..\phys_values\macroscopic_param.h"
 
 /// <summary>
@@ -127,7 +127,7 @@ public:
 #pragma region Proprerties (Get/Set)
 
 	//! Get q-component of probability distribution function
-	Matrix<T> & operator[](unsigned q);
+	Matrix2D<T> & operator[](unsigned q);
 	
 	//! Get pair in witch: first = rows_, second = colls_
 	std::pair<unsigned int, unsigned int> size() const;
@@ -191,7 +191,7 @@ private:
 	/// <summary>
 	/// Array which store all components of probability distribution function.
 	/// </summary>
-	std::array<Matrix<T>, kQ> dfunc_body_;
+	std::array<Matrix2D<T>, kQ> dfunc_body_;
 
 #pragma endregion
 
