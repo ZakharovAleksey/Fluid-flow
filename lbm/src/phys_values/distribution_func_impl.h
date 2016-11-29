@@ -41,7 +41,7 @@ inline void DistributionFunction<T>::swap(DistributionFunction & dist_func)
 }
 
 template<typename T>
-inline Matrix<T>& DistributionFunction<T>::operator[](unsigned q)
+inline Matrix2D<T>& DistributionFunction<T>::operator[](unsigned q)
 {
 	assert(q < kQ);
 	return dfunc_body_.at(q);

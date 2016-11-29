@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-#include"..\math\my_matrix.h"
+#include"..\math\my_matrix_2d.h"
 
 /*!
 	“ип €чейки: жидкость, или €чейка на границе области моделировани€.
@@ -60,5 +60,5 @@ private:
 	/// </summary>
 	unsigned colls_;
 
-	Matrix<NodeType> medium_;
+	Matrix2D<NodeType> medium_;
 };

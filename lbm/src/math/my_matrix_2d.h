@@ -1,5 +1,7 @@
 #pragma once
 
+#include"my_matrix_interface.h"
+
 #include<iostream>
 #include<ostream>
 #include <cassert> // setw()
@@ -9,6 +11,7 @@
 
 #include<ppl.h>
 #include<omp.h>
+
 
 #define TEST_INCLUDE 
 
@@ -27,7 +30,7 @@
 /// Overloading implemetation only for operations witch we need in LBM implementation.
 /// </remarks>
 template<typename T>
-class Matrix
+class Matrix2D : public iMatrix<T>
 {
 public:
 
@@ -36,28 +39,28 @@ public:
 	/// <summary>
 	/// Allocates an uninitialized matrix that holds zero elements.
 	/// </summary>
-	Matrix();
+	Matrix2D();
 
 	/// <summary>
 	/// Allocates an matrix with rows number is equal to "rows" and column number is equal to "cells", which is filled with zeros.
 	/// </summary>
 	/// <param name="rows"> Number of rows in matrix. </param>
 	/// <param name="colls"> Number of columns in matrix.</param>
-	Matrix(unsigned rows, unsigned colls);
+	Matrix2D(unsigned rows, unsigned colls);
 
-	virtual ~Matrix();
+	virtual ~Matrix2D();
 
 	/// <summary>
 	/// Allocates an matrix with rows number is equal to the "other" matrix rows and column number is equal to the "other" matrix cells, which is filled with 
 	/// the "other" matrix values.
 	/// </summary>
-	Matrix(Matrix<T> const & other);	// Проверить все ли хорошо при вызове функции отсюда
+	Matrix2D(Matrix2D<T> const & other);	// Проверить все ли хорошо при вызове функции отсюда
 
 	/// <summary>
 	/// Swap current matrix (Swap includes rows number, columns number and all elements) with the "other" matrix.
 	/// </summary>
 	/// <param name="other"> The matrix which is swapped with the current </param>
-	void Swap(Matrix<T> & other);
+	void Swap(Matrix2D<T> & other);
 
 #pragma endregion
 
@@ -66,14 +69,14 @@ public:
 	/// </summary>
 	/// <param name="other"> Matirix from the rigth side of the assigment operator. </param>
 	/// <returns> New assigment matrix. </returns>
-	Matrix<T> & operator=(Matrix<T> const & other) 
+	Matrix2D<T> & operator=(Matrix2D<T> const & other) 
 	{
 		// Check that rows or colls number of right and left matrix are equal
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
 
 		if (this != & other) 
 		{
-			Matrix<T> temp(other);
+			Matrix2D<T> temp(other);
 			temp.Swap(*this);
 		}
 
@@ -87,7 +90,7 @@ public:
 	/// </summary>
 	/// <param name="other"> Matrix that we add to the current matrix. </param>
 	/// <returns>  The result of adding two matrices. </returns>
-	Matrix<T> & operator+=(Matrix<T> const & other) 
+	Matrix2D<T> & operator+=(Matrix2D<T> const & other) 
 	{
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
 	
@@ -103,7 +106,7 @@ public:
 	/// </summary>
 	/// <param name="other"> Value, we add to the each element of the current matrix. </param>
 	/// <returns>  The result of adding the matrix and the value.  </returns>
-	Matrix<T> & operator+=(T const other) 
+	Matrix2D<T> & operator+=(T const other) 
 	{
 		std::for_each(body_.begin(), body_.end(), [&](T & value) {value += other; });
 		return *this;
@@ -114,12 +117,12 @@ public:
 	/// </summary>
 	/// <param name="other"> Matrix that we add to the current matrix. </param>
 	/// <returns>  The result of adding two matrices. </returns>
-	Matrix<T> operator+(Matrix<T> const & other) const 
+	Matrix2D<T> operator+(Matrix2D<T> const & other) const 
 	{
 		// Check that rows or columns number of right and left matrix are equal
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
 
-		Matrix<T> result(*this);
+		Matrix2D<T> result(*this);
 	#pragma omp parallel for
 		for (int i = 0; i < result.body_.size(); ++i)
 			result.body_.at(i) += other.body_.at(i);
@@ -132,9 +135,9 @@ public:
 	/// </summary>
 	/// <param name="other"> Value, we add to the each element of the current matrix. </param>
 	/// <returns> The result of adding the matrix and the value. </returns>
-	Matrix<T> operator+(T const other) const 
+	Matrix2D<T> operator+(T const other) const 
 	{
-		Matrix<T> result(*this);
+		Matrix2D<T> result(*this);
 
 		std::for_each(result.body_.begin(), result.body_.end(), [&](T & value) {value += other; });
 
@@ -149,7 +152,7 @@ public:
 	/// <param name="left"> Value, we add to the each element of the current matrix. </param>
 	/// <param name="right"> the current matrix.</param>
 	/// <returns> The result of adding the value and the matrix. </returns>
-	friend Matrix<T1> operator+(T1 const left, Matrix<T1> const & right);
+	friend Matrix2D<T1> operator+(T1 const left, Matrix2D<T1> const & right);
 
 #pragma endregion
 
@@ -160,7 +163,7 @@ public:
 	/// </summary>
 	/// <param name="other"> Matrix that we substract from the current matrix. </param>
 	/// <returns>  The result of subctract two matrices. </returns>
-	Matrix<T> & operator-=(Matrix<T> const & other) {
+	Matrix2D<T> & operator-=(Matrix2D<T> const & other) {
 		// Check that rows or columns number of right and left matrix are equal
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
 	#pragma omp parallel for
@@ -175,7 +178,7 @@ public:
 	/// </summary>
 	/// <param name="other"> Value, we substract from the each element of the current matrix. </param>
 	/// <returns>  The result of subctracting the matrix and the value.  </returns>
-	Matrix<T> & operator-=(T const other) {
+	Matrix2D<T> & operator-=(T const other) {
 		std::for_each(body_.begin(), body_.end(),
 			[&](T & value) {value -= other; });
 
@@ -187,11 +190,11 @@ public:
 	/// </summary>
 	/// <param name="other"> Matrix that we substract from the current matrix. </param>
 	/// <returns>  The result of substracting two matrices. </returns>
-	Matrix<T> operator-(Matrix<T> const & other) const {
+	Matrix2D<T> operator-(Matrix2D<T> const & other) const {
 		// Check that rows or colls number of right and left matrix are equal
 		assert(rows_ == other.rows_ && colls_ == other.colls_);
 
-		Matrix<T> result(*this);
+		Matrix2D<T> result(*this);
 	#pragma omp parallel for
 		for (int i = 0; i < result.body_.size(); ++i)
 			result.body_.at(i) -= other.body_.at(i);
@@ -204,8 +207,8 @@ public:
 	/// </summary>
 	/// <param name="other"> Value, we substract from the each element of the current matrix. </param>
 	/// <returns> The result of adding the matrix and the value. </returns>
-	Matrix<T> operator-(T const other) const {
-		Matrix<T> result(*this);
+	Matrix2D<T> operator-(T const other) const {
+		Matrix2D<T> result(*this);
 
 		std::for_each(result.body_.begin(), result.body_.end(),
 			[&](T & value) {value -= other; });
@@ -222,7 +225,7 @@ public:
 	/// </summary>
 	/// <param name="other"> Value that we multiply on the current matrix. </param>
 	/// <returns>  The result of multiplying matrix with value. </returns>
-	Matrix<T> & operator*=(T other) {
+	Matrix2D<T> & operator*=(T other) {
 	#pragma omp parallel for
 		for (int i = 0; i < body_.size(); ++i)
 			body_.at(i) *= other;
@@ -235,8 +238,8 @@ public:
 	/// </summary>
 	/// <param name="other"> Value that we multiply to the current matrix. </param>
 	/// <returns>  The result of multiplying the matrix with value. </returns>
-	Matrix<T> operator*(T other) const {
-		Matrix<T> result(*this);
+	Matrix2D<T> operator*(T other) const {
+		Matrix2D<T> result(*this);
 
 		std::for_each(result.body_.begin(), result.body_.end(),
 			[&](T & value) {value *= other; });
@@ -251,14 +254,14 @@ public:
 	/// <param name="left"> Value that we multiply to the current matrix. </param>
 	/// <param name="right"> The current matrix. </param>
 	/// <returns> The result of multiplying the matrix with value. </returns>
-	friend Matrix<T1> operator*(T1 const left, Matrix<T1> const & right);
+	friend Matrix2D<T1> operator*(T1 const left, Matrix2D<T1> const & right);
 
 	/// <summary>
 	/// The scalar product of current matrix and "other" matrix.
 	/// </summary>
 	/// <param name="other"> Right part of scalar product matrix. </param>
 	/// <returns> The scalar product of two matrix. </returns>
-	Matrix<T> ScalarMultiplication(Matrix<T> const & other);
+	Matrix2D<T> ScalarMultiplication(Matrix2D<T> const & other);
 
 #pragma endregion
 
@@ -269,7 +272,7 @@ public:
 	/// </summary>
 	/// <param name="other"> Matrix that we divide on the current matrix. </param>
 	/// <returns>  The result of divideing two matrices. </returns>
-	Matrix<T> & operator/=(T other) {
+	Matrix2D<T> & operator/=(T other) {
 		// Check that other value is not equal by zero
 		assert(other != 0);
 
@@ -285,11 +288,11 @@ public:
 	/// </summary>
 	/// <param name="other"> Value by which we divide each element of the matrix. </param>
 	/// <returns>  The result of divideing two matrices. </returns>
-	Matrix<T> operator/(T other) const {
+	Matrix2D<T> operator/(T other) const {
 		// Check that other value is not equal by zero
 		assert(other != 0);
 
-		Matrix<T> result(*this);
+		Matrix2D<T> result(*this);
 
 		std::for_each(result.body_.begin(), result.body_.end(),
 			[&](T & value) {value /= other; });
@@ -302,7 +305,7 @@ public:
 	/// </summary>
 	/// <param name="other"> Matrix by which we divide aproppriate element of the current matrix. </param>
 	/// <returns> Termwise division of the two matrix. </returns>
-	Matrix<T> TimesDivide(Matrix<T> const & other);
+	Matrix2D<T> TimesDivide(Matrix2D<T> const & other);
 
 #pragma endregion
 
@@ -436,7 +439,7 @@ public:
 	void WriteRowToFile(std::string value_name, int const row_id, int const time);
 
 	template<typename T1>
-	friend std::ostream & operator<<(std::ostream & os, Matrix<T1> const & matrix);
+	friend std::ostream & operator<<(std::ostream & os, Matrix2D<T1> const & matrix);
 
 
 #pragma endregion
@@ -469,4 +472,4 @@ protected:
 
 
 
-#include"my_matrix_impl.h"
+#include"my_matrix_2d_impl.h"

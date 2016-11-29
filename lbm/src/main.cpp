@@ -3,7 +3,7 @@
 #include<cstdlib>
 #include<omp.h>
 
-#include"math\my_matrix.h"
+#include"math\my_matrix_2d.h"
 #include"phys_values\macroscopic_param.h"
 #include"phys_values\distribution_func.h"
 #include"modeling_area\medium.h"
