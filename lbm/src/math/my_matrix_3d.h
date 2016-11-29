@@ -1,13 +1,21 @@
 #pragma once
 
+#include<iostream>
+#include<vector>
+
 #include"my_matrix_interface.h"
+#include"my_matrix_2d.h"
+
 
 template<typename T>
-class Matrix3D : iMatrix
+class Matrix3D : public Matrix2D<T>
 {
 public:
-	Matrix3D();
+
+	Matrix3D(const int rows, const int colls, const int height);
 	~Matrix3D() {}
+
+#pragma region Overloading functions
 
 	/// <summary>
 	/// Returns the sum of all elements of the matrix
@@ -27,7 +35,7 @@ public:
 	/// </summary>
 	/// <param name="y"> Index of matrix row for insertion operation. </param>
 	/// <param name="row"> Vector for for insertion operation. </param>
-	void SetRow(unsigned const y, std::vector<T> const & row) = 0;
+	void SetRow(unsigned const y, std::vector<T> const & row) {}
 
 	/// <summary>
 	/// Returns std::vector, with values in range [1 : rows_ - 2] from column with "x" index.
@@ -43,7 +51,38 @@ public:
 	/// <param name="coll">  Vector for for insertion operation. </param>
 	void SetColumn(unsigned const x, std::vector<T> const & coll) {}
 
+#pragma endregion
+
+
+	//T const operator()(const int x, const int y, const int z) const {}
+
+	//T const Get(const int x, const int y, const int z) const;
+
+	//T & operator()(const int x, const int y, const int z) { return T(); }
+
+	void Set(const int x, const int y, const int z, T const value);
+
+
+	template<typename T1>
+	friend std::ostream & operator<<(std::ostream & os, Matrix3D<T1> const & matrix);
+
+
+#pragma region Properties
+
+#pragma endregion
+
+
+
 private:
+
+	int rows_;
+	int colls_;
+	int height_;
+
+	typedef std::vector<Matrix2D<T>> VectorOf2DMatrix;
+
+	VectorOf2DMatrix body3d_;
 
 };
 
+#include"my_matrix_3d_impl.h"

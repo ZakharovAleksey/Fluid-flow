@@ -4,6 +4,8 @@
 #include<omp.h>
 
 #include"math\my_matrix_2d.h"
+#include"math\my_matrix_3d.h"
+
 #include"phys_values\macroscopic_param.h"
 #include"phys_values\distribution_func.h"
 #include"modeling_area\medium.h"
@@ -20,7 +22,20 @@ int main()
 	using std::endl;
 
 
-	omp_set_num_threads(5);
+	omp_set_num_threads(1);
+
+	Matrix3D<int> testMatrix(2, 4, 3);
+	testMatrix.Set(1, 3, 1, 10);
+	cout << testMatrix;
+
+	/*
+	Matrix2D<int> m(2, 4);
+	m(1, 2) = 100;
+	cout << m;
+	*/
+	// 3D tests
+
+
 
 	// Тестирование функционала матриц ------ Реализовать через тесты
 
@@ -41,6 +56,7 @@ int main()
 
 	// ---------------------------
 
+	/* LBM 2D 
 	int X{ 100 };
 	int Y{ 20 };
 	Fluid f(Y, X);
@@ -50,6 +66,8 @@ int main()
 
 	SRTsolver solver(1.0, m, f);
 	solver.solve(50);
+
+	*/
 
 	/*
 		- Продумать структуру для BC!

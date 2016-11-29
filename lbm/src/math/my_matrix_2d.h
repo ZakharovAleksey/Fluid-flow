@@ -13,13 +13,6 @@
 #include<omp.h>
 
 
-#define TEST_INCLUDE 
-
-#ifndef TEST_INCLUDE 
- 	#include<cstdlib>
- 	#include<ctime>
-#endif // !TEST_INCLUDE
-
 
 /// <summary>
 /// The template class of 2D matrix.
@@ -452,12 +445,12 @@ protected:
 #pragma region Fields
 
 	/// <summary>
-	/// Number of rows in matrix
+	/// Number of rows in matrix across X-axis direction
 	/// </summary>
 	unsigned rows_;
 	
 	/// <summary>
-	/// Number of columns in matrix
+	/// Number of columns in matrix across Y-axis directions
 	/// </summary>
 	unsigned colls_;
 

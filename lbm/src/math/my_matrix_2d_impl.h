@@ -7,6 +7,14 @@
 
 #include"my_matrix_2d.h"
 
+
+#define TEST_INCLUDE 0
+
+#if TEST_INCLUDE 
+#include<cstdlib>
+#include<ctime>
+#endif // !TEST_INCLUDE
+
 template<typename T>
 inline Matrix2D<T>::Matrix2D(): rows_(0), colls_(0) 
 {
@@ -19,11 +27,12 @@ Matrix2D<T>::Matrix2D(unsigned rows, unsigned colls) : rows_(rows), colls_(colls
 	// Resize matrix body to contain all elements of matrix
 	body_.resize(rows_ * colls_, 0.0);
 
-	#ifndef TEST_INCLUDE
-	for (auto & i : body_)
-		i = rand() % 10;
+	#if TEST_INCLUDE
+	for (int i = 0; i < rows_ * colls_; ++i)
+		body_.at(i) = i;
 	#endif // !TEST_INCLUDE
 }
+
 
 template<class T>
 Matrix2D<T>::~Matrix2D() {}
@@ -303,7 +312,7 @@ std::ostream & operator<<(std::ostream & os, Matrix2D<T1> const & matrix) {
 
 	for (unsigned y = 0; y != matrix.rows_; ++y){
 		for (unsigned x = 0; x != matrix.colls_; ++x)
-			os << std::setw(7) << matrix.body_[x + y * matrix.colls_];
+			os << std::setw(7) << matrix(y, x);//matrix.body_[x + y * matrix.colls_];
 		os << endl;
 	}
 	
