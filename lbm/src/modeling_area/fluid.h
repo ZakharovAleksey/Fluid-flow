@@ -21,14 +21,14 @@ public:
 
 #pragma region Constructor
 
-	Fluid(unsigned rows, unsigned colls);
+	Fluid(int rows, int colls);
 	~Fluid();
 
 #pragma endregion
 
 #pragma region Properties(Get/Set)
 
-	std::pair<unsigned, unsigned> size() const;
+	std::pair<int, int> size() const;
 
 #pragma endregion
 
@@ -43,9 +43,9 @@ private:
 #pragma region Fields
 
 	//! Rows count for fluid modeling area
-	unsigned rows_;
+	int rows_;
 	//! Columns count for fluid modeling area
-	unsigned colls_;
+	int colls_;
 
 // ”ЅЅЅЅЅЅ–––јјјјј“№№№№№№№№ - это было просто дл€ тестироани€ чтобы передать f_ ка аргумент дл€ BCs
 public:

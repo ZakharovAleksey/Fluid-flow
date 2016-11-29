@@ -28,37 +28,37 @@ class Medium
 {
 public:
 	Medium();
-	Medium(unsigned rows, unsigned colls);
+	Medium(int rows, int colls);
 	~Medium();
 	
-	bool is_fluid(unsigned y, unsigned x) const;
+	bool is_fluid(int y, int x) const;
 	// Возможно понадобится определить
-	/*bool is_upper_boundary(unsigned y, unsigned x) const;
-	bool is_bottom_boundary(unsigned y, unsigned x) const;
-	bool is_left_boundary(unsigned y, unsigned x) const;
-	bool is_right_boundary(unsigned y, unsigned x) const;*/
+	/*bool is_upper_boundary(int y, int x) const;
+	bool is_bottom_boundary(int y, int x) const;
+	bool is_left_boundary(int y, int x) const;
+	bool is_right_boundary(int y, int x) const;*/
 
 	/// <summary>
 	/// Resize current Medium with values !!!!!
 	/// </summary>
 	/// <param name="rows"> lol </param>
 	/// <param name="colls"> hah </param>
-	void resize(unsigned rows, unsigned colls);
+	void resize(int rows, int colls);
 
 	friend std::ostream & operator<<(std::ostream & os, Medium const & medium);
 
 	// Переписать через метод size() реализованный у класса Matrix<>
-	std::pair<unsigned int, unsigned int> size() const;
+	std::pair<int, int> size() const;
 
 private:
 	/// <summary>
 	/// Rows in modaling area
 	/// </summary>
-	unsigned rows_;
+	int rows_;
 	/// <summary>
 	/// Columns in modaling area
 	/// </summary>
-	unsigned colls_;
+	int colls_;
 
 	Matrix2D<NodeType> medium_;
 };

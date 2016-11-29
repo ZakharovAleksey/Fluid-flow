@@ -1,6 +1,6 @@
 #include"fluid.h"
 
-Fluid::Fluid(unsigned rows, unsigned colls) : rows_(rows), colls_(colls) {
+Fluid::Fluid(int rows, int colls) : rows_(rows), colls_(colls) {
 
 	rho_.Resize(rows_, colls_);
 	rho_.FillWithoughtBoundary(1.0);
@@ -19,7 +19,7 @@ void Fluid::Poiseuille_IC(double const dvx)
 		vx_(y, 1) += dvx;
 }
 
-std::pair<unsigned, unsigned> Fluid::size() const
+std::pair<int, int> Fluid::size() const
 {
 	return std::make_pair(rows_, colls_);
 }

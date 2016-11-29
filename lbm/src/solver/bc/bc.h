@@ -31,7 +31,7 @@ public:
 
 #pragma region Constructor
 
-	BCs(unsigned rows, unsigned colls, DistributionFunction<double> & dfunc);
+	BCs(int rows, int colls, DistributionFunction<double> & dfunc);
 	~BCs();
 
 #pragma endregion
@@ -85,9 +85,9 @@ private:
 #pragma region Fields
 
 	//! Rows length [equal to rows_ of matrix]  beacuse all nodes takes placr in BC
-	unsigned length_;
+	int length_;
 	//! Columns height [equal to colls_ - 2 of matrix] because UP and DOWN nodes are already counted in TOP and BOTTOM BC
-	unsigned height_;
+	int height_;
 
 	//! Poiner to Fluid distribution function to work with it's boundaries (ѕопробовать переделать через ссылку)
 	DistributionFunction<double>* f_ptr_;

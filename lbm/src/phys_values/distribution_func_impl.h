@@ -10,7 +10,7 @@ inline DistributionFunction<T>::DistributionFunction() : rows_(0), colls_(0)
 }
 
 template<typename T>
-DistributionFunction<T>::DistributionFunction(unsigned rows, unsigned colls): rows_(rows), colls_(colls) 
+DistributionFunction<T>::DistributionFunction(int rows, int colls): rows_(rows), colls_(colls) 
 {
 	for (int q = 0; q < kQ; ++q)
 		dfunc_body_.at(q).resize(rows_, colls_);
@@ -41,7 +41,7 @@ inline void DistributionFunction<T>::swap(DistributionFunction & dist_func)
 }
 
 template<typename T>
-inline Matrix2D<T>& DistributionFunction<T>::operator[](unsigned q)
+inline Matrix2D<T>& DistributionFunction<T>::operator[](int q)
 {
 	assert(q < kQ);
 	return dfunc_body_.at(q);
@@ -95,7 +95,7 @@ inline void DistributionFunction<T>::fillBoundaries(T const value)
 }
 
 template<typename T>
-inline void DistributionFunction<T>::resize(unsigned rows, unsigned colls)
+inline void DistributionFunction<T>::resize(int rows, int colls)
 {
 	rows_ = rows;
 	colls_ = colls;
@@ -105,7 +105,7 @@ inline void DistributionFunction<T>::resize(unsigned rows, unsigned colls)
 }
 
 template<typename T>
-inline std::pair<unsigned int, unsigned int> DistributionFunction<T>::size() const
+inline std::pair<int, int> DistributionFunction<T>::size() const
 {
 	return std::make_pair(rows_, colls_);
 }
@@ -187,7 +187,7 @@ inline MacroscopicParam<T> DistributionFunction<T>::calculateVelocity(const doub
 
 template<typename T1>
 std::ostream & operator<<(std::ostream & os, DistributionFunction<T1> const & dist_func) {
-	unsigned i{ 0 };
+	int i{ 0 };
 	for (auto matrix : dist_func.dfunc_body_) {
 		os << "Distribution func f[" << i++ << "] ------------------- \n";
 		os << matrix;

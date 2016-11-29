@@ -12,7 +12,7 @@ class MacroscopicParam : public Matrix2D<T>
 {
 public:
 	MacroscopicParam();
-	MacroscopicParam(unsigned rows, unsigned colls);
+	MacroscopicParam(int rows, int colls);
 	virtual ~MacroscopicParam() {}
 
 private:

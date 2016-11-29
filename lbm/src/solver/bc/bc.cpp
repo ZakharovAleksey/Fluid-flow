@@ -5,7 +5,7 @@
 #include"../../math/array_func_impl.h" // Для работы с ГУ Фон-Неймана
 
 
-BCs::BCs(unsigned rows, unsigned colls, DistributionFunction<double> & dfunc): 
+BCs::BCs(int rows, int colls, DistributionFunction<double> & dfunc): 
 	length_(colls), height_(rows - 2), 
 	f_ptr_(&dfunc) 
 {

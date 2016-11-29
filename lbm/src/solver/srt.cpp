@@ -31,8 +31,8 @@ void SRTsolver::streaming()
 		Matrix2D<double> temp = fluid_->f_[q];
 		fluid_->f_[q].FillWith(0.0);
 
-		for (unsigned y = 0; y < fluid_->size().first; ++y)
-			for (unsigned x = 0; x < fluid_->size().second; ++x)
+		for (int y = 0; y < fluid_->size().first; ++y)
+			for (int x = 0; x < fluid_->size().second; ++x)
 				if (medium_->is_fluid(y, x))
 			 		fluid_->f_[q](y - kEy[q], x + kEx[q]) = temp(y, x);
 	}

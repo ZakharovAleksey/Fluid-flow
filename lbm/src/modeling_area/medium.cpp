@@ -20,7 +20,7 @@
 Medium::Medium() : rows_(0), colls_(0), medium_() {}
 
 
-Medium::Medium(unsigned rows, unsigned colls):
+Medium::Medium(int rows, int colls):
 	rows_(rows), colls_(colls) 
 { 
 
@@ -43,13 +43,13 @@ Medium::Medium(unsigned rows, unsigned colls):
 
 Medium::~Medium() {}
 
-bool Medium::is_fluid(unsigned y, unsigned x) const
+bool Medium::is_fluid(int y, int x) const
 {
 	assert(y < rows_ && x < colls_);
 	return medium_(y, x) == NodeType::FLUID;
 }
 
-void Medium::resize(unsigned rows, unsigned colls)
+void Medium::resize(int rows, int colls)
 {
 	rows_ = rows;
 	colls_ = colls;
@@ -75,7 +75,7 @@ void Medium::resize(unsigned rows, unsigned colls)
 }
 
 
-std::pair<unsigned, unsigned> Medium::size() const
+std::pair<int, int> Medium::size() const
 {
 	return std::make_pair(rows_, colls_);
 }

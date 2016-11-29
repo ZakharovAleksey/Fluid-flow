@@ -39,7 +39,7 @@ public:
 	/// </summary>
 	/// <param name="rows"> Number of rows in matrix. </param>
 	/// <param name="colls"> Number of columns in matrix.</param>
-	Matrix2D(unsigned rows, unsigned colls);
+	Matrix2D(int rows, int colls);
 
 	virtual ~Matrix2D();
 
@@ -310,7 +310,7 @@ public:
 	/// <param name="y"> Row index </param>
 	/// <param name="x"> Column index </param>
 	/// <returns> Value in matrix at [y][x] position</returns>
-	T & operator()(unsigned y, unsigned x) 
+	T & operator()(int y, int x) 
 	{
 		return body_.at(y * colls_ + x);
 	}
@@ -321,7 +321,7 @@ public:
 	/// <param name="y"> Row index </param>
 	/// <param name="x"> Column index </param>
 	/// <returns></returns>
-	T const operator()(unsigned y, unsigned x) const 
+	T const operator()(int y, int x) const 
 	{
 		return body_.at(y * colls_ + x);
 	}
@@ -330,7 +330,7 @@ public:
 	/// Returns values pair, in witch first isequal to rows number, second is equal to columns number
 	/// </summary>
 	/// <returns> Pair, where first element is row number and second is column number </returns>
-	std::pair<unsigned int, unsigned int> Size() const;
+	std::pair<int, int> Size() const;
 
 	/// <summary>
 	/// Returns the sum of all elements of the matrix
@@ -343,28 +343,28 @@ public:
 	/// </summary>
 	/// <param name="y"> Index of row </param>
 	/// <returns> vector with values from choosen row </returns>
-	std::vector<T> GetRow(unsigned const y) const;
+	std::vector<T> GetRow(int const y) const;
 
 	/// <summary>
 	/// Set elements of "y" row in the current matrix equal to values from std::vector "row"
 	/// </summary>
 	/// <param name="y"> Index of matrix row for insertion operation. </param>
 	/// <param name="row"> Vector for for insertion operation. </param>
-	void SetRow(unsigned const y, std::vector<T> const & row);
+	void SetRow(int const y, std::vector<T> const & row);
 
 	/// <summary>
 	/// Returns std::vector, with values in range [1 : rows_ - 2] from column with "x" index.
 	/// </summary>
 	/// <param name="x"> Index of column from witch method extract values. </param>
 	/// <returns> Vector filled with values from apropriate column of the current matrix. </returns>
-	std::vector<T> GetColumn(unsigned const x) const;
+	std::vector<T> GetColumn(int const x) const;
 
 	/// <summary>
 	/// Set elements of "x" column in the current matrix equal to values from std::vector "coll"
 	/// </summary>
 	/// <param name="x"> Index of matrix column for insertion operation. </param>
 	/// <param name="coll">  Vector for for insertion operation. </param>
-	void SetColumn(unsigned const x, std::vector<T> const & coll);
+	void SetColumn(int const x, std::vector<T> const & coll);
 
 #pragma endregion
 
@@ -404,7 +404,7 @@ public:
 	/// </summary>
 	/// <param name="rows"> Number of rows in new matrix. </param>
 	/// <param name="colls"> Number of columns in new matrix. </param>
-	void Resize(unsigned rows, unsigned colls);
+	void Resize(int rows, int colls);
 
 #pragma region Ostream Methods
 
@@ -447,12 +447,12 @@ protected:
 	/// <summary>
 	/// Number of rows in matrix across X-axis direction
 	/// </summary>
-	unsigned rows_;
+	int rows_;
 	
 	/// <summary>
 	/// Number of columns in matrix across Y-axis directions
 	/// </summary>
-	unsigned colls_;
+	int colls_;
 
 	/// <summary>
 	/// Main body of matrix, wich contain all matrix elements

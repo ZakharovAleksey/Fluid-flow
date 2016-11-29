@@ -25,7 +25,12 @@ int main()
 	omp_set_num_threads(1);
 
 	Matrix3D<int> testMatrix(2, 4, 3);
-	testMatrix.Set(1, 3, 1, 10);
+	testMatrix.Set(1, 3, 2, 10);
+	testMatrix(1, 3, 1) = 100;
+	std::cout << testMatrix.GetSum() << std::endl;
+	
+
+
 	cout << testMatrix;
 
 	/*
@@ -66,8 +71,8 @@ int main()
 
 	SRTsolver solver(1.0, m, f);
 	solver.solve(50);
-
 	*/
+	
 
 	/*
 		- Продумать структуру для BC!

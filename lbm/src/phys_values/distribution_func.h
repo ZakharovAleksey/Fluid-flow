@@ -8,7 +8,7 @@
 /// <summary>
 /// Possible number of directions in which pseudo-particles could move.
 /// </summary>
-unsigned const kQ{ 9 };
+int const kQ{ 9 };
 
 /// <summary>
 /// Template class for probability distribution function field for all modeling area representation.
@@ -37,7 +37,7 @@ public:
 #pragma region Constructor
 
 	DistributionFunction();
-	DistributionFunction(unsigned rows, unsigned colls);
+	DistributionFunction(int rows, int colls);
 	~DistributionFunction();
 	
 	DistributionFunction(DistributionFunction<T> const & other);
@@ -127,10 +127,10 @@ public:
 #pragma region Proprerties (Get/Set)
 
 	//! Get q-component of probability distribution function
-	Matrix2D<T> & operator[](unsigned q);
+	Matrix2D<T> & operator[](int q);
 	
 	//! Get pair in witch: first = rows_, second = colls_
-	std::pair<unsigned int, unsigned int> size() const;
+	std::pair<int, int> size() const;
 
 	//! Get probability distribution function values on TOP boundary
 	std::vector<T> getTopBoundaryValues(int const q) const;
@@ -161,7 +161,7 @@ public:
 	void fillBoundaries(T const value);
 
 	//! Resize each of kQ component of probability distribution function 
-	void resize(unsigned rows, unsigned colls);
+	void resize(int rows, int colls);
 
 	//! —читает плотность в кажой из €чеек области
 	MacroscopicParam<T> calculateDensity() const;
@@ -181,12 +181,12 @@ private:
 	/// <summary>
 	/// Height of modeling area across Y axis direction.
 	/// </summary>
-	unsigned rows_;
+	int rows_;
 	
 	/// <summary>
 	/// Lenght of modeling area across X axis direction.
 	/// </summary>
-	unsigned colls_;
+	int colls_;
 
 	/// <summary>
 	/// Array which store all components of probability distribution function.
