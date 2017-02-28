@@ -2,7 +2,7 @@
 
 #include<array>
 
-#include"..\math\my_matrix_2d.h"
+#include"../math/2d/my_matrix_2d.h"
 #include"..\phys_values\macroscopic_param.h"
 
 /// <summary>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include"my_matrix_interface.h"
+#include"../my_matrix_interface.h"
 
 #include<iostream>
 #include<ostream>
