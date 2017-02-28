@@ -1,6 +1,6 @@
 #pragma once
 
-#include"..\math\my_matrix_2d.h"
+#include"../math/2d/my_matrix_2d.h"
 
 /*!
 	Macroscopic physical values implementation class.

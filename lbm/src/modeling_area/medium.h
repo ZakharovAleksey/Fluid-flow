@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-#include"..\math\my_matrix_2d.h"
+#include"../math/2d/my_matrix_2d.h"
 
 /*!
 	“ип €чейки: жидкость, или €чейка на границе области моделировани€.

@@ -9,8 +9,10 @@ set(PATH_BC "solver/bc")
 set(
 	source_list
 	"math/array_func_impl.h"
-	"math/my_matrix_2d.h"
-	"math/my_matrix_2d_impl.h"
+	"math/2d/my_matrix_2d.h"
+	"math/2d/my_matrix_2d_impl.h"
+	"math/3d/my_matrix_3d.h"
+	"math/3d/my_matrix_3d_impl.h"
 	"math/my_matrix_interface.h"
 	"modeling_area/fluid.h"
 	"modeling_area/medium.h"
