@@ -17,7 +17,7 @@ template<class T>
 Matrix2D<T>::Matrix2D(unsigned rows, unsigned colls) : rows_(rows), colls_(colls)
 {
 	// Resize matrix body to contain all elements of matrix
-	body_.resize(rows_ * colls_, 0.0);
+	body_.resize(rows_ * colls_, T());
 
 	#ifndef TEST_INCLUDE
 	for (auto & i : body_)

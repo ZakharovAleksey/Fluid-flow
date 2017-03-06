@@ -451,19 +451,13 @@ protected:
 
 #pragma region Fields
 
-	/// <summary>
-	/// Number of rows in matrix
-	/// </summary>
-	unsigned rows_;
+	// Number of rows in matrix
+	int rows_;
 	
-	/// <summary>
-	/// Number of columns in matrix
-	/// </summary>
-	unsigned colls_;
+	// Number of columns in matrix
+	int colls_;
 
-	/// <summary>
-	/// Main body of matrix, wich contain all matrix elements
-	/// </summary>
+	// Main body of matrix, wich contain all matrix elements
 	std::vector<T> body_;
 
 #pragma endregion
