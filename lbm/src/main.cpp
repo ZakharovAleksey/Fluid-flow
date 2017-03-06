@@ -12,6 +12,8 @@
 #include"solver\bc\bc.h"
 
 
+#include"math\3d\my_matrix_3d.h"
+
 int main()
 {
 	srand(time(NULL));
@@ -41,7 +43,7 @@ int main()
 
 	// ---------------------------
 
-	int X{ 100 };
+	/*int X{ 100 };
 	int Y{ 20 };
 	Fluid f(Y, X);
 	Medium m(Y, X);
@@ -49,7 +51,25 @@ int main()
 	f.Poiseuille_IC(0.01);
 
 	SRTsolver solver(1.0, m, f);
-	solver.solve(50);
+	solver.solve(10);*/
+
+
+	// 3D matrix testing
+
+	int x{ 2 };
+	int y{ 2 };
+	int z{ 2 };
+
+	Matrix3D<int> first(x, y, z);
+	Matrix3D<int> second(x, y, z);
+
+	std::cout << first;
+	std::cout << second;
+	
+	first = 10 + 10* second / 10 - 10;
+
+
+	std::cout << first;
 
 	/*
 		- Продумать структуру для BC!
