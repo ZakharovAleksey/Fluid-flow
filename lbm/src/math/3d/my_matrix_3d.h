@@ -7,7 +7,7 @@
 #include"../2d/my_matrix_2d.h"
 
 template<typename T>
-class Matrix3D : public Matrix2D<T>
+class Matrix3D : public Matrix2D<T>, public iMatrix<T>
 {
 public:
 
@@ -97,6 +97,22 @@ public:
 #pragma endregion
 
 	Matrix3D<T> const ScalarMultiplication(Matrix3D<T> const & other);
+
+
+
+	long double GetSum() const override;
+
+	std::vector<T> GetRow(unsigned const y) const override;
+
+	void SetRow(unsigned const y, std::vector<T> const & row) override;
+
+	std::vector<T> GetColumn(unsigned const x) const override;
+
+	// Set elements of "x" column in the current matrix equal to values from std::vector "coll"
+	void SetColumn(unsigned const x, std::vector<T> const & coll) override;
+
+
+
 
 
 private:
