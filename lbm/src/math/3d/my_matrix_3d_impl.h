@@ -22,7 +22,7 @@ template<typename T>
 Matrix3D<T>::Matrix3D() : rows_(0), colls_(0), depth_(0) {}
 
 template<typename T>
-inline Matrix3D<T>::Matrix3D(int rows, int colls, int depth) : Matrix2D<T>(rows, colls), depth_(depth)
+inline Matrix3D<T>::Matrix3D(int depth, int rows, int colls) : depth_(depth), Matrix2D<T>(rows, colls)
 {
 	body_.resize(GetTotalSize(), T());
 
@@ -48,6 +48,86 @@ inline Matrix3D<T> const Matrix3D<T>::ScalarMultiplication(Matrix3D<T> const & o
 		res.at(i) *= other.body_.at(i);
 
 	return res;
+}
+
+template<typename T>
+inline long double Matrix3D<T>::GetSum() const
+{
+	long double sum{ 0.0 };
+
+#pragma omp parallel for
+	for (int i = 0; i < GetTotalSize(); ++i)
+	{
+		#pragma omp atomic
+		sum += static_cast<long double>(body_.at(i));
+	}
+
+	return sum;
+
+
+}
+
+template<typename T>
+inline std::vector<T> Matrix3D<T>::GetRow(unsigned const y) const
+{
+	// Check that row ID less than number of rows
+	assert(y < rows_);
+	std::vector<T> result(depth_ * colls_, T());
+
+	for (int z = 0; z < depth_; ++z)
+	{
+		#pragma omp parallel for
+		for (int x = 0; x < colls_; ++x)
+			result.at(z * colls_ + x) = this->operator()(z, y, x);
+	}
+	return result;
+}
+
+template<typename T>
+inline void Matrix3D<T>::SetRow(unsigned const y, std::vector<T> const & row)
+{
+	// Check that std::vector<T> row size is equal to columns number of matrix
+	assert(colls_ * depth_ == row.size());
+
+	for (int z = 0; z < depth_; ++z)
+	{
+		#pragma omp parallel
+		for (int x = 0; x < colls_; ++x)
+			this->operator()(z,y,x) = row.at(z * colls_ + x);
+	}
+}
+
+template<typename T>
+inline std::vector<T> Matrix3D<T>::GetColumn(unsigned const x) const
+{
+	// Check that coll ID less than number of column
+	assert(x < colls_);
+	std::vector<T> result(depth_ * (rows_ - 2), T());
+
+	int curId = 0;
+	for (int z = 0; z < depth_; ++z)
+	{
+		#pragma omp parallel for
+		for (int y = 1; y < rows_ - 1; ++y)
+			result.at(curId++) = this->operator()(z, y, x);
+			//result.at(y - 1) = body_.at(x + y * colls_);
+	}
+	return result;
+}
+
+template<typename T>
+inline void Matrix3D<T>::SetColumn(unsigned const x, std::vector<T> const & coll)
+{
+	// Check that std::vector<T> coll size is equal to rows number of matrix, bsides 2 (left and right boundary index)
+	assert(depth_ * (rows_ - 2) == coll.size());
+
+	int curId = 0;
+	for (int z = 0; z < depth_; ++z)
+	{
+		#pragma omp parallel for
+		for (int y = 1; y < rows_ - 1; ++y)
+			this->operator()(z, y, x) = coll.at(curId++);
+	}
 }
 
 template<typename T>

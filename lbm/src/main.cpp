@@ -56,20 +56,38 @@ int main()
 
 	// 3D matrix testing
 
-	int x{ 2 };
-	int y{ 2 };
-	int z{ 2 };
+	int x{ 3 };
+	int y{ 6 };
+	int z{ 3 };
 
-	Matrix3D<int> first(x, y, z);
+	Matrix3D<int> first(z, y, x);
 	Matrix3D<int> second(x, y, z);
 
 	std::cout << first;
-	std::cout << second;
-	
-	first = 10 + 10* second / 10 - 10;
+	std::vector<int> row = first.GetRow(2);
+	std::vector<int> column = first.GetColumn(2);
 
+	for (auto & i : column)
+	{
+		std::cout << i << " ";
+		i += 100;
+	}
+	std::cout << std::endl;
+
+	first.SetColumn(1, column);
 
 	std::cout << first;
+
+	/*for (auto i : row)
+		std::cout << i << " ";
+	std::cout << std::endl;
+
+	for (auto & i : row)
+		i += 100;
+
+	first.SetRow(3, row);
+
+	std::cout << first;*/
 
 	/*
 		- Продумать структуру для BC!
