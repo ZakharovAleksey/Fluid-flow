@@ -115,6 +115,12 @@ public:
 	
 	void Resize(int new_rows_numb, int new_colls_numb, int new_depth_numb = 0) override;
 
+	// Чисто для тестов - потом убратьЫ
+	void Fill()
+	{
+		for (int i = 0; i < body_.size(); ++i)
+			body_.at(i) = rand() % 100;
+	}
 
 
 

@@ -61,7 +61,6 @@ public:
 
 #pragma endregion
 
-
 #pragma region Streaming operators
 
 	template<typename T1>
@@ -82,16 +81,16 @@ public:
 	void Swap(DistributionFunction3D<T> & other);
 
 
-	std::vector<T> getTopBoundaryValues(int const q) const  override { return std::vector<T>(0,T()); }
-	std::vector<T> getBottomBoundaryValue(int const q) const override { return std::vector<T>(0,T()); }
-	std::vector<T> getLeftBoundaryValue(int const q) const override { return std::vector<T>(0,T()); }
-	std::vector<T> getRightBoundaryValue(int const q) const override { return std::vector<T>(0,T()); }
+	std::vector<T> GetTopBoundaryValues(int const q) const  override;
+	std::vector<T> GetBottomBoundaryValue(int const q) const override;
+	std::vector<T> GetLeftBoundaryValue(int const q) const override;
+	std::vector<T> GetRightBoundaryValue(int const q) const override;
 
 	
-	void setTopBoundaryValue(int const q, std::vector<T> const & row) override {}
-	void setBottomBoundaryValue(int const q, std::vector<T> const & row) override {}
-	void setLeftBoundaryValue(int const q, std::vector<T> const & coll) override  {}
-	void setRightBoundaryValue(int const q, std::vector<T> const & coll) override {}
+	void SetTopBoundaryValue(int const q, std::vector<T> const & row) override;
+	void SetBottomBoundaryValue(int const q, std::vector<T> const & row) override;
+	void SetLeftBoundaryValue(int const q, std::vector<T> const & coll) override;
+	void SetRightBoundaryValue(int const q, std::vector<T> const & coll) override;
 
 
 private:

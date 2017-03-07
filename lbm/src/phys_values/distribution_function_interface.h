@@ -10,22 +10,22 @@ public:
 	virtual ~iDistributionFunction() {}
 
 
-	virtual std::vector<T> getTopBoundaryValues(int const q) const = 0;
+	virtual std::vector<T> GetTopBoundaryValues(int const q) const = 0;
 	//! Get probability distribution function values on BOTTOM boundary
-	virtual  std::vector<T> getBottomBoundaryValue(int const q) const = 0;
+	virtual  std::vector<T> GetBottomBoundaryValue(int const q) const = 0;
 	//! Get probability distribution function values on LEFT boundary
-	virtual std::vector<T> getLeftBoundaryValue(int const q) const = 0;
+	virtual std::vector<T> GetLeftBoundaryValue(int const q) const = 0;
 	//! Get probability distribution function values on RIGHT boundary
-	virtual std::vector<T> getRightBoundaryValue(int const q) const = 0;
+	virtual std::vector<T> GetRightBoundaryValue(int const q) const = 0;
 
 	//! Set probability distribution function values on TOP boundary equal to parameter array
-	virtual void setTopBoundaryValue(int const q, std::vector<T> const & row) = 0;
+	virtual void SetTopBoundaryValue(int const q, std::vector<T> const & row) = 0;
 	//! Set probability distribution function values on BOTTOM boundary equal to parameter array
-	virtual void setBottomBoundaryValue(int const q, std::vector<T> const & row) = 0;
+	virtual void SetBottomBoundaryValue(int const q, std::vector<T> const & row) = 0;
 	//! Set probability distribution function values on LEFT boundary equal to parameter array
-	virtual void setLeftBoundaryValue(int const q, std::vector<T> const & coll) = 0;
+	virtual void SetLeftBoundaryValue(int const q, std::vector<T> const & coll) = 0;
 	//! Set probability distribution function values on RIGHT boundary equal to parameter array
-	virtual void setRightBoundaryValue(int const q, std::vector<T> const & coll) = 0;
+	virtual void SetRightBoundaryValue(int const q, std::vector<T> const & coll) = 0;
 
 
 #pragma region Methods

@@ -125,28 +125,24 @@ public:
 
 #pragma region Proprerties (Get/Set)
 
-	//! Get q-component of probability distribution function
+	// Gets 'q'-component of probability distribution function
 	Matrix2D<T> & operator[](unsigned q);
 	
-	//! Get pair in witch: first = rows_, second = colls_
+	// Get pair in witch: first = rows_, second = colls_
 	std::pair<unsigned int, unsigned int> size() const;
 
-	//! Get probability distribution function values on TOP boundary
+	
+	// ядекюрэ вепег OVERRIDE вепег хмрептеияю
+
 	std::vector<T> getTopBoundaryValues(int const q) const;
-	//! Get probability distribution function values on BOTTOM boundary
 	std::vector<T> getBottomBoundaryValue(int const q) const;
-	//! Get probability distribution function values on LEFT boundary
 	std::vector<T> getLeftBoundaryValue(int const q) const;
-	//! Get probability distribution function values on RIGHT boundary
 	std::vector<T> getRightBoundaryValue(int const q) const;
 
-	//! Set probability distribution function values on TOP boundary equal to parameter array
+	
 	void setTopBoundaryValue(int const q, std::vector<T> const & row);
-	//! Set probability distribution function values on BOTTOM boundary equal to parameter array
 	void setBottomBoundaryValue(int const q, std::vector<T> const & row);
-	//! Set probability distribution function values on LEFT boundary equal to parameter array
 	void setLeftBoundaryValue(int const q, std::vector<T> const & coll);
-	//! Set probability distribution function values on RIGHT boundary equal to parameter array
 	void setRightBoundaryValue(int const q, std::vector<T> const & coll);
 
 #pragma endregion

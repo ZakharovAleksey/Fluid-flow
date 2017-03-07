@@ -59,13 +59,14 @@ int main()
 
 	// 3D matrix testing
 
-	int x{ 3 };
-	int y{ 6 };
-	int z{ 3 };
+	int x{ 4 };
+	int y{ 4 };
+	int z{ 2 };
 
 	DistributionFunction3D<int> fun(z, y, x);
-	fun = 50 - 2 * fun / 2 - 100 ;
-	std::cout << -fun;
+	std::cout << fun;
+
+
 
 	/*MacroscopicParam3D<int> first(z, y, x);
 	MacroscopicParam3D<int> second(x, y, z);

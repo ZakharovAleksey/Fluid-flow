@@ -62,7 +62,7 @@ inline void Matrix3D<T>::Resize(int new_rows_numb, int new_colls_numb, int new_d
 
 	// If we swap on matrix size (y,0) or (0, x) we need onlly to allocate memory
 	if (depth_ != 0 && rows_ != 0 && colls_ != 0)
-		body_.resize(depth_ * rows_ * colls_, 100/* T()*/);
+		body_.resize(depth_ * rows_ * colls_, T());
 }
 
 template<typename T>
