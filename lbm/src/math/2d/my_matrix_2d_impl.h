@@ -196,10 +196,10 @@ inline void Matrix2D<T>::FillRowWith(int const row_id, T const value)
 }
 
 template<typename T>
-inline void Matrix2D<T>::Resize(unsigned rows, unsigned colls)
+inline void Matrix2D<T>::Resize(int new_rows_numb, int new_colls_numb, int new_depth_numb = 0)
 {
-	rows_ = rows;
-	colls_ = colls;
+	rows_ = new_rows_numb;
+	colls_ = new_colls_numb;
 
 	// Трюк с освобождением памяти под вектор | body_.clear() Не работает - проверка по body.capasity()
 	std::vector<T>().swap(body_);

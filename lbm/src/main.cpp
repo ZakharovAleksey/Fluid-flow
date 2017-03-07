@@ -14,6 +14,8 @@
 
 
 #include"math\3d\my_matrix_3d.h"
+#include"phys_values\3d\macroscopic_param_3d.h"
+#include"phys_values\3d\distribution_func_3d.h"
 
 int main()
 {
@@ -61,8 +63,12 @@ int main()
 	int y{ 6 };
 	int z{ 3 };
 
-	Matrix3D<int> first(z, y, x);
-	Matrix3D<int> second(x, y, z);
+	DistributionFunction3D<int> fun(z, y, x);
+	fun = 50 - 2 * fun / 2 - 100 ;
+	std::cout << -fun;
+
+	/*MacroscopicParam3D<int> first(z, y, x);
+	MacroscopicParam3D<int> second(x, y, z);
 
 	std::cout << first;
 	std::vector<int> row = first.GetRow(2);
@@ -77,7 +83,7 @@ int main()
 
 	first.SetColumn(1, column);
 
-	std::cout << first;
+	std::cout << first;*/
 
 
 

@@ -5,9 +5,8 @@
 #include"../../math/2d/my_matrix_2d.h"
 #include"../../phys_values/2d/macroscopic_param_2d.h"
 
-/// <summary>
-/// Possible number of directions in which pseudo-particles could move.
-/// </summary>
+
+// Possible number of directions in which pseudo-particles could move.
 unsigned const kQ{ 9 };
 
 /// <summary>
@@ -178,7 +177,6 @@ private:
 
 	// Height of modeling area across Y axis direction.
 	unsigned rows_;
-	
 	// Lenght of modeling area across X axis direction.
 	unsigned colls_;
 

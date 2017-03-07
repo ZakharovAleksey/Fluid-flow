@@ -24,6 +24,7 @@ set(
 	"phys_values/3d/distribution_func_3d_impl.h"
 	"phys_values/3d/macroscopic_param_3d.h"
 	"phys_values/3d/macroscopic_param_3d_impl.h"
+	"phys_values/distribution_function_interface.h"
 	"solver/solver.h"
 	"solver/srt.h"
 	"solver/bc/bc.h"

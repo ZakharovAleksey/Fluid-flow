@@ -19,7 +19,7 @@ void CompareSize(const Matrix3D<T> & first, const Matrix3D<T> & second)
 
 
 template<typename T>
-Matrix3D<T>::Matrix3D() : rows_(0), colls_(0), depth_(0) {}
+Matrix3D<T>::Matrix3D() : depth_(0), Matrix2D<T>() {}
 
 template<typename T>
 inline Matrix3D<T>::Matrix3D(int depth, int rows, int colls) : depth_(depth), Matrix2D<T>(rows, colls)
@@ -48,6 +48,21 @@ inline Matrix3D<T> const Matrix3D<T>::ScalarMultiplication(Matrix3D<T> const & o
 		res.at(i) *= other.body_.at(i);
 
 	return res;
+}
+
+template<typename T>
+inline void Matrix3D<T>::Resize(int new_rows_numb, int new_colls_numb, int new_depth_numb = 0)
+{
+	rows_ = new_rows_numb;
+	colls_ = new_colls_numb;
+	depth_ = new_depth_numb;
+
+	// Трюк с освобождением памяти под вектор | body_.clear() Не работает - проверка по body.capasity()
+	std::vector<T>().swap(body_);
+
+	// If we swap on matrix size (y,0) or (0, x) we need onlly to allocate memory
+	if (depth_ != 0 && rows_ != 0 && colls_ != 0)
+		body_.resize(depth_ * rows_ * colls_, 100/* T()*/);
 }
 
 template<typename T>

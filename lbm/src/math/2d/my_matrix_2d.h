@@ -405,13 +405,8 @@ public:
 	/// <param name="value"> The value that is filled elements of the the matrix. </param>
 	void FillRowWith(int const row_id, T const value);
 
-	/// <summary>
-	/// Removes current version of the matrix. After that allocates an matrix with rows 
-	/// number is equal to "rows" and column number is equal to "cells", which is filled with zeros.
-	/// </summary>
-	/// <param name="rows"> Number of rows in new matrix. </param>
-	/// <param name="colls"> Number of columns in new matrix. </param>
-	void Resize(unsigned rows, unsigned colls);
+
+	void Resize(int new_rows_numb, int new_colls_numb, int new_depth_numb = 0) override;
 
 #pragma region Ostream Methods
 
