@@ -1,6 +1,6 @@
 #pragma once
 
-#include"macroscopic_param.h"
+#include"macroscopic_param_2d.h"
 
 template<typename T>
 inline MacroscopicParam<T>::MacroscopicParam() : Matrix2D() {}

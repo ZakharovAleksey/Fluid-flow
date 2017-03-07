@@ -2,12 +2,11 @@
 
 #include<array>
 
-#include"../math/2d/my_matrix_2d.h"
-#include"..\phys_values\macroscopic_param.h"
+#include"../../math/2d/my_matrix_2d.h"
+#include"../../phys_values/2d/macroscopic_param_2d.h"
 
-/// <summary>
-/// Possible number of directions in which pseudo-particles could move.
-/// </summary>
+
+// Possible number of directions in which pseudo-particles could move.
 unsigned const kQ{ 9 };
 
 /// <summary>
@@ -126,28 +125,24 @@ public:
 
 #pragma region Proprerties (Get/Set)
 
-	//! Get q-component of probability distribution function
+	// Gets 'q'-component of probability distribution function
 	Matrix2D<T> & operator[](unsigned q);
 	
-	//! Get pair in witch: first = rows_, second = colls_
+	// Get pair in witch: first = rows_, second = colls_
 	std::pair<unsigned int, unsigned int> size() const;
 
-	//! Get probability distribution function values on TOP boundary
+	
+	// ядекюрэ вепег OVERRIDE вепег хмрептеияю
+
 	std::vector<T> getTopBoundaryValues(int const q) const;
-	//! Get probability distribution function values on BOTTOM boundary
 	std::vector<T> getBottomBoundaryValue(int const q) const;
-	//! Get probability distribution function values on LEFT boundary
 	std::vector<T> getLeftBoundaryValue(int const q) const;
-	//! Get probability distribution function values on RIGHT boundary
 	std::vector<T> getRightBoundaryValue(int const q) const;
 
-	//! Set probability distribution function values on TOP boundary equal to parameter array
+	
 	void setTopBoundaryValue(int const q, std::vector<T> const & row);
-	//! Set probability distribution function values on BOTTOM boundary equal to parameter array
 	void setBottomBoundaryValue(int const q, std::vector<T> const & row);
-	//! Set probability distribution function values on LEFT boundary equal to parameter array
 	void setLeftBoundaryValue(int const q, std::vector<T> const & coll);
-	//! Set probability distribution function values on RIGHT boundary equal to parameter array
 	void setRightBoundaryValue(int const q, std::vector<T> const & coll);
 
 #pragma endregion
@@ -176,26 +171,15 @@ public:
 
 private:
 
-#pragma region Fields
-
-	/// <summary>
-	/// Height of modeling area across Y axis direction.
-	/// </summary>
+	// Height of modeling area across Y axis direction.
 	unsigned rows_;
-	
-	/// <summary>
-	/// Lenght of modeling area across X axis direction.
-	/// </summary>
+	// Lenght of modeling area across X axis direction.
 	unsigned colls_;
 
-	/// <summary>
-	/// Array which store all components of probability distribution function.
-	/// </summary>
+	// Array which store all components of probability distribution function.
 	std::array<Matrix2D<T>, kQ> dfunc_body_;
-
-#pragma endregion
 
 };
 
 
-#include"distribution_func_impl.h"
+#include"distribution_func_2d_impl.h"
