@@ -78,6 +78,8 @@ int main()
 
 	std::cout << first;
 
+
+
 	/*for (auto i : row)
 		std::cout << i << " ";
 	std::cout << std::endl;
