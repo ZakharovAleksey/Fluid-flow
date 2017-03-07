@@ -94,22 +94,23 @@ public:
 	// Returns X-dimension size of the current 3d-matrix
 	int const GetCollsNumber() const { return colls_; }
 
-#pragma endregion
-
-	Matrix3D<T> const ScalarMultiplication(Matrix3D<T> const & other);
-
-
+#pragma region Override interface methods
 
 	long double GetSum() const override;
 
 	std::vector<T> GetRow(unsigned const y) const override;
-
-	void SetRow(unsigned const y, std::vector<T> const & row) override;
-
 	std::vector<T> GetColumn(unsigned const x) const override;
 
-	// Set elements of "x" column in the current matrix equal to values from std::vector "coll"
+	void SetRow(unsigned const y, std::vector<T> const & row) override;
 	void SetColumn(unsigned const x, std::vector<T> const & coll) override;
+
+#pragma endregion
+
+
+#pragma endregion
+
+	Matrix3D<T> const ScalarMultiplication(Matrix3D<T> const & other);
+
 
 
 
