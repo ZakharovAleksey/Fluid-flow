@@ -112,7 +112,19 @@ public:
 	Matrix3D<T> const ScalarMultiplication(Matrix3D<T> const & other);
 
 
+<<<<<<< HEAD
 
+=======
+	
+	void Resize(int new_rows_numb, int new_colls_numb, int new_depth_numb = 0) override;
+
+	// Чисто для тестов - потом убратьЫ
+	void Fill()
+	{
+		for (int i = 0; i < body_.size(); ++i)
+			body_.at(i) = rand() % 100;
+	}
+>>>>>>> refs/remotes/origin/3d
 
 
 
