@@ -1,7 +1,6 @@
 #pragma once
 
-#include"..\phys_values\distribution_func.h"
-
+#include"../phys_values/2d/distribution_func_2d.h"
 
 //! Weigth for probability distribution function calculation
 const double kW[kQ]{ 4.0 / 9.0, 1.0 / 9.0, 1.0 / 9.0, 1.0 / 9.0, 1.0 / 9.0,

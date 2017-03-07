@@ -1,6 +1,6 @@
 #pragma once
 
-#include"../math/2d/my_matrix_2d.h"
+#include"../../math/2d/my_matrix_2d.h"
 
 /*!
 	Macroscopic physical values implementation class.
@@ -19,4 +19,4 @@ private:
 
 };
 
-#include"macroscopic_param_impl.h"
+#include"macroscopic_param_2d_impl.h"

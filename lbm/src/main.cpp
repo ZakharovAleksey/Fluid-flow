@@ -4,8 +4,9 @@
 #include<omp.h>
 
 #include"math\2d\my_matrix_2d.h"
-#include"phys_values\macroscopic_param.h"
-#include"phys_values\distribution_func.h"
+#include"phys_values\2d\macroscopic_param_2d.h"
+#include"phys_values\2d\distribution_func_2d.h"
+
 #include"modeling_area\medium.h"
 #include"modeling_area\fluid.h"
 #include"solver\srt.h"
@@ -51,7 +52,7 @@ int main()
 	f.Poiseuille_IC(0.01);
 
 	SRTsolver solver(1.0, m, f);
-	solver.solve(10);*/
+	solver.solve(100);*/
 
 
 	// 3D matrix testing

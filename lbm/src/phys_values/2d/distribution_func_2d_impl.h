@@ -1,6 +1,6 @@
 #pragma once
 
-#include"distribution_func.h"
+#include"distribution_func_2d.h"
 
 template<typename T>
 inline DistributionFunction<T>::DistributionFunction() : rows_(0), colls_(0) 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include"..\phys_values\macroscopic_param.h"
-#include"..\phys_values\distribution_func.h"
+#include"../phys_values/2d/macroscopic_param_2d.h"
+#include"../phys_values/2d/distribution_func_2d.h"
 #include"medium.h"
 
 class SRTsolver;
@@ -19,28 +19,18 @@ class Fluid
 
 public:
 
-#pragma region Constructor
 
 	Fluid(unsigned rows, unsigned colls);
 	~Fluid();
 
-#pragma endregion
-
-#pragma region Properties(Get/Set)
 
 	std::pair<unsigned, unsigned> size() const;
 
-#pragma endregion
-
-#pragma region Methods
-
 	void Poiseuille_IC(double const dvx);
 
-#pragma endregion
+
 
 private:
-
-#pragma region Fields
 
 	//! Rows count for fluid modeling area
 	unsigned rows_;
@@ -60,7 +50,5 @@ public:
 	DistributionFunction<double> f_;
 	//! Equilibrium probability distribution function field
 	DistributionFunction<double> feq_;
-
-#pragma endregion
 
 };

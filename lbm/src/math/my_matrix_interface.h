@@ -24,7 +24,4 @@ public:
 
 	// Set elements of "x" column in the current matrix equal to values from std::vector "coll"
 	virtual void SetColumn(unsigned const x, std::vector<T> const & coll) = 0;
-
-private:
-
 };
