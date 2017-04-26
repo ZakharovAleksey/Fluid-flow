@@ -52,8 +52,8 @@ int main()
 	int z{ 3 };
 
 
-	Fluid3D fl(z, y, x);
-	fl.Poiseuille_IC(0.1);
+	Medium3D m(z,y,x);
+	std::cout << m;
 
 
 	/*

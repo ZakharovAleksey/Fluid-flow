@@ -26,8 +26,8 @@ inline Matrix3D<T>::Matrix3D(int depth, int rows, int colls) : depth_(depth), Ma
 {
 	body_.resize(GetTotalSize(), T());
 
-	for (int i = 0; i < GetTotalSize(); ++i)
-		body_.at(i) = rand() % 10;
+//	for (int i = 0; i < GetTotalSize(); ++i)
+//		body_.at(i) = rand() % 10;
 }
 
 

@@ -1,4 +1,7 @@
 #include"medium.h"
+
+
+
 /*!
 	Конструктор класса medium:
 
@@ -17,24 +20,27 @@
 
 */
 
+#pragma region 2d
+
+
 Medium::Medium() : rows_(0), colls_(0), medium_() {}
 
 
-Medium::Medium(unsigned rows, unsigned colls):
-	rows_(rows), colls_(colls) 
-{ 
+Medium::Medium(unsigned rows, unsigned colls) :
+	rows_(rows), colls_(colls)
+{
 
 	assert(rows_ > 2 && colls_ > 2);
 
 	medium_.Resize(rows_, colls_);
 
-	for (int x = 0; x < colls_; ++x) 
+	for (int x = 0; x < colls_; ++x)
 	{
 		medium_(0, x) = NodeType::UPPER_BOUNDARY;
 		medium_(rows_ - 1, x) = NodeType::BOTTOM_BOUNDARY;
 	}
 
-	for (int y = 1; y < rows_ - 1; ++y) 
+	for (int y = 1; y < rows_ - 1; ++y)
 	{
 		medium_(y, 0) = NodeType::LEFT_BOUNDARY;
 		medium_(y, colls_ - 1) = NodeType::RIGHT_BOUNDARY;
@@ -61,19 +67,18 @@ void Medium::resize(unsigned rows, unsigned colls)
 
 	medium_.Resize(rows_, colls_);
 
-	for (int x = 0; x < colls_; ++x) 
+	for (int x = 0; x < colls_; ++x)
 	{
 		medium_(0, x) = NodeType::UPPER_BOUNDARY;
 		medium_(rows_ - 1, x) = NodeType::BOTTOM_BOUNDARY;
 	}
 
-	for (int y = 1; y < colls_ - 2; ++y) 
+	for (int y = 1; y < colls_ - 2; ++y)
 	{
 		medium_(y, 0) = NodeType::LEFT_BOUNDARY;
 		medium_(y, colls_ - 1) = NodeType::RIGHT_BOUNDARY;
 	}
 }
-
 
 std::pair<unsigned, unsigned> Medium::size() const
 {
@@ -102,3 +107,97 @@ std::ostream & operator<<(std::ostream & os, Medium const & medium) {
 
 	return os;
 }
+
+#pragma endregion
+
+#pragma region 3d
+
+
+
+Medium3D::Medium3D() : depth_(0), rows_(0), colls_(0), medium_(nullptr) { }
+
+Medium3D::Medium3D(int depth, int rows, int colls) : depth_(depth), rows_(rows), colls_(colls)
+{
+	medium_ = std::make_unique<Matrix3D<NodeType>>(depth_, rows_, colls_);
+	FillMedium();
+}
+
+bool Medium3D::IsFluid(int z, int y, int x) const
+{
+	return (medium_->operator()(z, y, x) == NodeType::FLUID) ? true : false;
+}
+
+void Medium3D::Resize(int depth, int rows, int colls)
+{
+	depth_ = depth;
+	rows_ = rows;
+	colls_ = colls;
+
+	medium_.release();
+	medium_ = std::make_unique<Matrix3D<NodeType>>(depth_, rows_, colls_);
+
+	FillMedium();
+}
+
+int Medium3D::GetDepthNumber() const
+{
+	return depth_;
+}
+
+int Medium3D::GetRowsNumber() const
+{
+	return rows_;
+}
+
+int Medium3D::GetColumnsNumber() const
+{
+	return colls_;
+}
+
+void Medium3D::FillMedium()
+{
+	for (int z = 0; z < depth_; ++z)
+	{
+		for (int x = 0; x < colls_; ++x)
+		{
+			medium_->operator()(z, 0, x) = NodeType::UPPER_BOUNDARY;
+			medium_->operator()(z, rows_ - 1, x) = NodeType::BOTTOM_BOUNDARY;
+		}
+
+		for (int y = 1; y < rows_ - 1; ++y)
+		{
+			medium_->operator()(z, y, 0) = NodeType::LEFT_BOUNDARY;
+			medium_->operator()(z, y, colls_ - 1) = NodeType::RIGHT_BOUNDARY;
+		}
+	}
+}
+
+std::ostream & operator<<(std::ostream & os, const Medium3D & m)
+{
+	for (int z = 0; z < m.depth_; ++z)
+	{
+		std::cout << "depth : " << z << " ----------- \n";
+
+		for (int y = 0; y < m.rows_; ++y) {
+			for (int x = 0; x < m.colls_; ++x) {
+
+
+				if (m.medium_->operator()(z, y, x) == NodeType::FLUID)
+					os << std::setw(3) << 0;
+				if (m.medium_->operator()(z, y, x) == NodeType::UPPER_BOUNDARY)
+					os << std::setw(3) << 1;
+				if (m.medium_->operator()(z, y, x) == NodeType::BOTTOM_BOUNDARY)
+					os << std::setw(3) << 2;
+				if (m.medium_->operator()(z, y, x) == NodeType::LEFT_BOUNDARY)
+					os << std::setw(3) << 3;
+				if (m.medium_->operator()(z, y, x) == NodeType::RIGHT_BOUNDARY)
+					os << std::setw(3) << 4;
+			}
+			os << std::endl;
+		}
+	}
+
+	return os;
+}
+
+#pragma endregion
