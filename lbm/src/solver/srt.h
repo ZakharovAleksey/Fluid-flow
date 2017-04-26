@@ -59,16 +59,20 @@ public:
 	SRT3DSolver(double const tau, Medium3D & medium, Fluid3D & fluid);
 	virtual ~SRT3DSolver() {}
 
-	//! Equilibrium probability distribution function calculation in SRT implementation
 	virtual void feqCalculate();
 
 	//! Streaming of particles to neighbour nodes in SRT implementation
-	virtual void streaming() {}
+	virtual void streaming();
 	//! Collision of particles in nodes in SRT implementation
 	virtual void collision() {}
 
-	//! Solver for modeling procedure in SRT implementation
-	virtual void solve(int iteration_number) {}
+	virtual void solve(int iteration_number)
+	{
+		fluid_->Poiseuille_IC(0.01);
+
+		feqCalculate();
+		std::cout << *fluid_->feq_;
+	}
 
 	//! Recalculation procedure (recalculate density, velocity) in SRT implementation
 	virtual void recalculate() {}

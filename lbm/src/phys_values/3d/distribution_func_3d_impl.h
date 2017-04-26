@@ -11,8 +11,6 @@ DistributionFunction3D<T>::DistributionFunction3D(int depth, int rows, int colls
 	for (int q = 0; q < kQ3d; ++q)
 	{
 		body_.at(q).Resize(rows_, colls_, depth_);
-		// чисто для тестов убрать!!!!
-		body_.at(q).Fill();
 	}
 }
 

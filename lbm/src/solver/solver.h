@@ -43,9 +43,8 @@ Interface for different simulation aproaches:
 #include<vector>
 
 // This is the vector of weights : initilize in feqCalculation() because it is too big
-std::vector<double> w;
 
-void FillWeightsFor3D(std::vector<double> & w)
+static void FillWeightsFor3D(std::vector<double> & w)
 {
 	w.resize(kQ3d, 1.0 / 36.0);
 

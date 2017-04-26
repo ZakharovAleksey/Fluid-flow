@@ -19,10 +19,10 @@ void CompareSize(const Matrix3D<T> & first, const Matrix3D<T> & second)
 
 
 template<typename T>
-Matrix3D<T>::Matrix3D() : depth_(0), Matrix2D<T>() {}
+Matrix3D<T>::Matrix3D() : depth_(0), rows_(0), colls_(0) {}
 
 template<typename T>
-inline Matrix3D<T>::Matrix3D(int depth, int rows, int colls) : depth_(depth), Matrix2D<T>(rows, colls)
+inline Matrix3D<T>::Matrix3D(int depth, int rows, int colls) : depth_(depth), rows_(rows), colls_(colls)
 {
 	body_.resize(GetTotalSize(), T());
 
@@ -45,7 +45,7 @@ inline Matrix3D<T> const Matrix3D<T>::ScalarMultiplication(Matrix3D<T> const & o
 	Matrix3D<T> res(*this);
 #pragma omp parallel for
 	for (int i = 0; i < GetTotalSize(); ++i)
-		res.at(i) *= other.body_.at(i);
+		res.body_.at(i) *= other.body_.at(i);
 
 	return res;
 }

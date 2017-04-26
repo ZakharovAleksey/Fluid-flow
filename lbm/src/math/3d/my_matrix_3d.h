@@ -7,7 +7,7 @@
 #include"../2d/my_matrix_2d.h"
 
 template<typename T>
-class Matrix3D : public Matrix2D<T>, public iMatrix<T>
+class Matrix3D : public iMatrix<T>
 {
 public:
 
@@ -115,13 +115,21 @@ public:
 	
 	void Resize(int new_rows_numb, int new_colls_numb, int new_depth_numb = 0) override;
 
-	// Чисто для тестов - потом убратьЫ
-	void Fill()
+	//  !!! Чисто для тестов - потом убратьЫ !!!
+	void FillWithoutBoundary(T value)
 	{
-		for (int i = 0; i < body_.size(); ++i)
-			body_.at(i) = rand() % 100;
+		for (int z = 0; z < depth_; ++z)
+			for (int y = 1; y < rows_ - 1; ++y)
+				for (int x = 1; x < colls_ - 1; ++x)
+					body_.at(z * rows_ * colls_ + y * colls_ + x) = value;
+		
 	}
-
+	// !!! 
+	void FillWith(T value)
+	{
+		for (auto & i : body_)
+			i = value;
+	}
 
 
 private:
@@ -132,9 +140,13 @@ private:
 	int const GetTotalSize() const { return depth_ * rows_ * colls_; }
 
 private:
-
 	// Depth of the matrix (Z-axis size  value)
 	int depth_;
+	int rows_;
+	int colls_;
+
+	std::vector<T> body_;
+
 };
 
 

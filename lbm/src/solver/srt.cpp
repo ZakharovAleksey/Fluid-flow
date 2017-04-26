@@ -117,21 +117,52 @@ void SRT3DSolver::feqCalculate()
 	int rows = medium_->GetRowsNumber();
 	int colls = medium_->GetColumnsNumber();
 	
+	std::vector<double> w;
+
 	FillWeightsFor3D(w);
 
 	for (int q = 0; q < kQ3d; ++q) 
 	{
+		// Article : Dmitry Biculov (e_{i}, v) form eq. (3) 
 		Matrix3D<double> v(depth, rows, colls);
+		v = *fluid_->vx_ * (double) ex[q] + *fluid_->vy_ * (double) ey[q] + *fluid_->vz_ * (double) ez[q];
+		// Article : Dmitry Biculov (e_{i}, v)^{2} form eq. (3) 
+		Matrix3D<double> v_sq(depth, rows, colls);
+		v_sq = v.ScalarMultiplication(v);
+		// Article : Dmitry Biculov (v, v)^{2} form eq. (3) 
+		// !!! Copy becauce constant values : deal with it !!!
+		Matrix3D<double> v_x = *fluid_->vx_;
+		Matrix3D<double> v_y = *fluid_->vy_;
+		Matrix3D<double> v_z = *fluid_->vz_;
 
-		v = (*fluid_->vx_) * ex[q]; // +*fluid_->vy_ * ey[q] + *fluid_->vz_ * ez[q];
+		Matrix3D<double> v_2(depth, rows, colls);
+		v_2 = v_x.ScalarMultiplication(v_x) + v_y.ScalarMultiplication(v_y) + v_z.ScalarMultiplication(v_z);
 
 
-		fluid_->feq_[q] = kW[q] * fluid_->rho_.ScalarMultiplication(
-			(1.0 + 3.0 * v + 4.5 * v.ScalarMultiplication(v) - 1.5 *
-			(fluid_->vx_.ScalarMultiplication(fluid_->vx_) + fluid_->vy_.ScalarMultiplication(fluid_->vy_)))
-		);
+		fluid_->feq_->operator[](q) = w[q] * fluid_->rho_->ScalarMultiplication(1.0 + 3.0 * v + 4.5 * v_sq - 1.5 * v_2);
 	}
 
+}
+
+void SRT3DSolver::streaming()
+{
+	int depth = medium_->GetDepthNumber();
+	int rows = medium_->GetRowsNumber();
+	int colls = medium_->GetColumnsNumber();
+
+	for (int q = 0; q < kQ; ++q) {
+		Matrix3D<double> temp = fluid_->f_->operator[](q);
+		fluid_->f_[q]->FillWith(0.0);
+
+		for(int z = 0; z < depth; ++z)
+		for (unsigned y = 0; y < rows; ++y)
+			for (unsigned x = 0; x < colls; ++x)
+				if (medium_->IsFluid(z, y, x))
+					fluid_->f_->operator[](q)(z, y - kEy[q], x + kEx[q]) = temp(z, y, x);
+	}
+
+	// Очищаем значения попавшие на границу, так как они уже сохранены в BCs
+	// !!! Делать в BC !!! fluid_->f_.fillBoundaries(0.0);
 }
 
 

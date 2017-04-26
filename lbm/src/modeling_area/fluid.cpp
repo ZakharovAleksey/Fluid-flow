@@ -36,6 +36,7 @@ std::pair<unsigned, unsigned> Fluid::size() const
 Fluid3D::Fluid3D(int depth, int rows, int colls) : depth_(depth), rows_(rows), colls_(colls)
 {
 	rho_ = std::make_unique<MacroscopicParam3D<double>>(depth_, rows_, colls_);
+	rho_->FillWithoutBoundary(1.0);
 	vx_ = std::make_unique<MacroscopicParam3D<double>>(depth_, rows_, colls_);
 	vy_ = std::make_unique<MacroscopicParam3D<double>>(depth_, rows_, colls_);
 	vz_ = std::make_unique<MacroscopicParam3D<double>>(depth_, rows_, colls_);

@@ -47,14 +47,15 @@ int main()
 
 	// 3D matrix testing
 
-	int x{ 5 };
-	int y{ 4 };
-	int z{ 3 };
+	int x{ 6 };
+	int y{ 5 };
+	int z{ 2 };
 
-
+	Fluid3D f(z, y, x);
 	Medium3D m(z,y,x);
-	std::cout << m;
 
+	SRT3DSolver srt(1.0, m, f);
+	srt.solve(10);
 
 	/*
 		- Продумать структуру для BC!
