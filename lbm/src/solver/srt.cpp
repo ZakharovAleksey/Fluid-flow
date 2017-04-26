@@ -1,8 +1,11 @@
 #include"srt.h"
 
-SRTsolver::SRTsolver(double const tau, Medium & medium, Fluid & fluid) : 
-	tau_(tau), 
-	medium_(&medium), 
+#pragma region 2d
+
+
+SRTsolver::SRTsolver(double const tau, Medium & medium, Fluid & fluid) :
+	tau_(tau),
+	medium_(&medium),
 	fluid_(&fluid)
 {
 	assert(medium_->size().first == fluid_->size().first &&
@@ -19,9 +22,9 @@ void SRTsolver::feqCalculate()
 		v = fluid_->vx_ * kEx[q] + fluid_->vy_ * kEy[q];
 
 		fluid_->feq_[q] = kW[q] * fluid_->rho_.ScalarMultiplication(
-			(1.0 + 3.0 * v + 4.5 * v.ScalarMultiplication(v) - 1.5 * 
+			(1.0 + 3.0 * v + 4.5 * v.ScalarMultiplication(v) - 1.5 *
 			(fluid_->vx_.ScalarMultiplication(fluid_->vx_) + fluid_->vy_.ScalarMultiplication(fluid_->vy_)))
-			);
+		);
 	}
 }
 
@@ -34,7 +37,7 @@ void SRTsolver::streaming()
 		for (unsigned y = 0; y < fluid_->size().first; ++y)
 			for (unsigned x = 0; x < fluid_->size().second; ++x)
 				if (medium_->is_fluid(y, x))
-			 		fluid_->f_[q](y - kEy[q], x + kEx[q]) = temp(y, x);
+					fluid_->f_[q](y - kEy[q], x + kEx[q]) = temp(y, x);
 	}
 
 	// Очищаем значения попавшие на границу, так как они уже сохранены в BCs
@@ -69,10 +72,10 @@ void SRTsolver::solve(int iteration_number)
 
 
 		BC.recordValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
-		
+
 		recalculate();
 		fluid_->vx_.SetColumn(1, vx);
-		
+
 		feqCalculate();
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
@@ -94,3 +97,42 @@ void SRTsolver::recalculate()
 }
 
 
+
+
+#pragma endregion
+
+#pragma region 3d
+
+
+SRT3DSolver::SRT3DSolver(double const tau, Medium3D & medium, Fluid3D & fluid) : tau_(tau), medium_(& medium), fluid_(& fluid)
+{
+	assert(medium_->GetDepthNumber() == fluid_->GetDepthNumber());
+	assert(medium_->GetRowsNumber() == fluid_->GetRowsNumber());
+	assert(medium_->GetColumnsNumber() == fluid_->GetColumnsNumber());
+}
+
+void SRT3DSolver::feqCalculate()
+{
+	int depth = medium_->GetDepthNumber();
+	int rows = medium_->GetRowsNumber();
+	int colls = medium_->GetColumnsNumber();
+	
+	FillWeightsFor3D(w);
+
+	for (int q = 0; q < kQ3d; ++q) 
+	{
+		Matrix3D<double> v(depth, rows, colls);
+
+		v = (*fluid_->vx_) * ex[q]; // +*fluid_->vy_ * ey[q] + *fluid_->vz_ * ez[q];
+
+
+		fluid_->feq_[q] = kW[q] * fluid_->rho_.ScalarMultiplication(
+			(1.0 + 3.0 * v + 4.5 * v.ScalarMultiplication(v) - 1.5 *
+			(fluid_->vx_.ScalarMultiplication(fluid_->vx_) + fluid_->vy_.ScalarMultiplication(fluid_->vy_)))
+		);
+	}
+
+}
+
+
+#pragma endregion

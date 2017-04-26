@@ -8,7 +8,7 @@
 
 #include<array>
 
-const int kQ3d = 2;
+const int kQ3d = 19;
 
 
 
