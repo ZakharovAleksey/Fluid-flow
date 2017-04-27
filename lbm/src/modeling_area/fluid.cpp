@@ -62,9 +62,56 @@ int Fluid3D::GetColumnsNumber() const
 
 void Fluid3D::Poiseuille_IC(double const dvx)
 {
-	for(int z = 0; z < depth_; ++ z)
+	for(int z = 1; z < depth_ - 1; ++ z)
 		for (int y = 1; y < rows_ - 1; ++y)
-			vx_->operator()(z, y, 0) += dvx;
+			vx_->operator()(z, y, 1) += dvx;
+}
+
+void Fluid3D::SetDistributionFuncValue(const int q, double const value)
+{
+	assert(q < kQ3d);
+	f_->operator[](q).FillWith(value);
+}
+
+Matrix2D<double> Fluid3D::GetDistributionFuncLayer(const int z, const int q)
+{
+	Matrix2D<double> res(rows_, colls_);
+
+	for (int y = 0; y < rows_; ++y)
+		for (int x = 0; x < colls_; ++x)
+			res(y, x) = f_->operator[](q)(z, y, x);
+		
+	return res;
+}
+
+void Fluid3D::SetDistributionFuncLayerValue(const int z, const int q, const int value)
+{
+	for (int y = 0; y < rows_; ++y)
+		for (int x = 0; x < colls_; ++x)
+			f_->operator[](q)(z, y, x) = value;
+}
+
+void Fluid3D::CalculateDencity()
+{
+	for(int z = 0; z < depth_; ++z)
+		for(int y = 0; y < rows_; ++y)
+			for (int x = 0; x < colls_; ++x)
+			{
+				rho_->operator()(z, y, x) = 0.0;
+				for (int q = 0; q < kQ3d; ++q)
+					rho_->operator()(z, y, x) += f_->operator[](q)(z, y, x);
+			}
+}
+
+void Fluid3D::CalculateVelocity(const MacroscopicParam3D<double>& rho, const int[] e)
+{
+
+	for (int q = 0; q < kQ; ++q)
+		result += dfunc_body_.at(q) * mas[q];
+
+	// Переписать сразу в return, тк лишнее копирование НО выпадает error
+	result.TimesDivide(density);
+	return result;
 }
 
 

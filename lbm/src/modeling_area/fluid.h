@@ -17,16 +17,11 @@ class Fluid
 
 public:
 
-
 	Fluid(unsigned rows, unsigned colls);
 	~Fluid();
 
-
 	std::pair<unsigned, unsigned> size() const;
-
 	void Poiseuille_IC(double const dvx);
-
-
 
 private:
 
@@ -78,6 +73,19 @@ public:
 	int GetColumnsNumber() const;
 
 	void Poiseuille_IC(double const dvx);
+
+	// Set q-s component of distribution function with choosen value
+	void SetDistributionFuncValue(const int q, double const value);
+
+	// !!! —‰ÂÎ‡Ú¸ Matrix<> - const
+	// Get q-s component of distribution finction on layer depth 'z'
+	Matrix2D<double> GetDistributionFuncLayer(const int z, const int q);
+	// Set q-s component of distribution finction on layer depth 'z' is equal to 'value'
+	void SetDistributionFuncLayerValue(const int z, const int q, const int value);
+
+	// !!!! œ≈–≈œ»—¿“‹ !!!!
+	void CalculateDencity();
+	void CalculateVelocity(const MacroscopicParam3D<double> & rho, const int[] e);
 
 private:
 

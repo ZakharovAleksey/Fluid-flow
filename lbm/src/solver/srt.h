@@ -59,23 +59,13 @@ public:
 	SRT3DSolver(double const tau, Medium3D & medium, Fluid3D & fluid);
 	virtual ~SRT3DSolver() {}
 
-	virtual void feqCalculate();
+	void feqCalculate() override;
+	void streaming() override;
+	void collision() override;
+	void recalculate() override;
 
-	//! Streaming of particles to neighbour nodes in SRT implementation
-	virtual void streaming();
-	//! Collision of particles in nodes in SRT implementation
-	virtual void collision() {}
-
-	virtual void solve(int iteration_number)
-	{
-		fluid_->Poiseuille_IC(0.01);
-
-		feqCalculate();
-		std::cout << *fluid_->feq_;
-	}
-
-	//! Recalculation procedure (recalculate density, velocity) in SRT implementation
-	virtual void recalculate() {}
+	void solve(int iteration_number) override;
+	
 
 private:
 	//! Relaxation parameter

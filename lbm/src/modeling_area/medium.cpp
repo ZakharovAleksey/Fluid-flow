@@ -36,7 +36,7 @@ Medium::Medium(unsigned rows, unsigned colls) :
 
 	for (int x = 0; x < colls_; ++x)
 	{
-		medium_(0, x) = NodeType::UPPER_BOUNDARY;
+		medium_(0, x) = NodeType::TOP_BOUNDARY;
 		medium_(rows_ - 1, x) = NodeType::BOTTOM_BOUNDARY;
 	}
 
@@ -69,7 +69,7 @@ void Medium::resize(unsigned rows, unsigned colls)
 
 	for (int x = 0; x < colls_; ++x)
 	{
-		medium_(0, x) = NodeType::UPPER_BOUNDARY;
+		medium_(0, x) = NodeType::TOP_BOUNDARY;
 		medium_(rows_ - 1, x) = NodeType::BOTTOM_BOUNDARY;
 	}
 
@@ -93,7 +93,7 @@ std::ostream & operator<<(std::ostream & os, Medium const & medium) {
 
 			if (medium.medium_(y, x) == NodeType::FLUID)
 				os << std::setw(3) << 0;
-			else if (medium.medium_(y, x) == NodeType::UPPER_BOUNDARY)
+			else if (medium.medium_(y, x) == NodeType::TOP_BOUNDARY)
 				os << std::setw(3) << 1;
 			else if (medium.medium_(y, x) == NodeType::BOTTOM_BOUNDARY)
 				os << std::setw(3) << 2;
@@ -156,19 +156,30 @@ int Medium3D::GetColumnsNumber() const
 
 void Medium3D::FillMedium()
 {
-	for (int z = 0; z < depth_; ++z)
-	{
+	// TOP and BOTTOM layers of modeling cube (Oxy plane)
+	for (int y = 0; y < rows_; ++y)
 		for (int x = 0; x < colls_; ++x)
 		{
-			medium_->operator()(z, 0, x) = NodeType::UPPER_BOUNDARY;
-			medium_->operator()(z, rows_ - 1, x) = NodeType::BOTTOM_BOUNDARY;
+			medium_->operator()(0, y, x) = NodeType::BOTTOM_BOUNDARY;
+			medium_->operator()(depth_ - 1, y, x) = NodeType::TOP_BOUNDARY;
 		}
 
-		for (int y = 1; y < rows_ - 1; ++y)
+	for (int z = 1; z < depth_ - 1; ++z)
+	{
+		// LEFT and RIGHT layers of modeling cube (Oxz plane)
+		for (int y = 0; y < rows_; ++y)
 		{
-			medium_->operator()(z, y, 0) = NodeType::LEFT_BOUNDARY;
-			medium_->operator()(z, y, colls_ - 1) = NodeType::RIGHT_BOUNDARY;
+			medium_->operator()(z, y, 0) = NodeType::RIGHT_BOUNDARY;
+			medium_->operator()(z, y, colls_ - 1) = NodeType::LEFT_BOUNDARY;
 		}
+
+		// NEAR and FAR layers of modeling cube (Oyz plane)
+		for (int x = 0; x < colls_; ++x)
+		{
+			medium_->operator()(z, 0, x) = NodeType::FAR_BOUNDARY;
+			medium_->operator()(z, rows_ - 1, x) = NodeType::NEAR_BOUNDARY;
+		}
+		
 	}
 }
 
@@ -184,14 +195,18 @@ std::ostream & operator<<(std::ostream & os, const Medium3D & m)
 
 				if (m.medium_->operator()(z, y, x) == NodeType::FLUID)
 					os << std::setw(3) << 0;
-				if (m.medium_->operator()(z, y, x) == NodeType::UPPER_BOUNDARY)
+				else if (m.medium_->operator()(z, y, x) == NodeType::TOP_BOUNDARY)
 					os << std::setw(3) << 1;
-				if (m.medium_->operator()(z, y, x) == NodeType::BOTTOM_BOUNDARY)
+				else if (m.medium_->operator()(z, y, x) == NodeType::BOTTOM_BOUNDARY)
 					os << std::setw(3) << 2;
-				if (m.medium_->operator()(z, y, x) == NodeType::LEFT_BOUNDARY)
+				else if (m.medium_->operator()(z, y, x) == NodeType::LEFT_BOUNDARY)
 					os << std::setw(3) << 3;
-				if (m.medium_->operator()(z, y, x) == NodeType::RIGHT_BOUNDARY)
+				else if (m.medium_->operator()(z, y, x) == NodeType::RIGHT_BOUNDARY)
 					os << std::setw(3) << 4;
+				else if (m.medium_->operator()(z, y, x) == NodeType::NEAR_BOUNDARY)
+					os << std::setw(3) << 5;
+				else if (m.medium_->operator()(z, y, x) == NodeType::FAR_BOUNDARY)
+					os << std::setw(3) << 6;
 			}
 			os << std::endl;
 		}

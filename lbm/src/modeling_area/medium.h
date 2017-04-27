@@ -11,10 +11,13 @@
 enum class NodeType : int 
 {
 	FLUID				= 0,
-	UPPER_BOUNDARY		= 1,
+	TOP_BOUNDARY		= 1,
 	BOTTOM_BOUNDARY		= 2,
 	LEFT_BOUNDARY		= 3,
 	RIGHT_BOUNDARY		= 4,
+	// In case of 3D LBM additional boundaries
+	NEAR_BOUNDARY		= 5,
+	FAR_BOUNDARY		= 6,
 };
 
 #pragma region 2d

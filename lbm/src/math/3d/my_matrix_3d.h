@@ -118,7 +118,7 @@ public:
 	//  !!! Чисто для тестов - потом убратьЫ !!!
 	void FillWithoutBoundary(T value)
 	{
-		for (int z = 0; z < depth_; ++z)
+		for (int z = 1; z < depth_ - 1; ++z)
 			for (int y = 1; y < rows_ - 1; ++y)
 				for (int x = 1; x < colls_ - 1; ++x)
 					body_.at(z * rows_ * colls_ + y * colls_ + x) = value;

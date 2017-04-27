@@ -150,20 +150,73 @@ void SRT3DSolver::streaming()
 	int rows = medium_->GetRowsNumber();
 	int colls = medium_->GetColumnsNumber();
 
-	for (int q = 0; q < kQ; ++q) {
-		Matrix3D<double> temp = fluid_->f_->operator[](q);
-		fluid_->f_[q]->FillWith(0.0);
+	for (int z = 0; z < depth; ++z)
+	{
+		for (int q = 0; q < 9; ++q) 
+		{
+			Matrix2D<double> temp = fluid_->GetDistributionFuncLayer(z, q);
+			fluid_->SetDistributionFuncLayerValue(z, q, 0.0);
 
-		for(int z = 0; z < depth; ++z)
-		for (unsigned y = 0; y < rows; ++y)
-			for (unsigned x = 0; x < colls; ++x)
-				if (medium_->IsFluid(z, y, x))
-					fluid_->f_->operator[](q)(z, y - kEy[q], x + kEx[q]) = temp(z, y, x);
+			for (unsigned y = 0; y < rows; ++y)
+				for (unsigned x = 0; x < colls; ++x)
+					if (medium_->IsFluid(z, y, x))
+						fluid_->f_->operator[](q)(z + ez[q], y + ey[q], x + ex[q]) = temp(y, x);
+		}
+	}
+
+	for (int z = 0; z < depth - 1; ++z)
+	{
+		for (int q = 9; q < 14; ++q)
+		{
+			Matrix2D<double> temp = fluid_->GetDistributionFuncLayer(z, q);
+			fluid_->SetDistributionFuncLayerValue(z, q, 0.0);
+
+			for (unsigned y = 0; y < rows; ++y)
+				for (unsigned x = 0; x < colls; ++x)
+					if (medium_->IsFluid(z, y, x))
+						fluid_->f_->operator[](q)(z + ez[q], y + ey[q], x + ex[q]) = temp(y, x);
+		}
+	}
+
+	for (int z = depth - 1; z > 0; --z)
+	{
+		for (int q = 14; q < 19; ++q)
+		{
+			Matrix2D<double> temp = fluid_->GetDistributionFuncLayer(z, q);
+			fluid_->SetDistributionFuncLayerValue(z, q, 0.0);
+
+			for (unsigned y = 0; y < rows; ++y)
+				for (unsigned x = 0; x < colls; ++x)
+					if (medium_->IsFluid(z, y, x))
+						fluid_->f_->operator[](q)(z + ez[q], y + ey[q], x + ex[q]) = temp(y, x);
+		}
 	}
 
 	// Очищаем значения попавшие на границу, так как они уже сохранены в BCs
 	// !!! Делать в BC !!! fluid_->f_.fillBoundaries(0.0);
 }
 
+void SRT3DSolver::collision()
+{
+	for (int q = 0; q < kQ3d; ++q)
+		fluid_->f_->operator[](q) += (fluid_->feq_->operator[](q) - fluid_->f_->operator[](q)) / tau_;
+}
+
+void SRT3DSolver::solve(int iteration_number)
+{
+	fluid_->Poiseuille_IC(0.01);
+
+	feqCalculate();
+	collision();
+	streaming();
+	std::cout << *fluid_->f_;
+}
+
+void SRT3DSolver::recalculate()
+{
+	fluid_->rho_ = fluid_->f_->
+	fluid_->vx_ = fluid_->f_.calculateVelocity(kEx, fluid_->rho_);
+	fluid_->vy_ = fluid_->f_.calculateVelocity(kEy, fluid_->rho_);
+}
 
 #pragma endregion

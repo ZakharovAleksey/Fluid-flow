@@ -227,10 +227,25 @@ inline std::ostream & operator<<(std::ostream & os, const DistributionFunction3D
 	using std::endl;
 	os.precision(3);
 
-	for (int q = 0; q < kQ3d; ++q)
+
+	for (int z = 0; z < dist_func.depth_; ++z)
 	{
-		os << q << " component of 3d distribution function:" << endl;
-		os << dist_func.body_.at(q);
+		os << "Depth : " << z << std::endl;
+
+		for (int q = 0; q < kQ3d; ++q)
+		{
+			os << q << "-component: \n";
+			for (int y = 0; y < dist_func.rows_; ++y)
+			{
+				for (int x = 0; x < dist_func.colls_; ++x)
+				{
+					os << std::setw(5) << dist_func.body_.at(q)(z, y, x) << " ";
+				}
+				os << std::endl;
+			}
+			os << std::endl;
+		}
+		
 	}
 
 	return os;

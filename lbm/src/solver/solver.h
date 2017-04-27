@@ -2,6 +2,7 @@
 
 #include"../phys_values/2d/distribution_func_2d.h"
 #include"../phys_values/3d/distribution_func_3d.h"
+
 #pragma region 2d
 
 
@@ -49,16 +50,19 @@ static void FillWeightsFor3D(std::vector<double> & w)
 	w.resize(kQ3d, 1.0 / 36.0);
 
 	w.at(0) = 12.0 / 36.0;
-	for (int i = 1; i <= 6; ++i)
-		w.at(i) = 2.0 / 36.0;
+	w.at(9) = 2.0 / 36.0;
+	w.at(14) = 2.0 / 36.0;
 
+	for (int i = 1; i <= 4; ++i)
+		w.at(i) = 2.0 / 36.0;
+	
 }
 
 
 // Directions in assordace with Dmitry Biculov article
-const int ex[kQ3d] { 0, 1,  -1, 0,   0, 0,   0, 1,  -1, -1,   1, 1,   1, -1,  -1, 0,   0,  0,  0 };
-const int ey[kQ3d] { 0, 0,   0, 1,  -1, 0,   0, 1,   1, -1,  -1, 0,   0, 0,    0, 1,  -1, -1,  1 };
-const int ez[kQ3d] { 0, 0,   0, 0,   0, 1,  -1, 0,   0, 0,    0, 1,  -1, -1,   1, 1,   1, -1, -1 };
+const int ex[kQ3d] { 0, 1,   0, -1,   0,  1,   -1, -1,   1, 0,   1,  0,   -1, 0,    0,  1,   0, -1,   0 };
+const int ey[kQ3d] { 0, 0,  -1,  0,   1, -1,   -1,  1,   1, 0,   0, -1,    0, 1,    0,  0,  -1,  0,   1 };
+const int ez[kQ3d] { 0, 0,   0,  0,   0,  0,    0,  0,   0,-1,  -1, -1,   -1,-1,    1,  1,   1,  1,  1 };
 
 #pragma endregion
 
