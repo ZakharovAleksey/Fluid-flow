@@ -49,7 +49,7 @@ int main()
 
 	int x{ 4 };
 	int y{ 4 };
-	int z{ 4 };
+	int z{ 5 };
 
 	Fluid3D f(z, y, x);
 	Medium3D m(z,y,x);

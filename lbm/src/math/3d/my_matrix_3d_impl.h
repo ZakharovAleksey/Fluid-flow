@@ -51,6 +51,19 @@ inline Matrix3D<T> const Matrix3D<T>::ScalarMultiplication(Matrix3D<T> const & o
 }
 
 template<typename T>
+inline Matrix3D<T> const Matrix3D<T>::TimesDivide(Matrix3D<T> const & other)
+{
+	CompareSize(*this, other);
+
+	Matrix3D<T> res(*this);
+#pragma omp parallel for
+	for (int i = 0; i < GetTotalSize(); ++i)
+		res.body_.at(i) /= other.body_.at(i);
+
+	return res;
+}
+
+template<typename T>
 inline void Matrix3D<T>::Resize(int new_rows_numb, int new_colls_numb, int new_depth_numb = 0)
 {
 	rows_ = new_rows_numb;

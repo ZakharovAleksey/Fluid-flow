@@ -146,13 +146,44 @@ void SRT3DSolver::feqCalculate()
 
 void SRT3DSolver::streaming()
 {
-	int depth = medium_->GetDepthNumber();
-	int rows = medium_->GetRowsNumber();
-	int colls = medium_->GetColumnsNumber();
+	const int depth = medium_->GetDepthNumber();
+	const int rows = medium_->GetRowsNumber();
+	const int colls = medium_->GetColumnsNumber();
 
+	subStreamingMiddle(depth, rows, colls);
+	subStreamingTop(depth, rows, colls);
+	subStreamingBottom(depth, rows, colls);
+
+	// Очищаем значения попавшие на границу, так как они уже сохранены в BCs
+	// !!! Делать в BC !!! fluid_->f_.fillBoundaries(0.0);
+}
+
+void SRT3DSolver::collision()
+{
+	for (int q = 0; q < kQ3d; ++q)
+		(*fluid_->f_)[q] += ((*fluid_->feq_)[q] - (*fluid_->f_)[q]) / tau_;
+}
+
+void SRT3DSolver::solve(int iteration_number)
+{
+	fluid_->Poiseuille_IC(0.01);
+
+	feqCalculate();
+	collision();
+	streaming();
+
+	std::ofstream myfile;
+	myfile.open("example.txt");
+
+	myfile << *fluid_->f_;
+	myfile.close();
+}
+
+void SRT3DSolver::subStreamingMiddle(const int depth, const int rows, const int colls)
+{
 	for (int z = 0; z < depth; ++z)
 	{
-		for (int q = 0; q < 9; ++q) 
+		for (int q = 0; q < 9; ++q)
 		{
 			Matrix2D<double> temp = fluid_->GetDistributionFuncLayer(z, q);
 			fluid_->SetDistributionFuncLayerValue(z, q, 0.0);
@@ -163,7 +194,10 @@ void SRT3DSolver::streaming()
 						fluid_->f_->operator[](q)(z + ez[q], y + ey[q], x + ex[q]) = temp(y, x);
 		}
 	}
+}
 
+void SRT3DSolver::subStreamingTop(const int depth, const int rows, const int colls)
+{
 	for (int z = 0; z < depth - 1; ++z)
 	{
 		for (int q = 9; q < 14; ++q)
@@ -177,7 +211,10 @@ void SRT3DSolver::streaming()
 						fluid_->f_->operator[](q)(z + ez[q], y + ey[q], x + ex[q]) = temp(y, x);
 		}
 	}
+}
 
+void SRT3DSolver::subStreamingBottom(const int depth, const int rows, const int colls)
+{
 	for (int z = depth - 1; z > 0; --z)
 	{
 		for (int q = 14; q < 19; ++q)
@@ -191,32 +228,12 @@ void SRT3DSolver::streaming()
 						fluid_->f_->operator[](q)(z + ez[q], y + ey[q], x + ex[q]) = temp(y, x);
 		}
 	}
-
-	// Очищаем значения попавшие на границу, так как они уже сохранены в BCs
-	// !!! Делать в BC !!! fluid_->f_.fillBoundaries(0.0);
-}
-
-void SRT3DSolver::collision()
-{
-	for (int q = 0; q < kQ3d; ++q)
-		fluid_->f_->operator[](q) += (fluid_->feq_->operator[](q) - fluid_->f_->operator[](q)) / tau_;
-}
-
-void SRT3DSolver::solve(int iteration_number)
-{
-	fluid_->Poiseuille_IC(0.01);
-
-	feqCalculate();
-	collision();
-	streaming();
-	std::cout << *fluid_->f_;
 }
 
 void SRT3DSolver::recalculate()
 {
-	fluid_->rho_ = fluid_->f_->
-	fluid_->vx_ = fluid_->f_.calculateVelocity(kEx, fluid_->rho_);
-	fluid_->vy_ = fluid_->f_.calculateVelocity(kEy, fluid_->rho_);
+	fluid_->RecalculateRho();
+	fluid_->RecalculateV();
 }
 
 #pragma endregion

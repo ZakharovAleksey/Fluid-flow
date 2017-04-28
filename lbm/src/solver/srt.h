@@ -65,7 +65,13 @@ public:
 	void recalculate() override;
 
 	void solve(int iteration_number) override;
-	
+
+private:
+	void subStreamingMiddle(const int depth, const int rows, const int colls);
+	void subStreamingTop(const int depth, const int rows, const int colls);
+	void subStreamingBottom(const int depth, const int rows, const int colls);
+
+
 
 private:
 	//! Relaxation parameter

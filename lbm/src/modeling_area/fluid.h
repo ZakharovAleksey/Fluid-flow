@@ -6,6 +6,7 @@
 #include"../phys_values/3d/distribution_func_3d.h"
 
 #include"medium.h"
+#include"../solver/solver.h"
 
 class SRTsolver;
 
@@ -64,6 +65,10 @@ Stores all parameters for fluid describing, i.e:
 class Fluid3D
 {
 	friend class SRTsolver;
+
+	typedef std::unique_ptr<MacroscopicParam3D<double>> MacroscopicParamPtr;
+	typedef std::unique_ptr<DistributionFunction3D<double>> DistributionFuncPtr;
+
 public:
 	Fluid3D(int depth, int rows, int colls);
 	~Fluid3D() {}
@@ -83,9 +88,11 @@ public:
 	// Set q-s component of distribution finction on layer depth 'z' is equal to 'value'
 	void SetDistributionFuncLayerValue(const int z, const int q, const int value);
 
-	// !!!! œ≈–≈œ»—¿“‹ !!!!
-	void CalculateDencity();
-	void CalculateVelocity(const MacroscopicParam3D<double> & rho, const int[] e);
+	// Recalculate dencity
+	void RecalculateRho();
+	// Racalculate all three velocities: vx, vy, vz
+	void RecalculateV();
+	
 
 private:
 
@@ -96,10 +103,10 @@ private:
 	//! Depth (Z-axis size  value)
 	int depth_;
 
-public:
+	// Recalculate single velocity component
+	void RecalculateVelocityComponent(const MacroscopicParamPtr & v_ptr, const int e[]);
 
-	typedef std::unique_ptr<MacroscopicParam3D<double>> MacroscopicParamPtr;
-	typedef std::unique_ptr<DistributionFunction3D<double>> DistributionFuncPtr;
+public:
 
 	//! Fluid density field
 	MacroscopicParamPtr rho_;

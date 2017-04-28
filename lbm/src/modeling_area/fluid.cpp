@@ -91,28 +91,33 @@ void Fluid3D::SetDistributionFuncLayerValue(const int z, const int q, const int 
 			f_->operator[](q)(z, y, x) = value;
 }
 
-void Fluid3D::CalculateDencity()
+void Fluid3D::RecalculateRho()
 {
-	for(int z = 0; z < depth_; ++z)
-		for(int y = 0; y < rows_; ++y)
-			for (int x = 0; x < colls_; ++x)
-			{
-				rho_->operator()(z, y, x) = 0.0;
-				for (int q = 0; q < kQ3d; ++q)
-					rho_->operator()(z, y, x) += f_->operator[](q)(z, y, x);
-			}
+	rho_->FillWith(0.0);
+	for (int q = 0; q < kQ3d; ++q)
+	{
+		*rho_ += f_->operator[](q);
+	}
 }
 
-void Fluid3D::CalculateVelocity(const MacroscopicParam3D<double>& rho, const int[] e)
+void Fluid3D::RecalculateV()
 {
-
-	for (int q = 0; q < kQ; ++q)
-		result += dfunc_body_.at(q) * mas[q];
-
-	// Переписать сразу в return, тк лишнее копирование НО выпадает error
-	result.TimesDivide(density);
-	return result;
+	RecalculateVelocityComponent(vx_, ex);
+	RecalculateVelocityComponent(vy_, ey);
+	RecalculateVelocityComponent(vz_, ez);
 }
+
+void Fluid3D::RecalculateVelocityComponent(const MacroscopicParamPtr & v_ptr, const int e[])
+{
+	v_ptr->FillWith(0.0);
+
+	for (int q = 0; q < kQ3d; ++q)
+		*v_ptr += (*f_)[q] * (double) e[q];
+
+	v_ptr->TimesDivide(*rho_);
+
+}
+
 
 
 #pragma endregion
