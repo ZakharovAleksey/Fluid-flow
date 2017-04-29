@@ -73,26 +73,30 @@ public:
 	Fluid3D(int depth, int rows, int colls);
 	~Fluid3D() {}
 
+	//! Returns depth number of fluid domain, or number size along Z-axis
 	int GetDepthNumber() const;
+	//! Returns rows number of fluid domain, or number size along Y-axis
 	int GetRowsNumber() const;
+	//! Returns columns number of fluid domain, or number size along X-axis
 	int GetColumnsNumber() const;
 
-	void Poiseuille_IC(double const dvx);
+	//! Applies Poiseuille initial condition to left boundary
+	void PoiseuilleIC(double const dvx);
 
-	// Set q-s component of distribution function with choosen value
+	//! Set 'q'-s component of distribution function with choosen value
 	void SetDistributionFuncValue(const int q, double const value);
 
 	// !!! Сделать Matrix<> - const
-	// Get q-s component of distribution finction on layer depth 'z'
+	// Gets 'q'-s component of distribution finction on layer depth 'z'
 	Matrix2D<double> GetDistributionFuncLayer(const int z, const int q);
-	// Set q-s component of distribution finction on layer depth 'z' is equal to 'value'
+	// Sets 'q'-s component of distribution finction on layer depth 'z' is equal to 'value'
 	void SetDistributionFuncLayerValue(const int z, const int q, const int value);
 
-	// Recalculate dencity
+	// Recalculate dencity for each node in fluid domain
 	void RecalculateRho();
-	// Racalculate all three velocities: vx, vy, vz
+	// Racalculate all three velocities: vx, vy, vz for each node in fluid domain
 	void RecalculateV();
-	// Total rho calculation
+	// Total rho calculation of all fluid domain (For check onlly)
 	long double TotalRho();
 
 private:

@@ -166,7 +166,7 @@ void SRT3DSolver::collision()
 
 void SRT3DSolver::solve(int iter_numb)
 {
-	fluid_->Poiseuille_IC(0.01);
+	fluid_->PoiseuilleIC(0.01);
 
 	feqCalculate();
 	for (int q = 0; q < kQ; ++q)

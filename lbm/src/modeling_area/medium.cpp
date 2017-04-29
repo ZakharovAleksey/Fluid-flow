@@ -3,16 +3,15 @@
 
 
 /*!
-	 онструктор класса medium:
+	Medium class constructor (idea is identical to 3D, but with some additions):
 
-	ћатрица состо€ща€ из NodeType.
-	ѕо умолчанию область моделировани€ заполн€етс€ жидкостью : NodeType::FLUID;
-		- после этого по умолчанию задаетс€ верхн€€, нижн€€, лева€, права€ границы соответственно 
-		NodeType::UPPER_BOUNDARY, NodeType::BOTTOM_BOUNDARY, NodeType::LEFT_BOUNDARY, NodeType::RIGHT_BOUNDARY.
+	Main body of class, is a matrix, which contains data about all nodes types.
+	By default all matrix filfilled with fluid type : NodeType::FLUID;
+		- After this procedure complite, we set TOP, BOTTOM, LEFT and RIGHT (NEAR and FAR in 3D case) using
+		NodeType::UPPER_BOUNDARY, NodeType::BOTTOM_BOUNDARY, NodeType::LEFT_BOUNDARY, NodeType::RIGHT_BOUNDARY
 
-	- в дальнейшем необходимо провер€ть область на наличие погруженных тел.
+	2D example :
 
-	ѕример:
 	1	1	1	1
 	3	0	0	4
 	3	0	0	4
@@ -113,7 +112,6 @@ std::ostream & operator<<(std::ostream & os, Medium const & medium) {
 #pragma region 3d
 
 
-
 Medium3D::Medium3D() : depth_(0), rows_(0), colls_(0), medium_(nullptr) { }
 
 Medium3D::Medium3D(int depth, int rows, int colls) : depth_(depth), rows_(rows), colls_(colls)
@@ -160,8 +158,8 @@ void Medium3D::FillMedium()
 	for (int y = 0; y < rows_; ++y)
 		for (int x = 0; x < colls_; ++x)
 		{
-			medium_->operator()(0, y, x) = NodeType::BOTTOM_BOUNDARY;
-			medium_->operator()(depth_ - 1, y, x) = NodeType::TOP_BOUNDARY;
+			(*medium_)(0, y, x)	= NodeType::BOTTOM_BOUNDARY;
+			(*medium_)(depth_ - 1, y, x) = NodeType::TOP_BOUNDARY;
 		}
 
 	for (int z = 1; z < depth_ - 1; ++z)
@@ -169,17 +167,16 @@ void Medium3D::FillMedium()
 		// LEFT and RIGHT layers of modeling cube (Oxz plane)
 		for (int y = 0; y < rows_; ++y)
 		{
-			medium_->operator()(z, y, 0) = NodeType::RIGHT_BOUNDARY;
-			medium_->operator()(z, y, colls_ - 1) = NodeType::LEFT_BOUNDARY;
+			(*medium_)(z, y, 0) = NodeType::RIGHT_BOUNDARY;
+			(*medium_)(z, y, colls_ - 1) = NodeType::LEFT_BOUNDARY;
 		}
 
 		// NEAR and FAR layers of modeling cube (Oyz plane)
 		for (int x = 0; x < colls_; ++x)
 		{
-			medium_->operator()(z, 0, x) = NodeType::FAR_BOUNDARY;
-			medium_->operator()(z, rows_ - 1, x) = NodeType::NEAR_BOUNDARY;
+			(*medium_)(z, 0, x) = NodeType::FAR_BOUNDARY;
+			(*medium_)(z, rows_ - 1, x) = NodeType::NEAR_BOUNDARY;
 		}
-		
 	}
 }
 

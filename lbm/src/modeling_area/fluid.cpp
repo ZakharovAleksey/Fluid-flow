@@ -30,13 +30,13 @@ std::pair<unsigned, unsigned> Fluid::size() const
 #pragma endregion
 
 
-
 #pragma region 3d
 
 Fluid3D::Fluid3D(int depth, int rows, int colls) : depth_(depth), rows_(rows), colls_(colls)
 {
 	rho_ = std::make_unique<MacroscopicParam3D<double>>(depth_, rows_, colls_);
 	rho_->FillWithoutBoundary(1.0);
+
 	vx_ = std::make_unique<MacroscopicParam3D<double>>(depth_, rows_, colls_);
 	vy_ = std::make_unique<MacroscopicParam3D<double>>(depth_, rows_, colls_);
 	vz_ = std::make_unique<MacroscopicParam3D<double>>(depth_, rows_, colls_);
@@ -60,7 +60,7 @@ int Fluid3D::GetColumnsNumber() const
 	return colls_;
 }
 
-void Fluid3D::Poiseuille_IC(double const dvx)
+void Fluid3D::PoiseuilleIC(double const dvx)
 {
 	for(int z = 1; z < depth_ - 1; ++ z)
 		for (int y = 1; y < rows_ - 1; ++y)
@@ -70,7 +70,7 @@ void Fluid3D::Poiseuille_IC(double const dvx)
 void Fluid3D::SetDistributionFuncValue(const int q, double const value)
 {
 	assert(q < kQ3d);
-	f_->operator[](q).FillWith(value);
+	(*f_)[q].FillWith(value);
 }
 
 Matrix2D<double> Fluid3D::GetDistributionFuncLayer(const int z, const int q)
@@ -88,7 +88,7 @@ void Fluid3D::SetDistributionFuncLayerValue(const int z, const int q, const int 
 {
 	for (int y = 0; y < rows_; ++y)
 		for (int x = 0; x < colls_; ++x)
-			f_->operator[](q)(z, y, x) = value;
+			(*f_)[q](z, y, x) = value;
 }
 
 void Fluid3D::RecalculateRho()
@@ -96,7 +96,7 @@ void Fluid3D::RecalculateRho()
 	rho_->FillWith(0.0);
 	for (int q = 0; q < kQ3d; ++q)
 	{
-		*rho_ += f_->operator[](q);
+		*rho_ += (*f_)[q];
 	}
 }
 
@@ -122,7 +122,6 @@ void Fluid3D::RecalculateVelocityComponent(const MacroscopicParamPtr & v_ptr, co
 	v_ptr->TimesDivide(*rho_);
 
 }
-
 
 
 #pragma endregion
