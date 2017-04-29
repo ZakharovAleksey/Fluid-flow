@@ -21,7 +21,7 @@ enum class Boundary {
 	BOTTOM,
 	RIGHT,
 	LEFT,
-	// In #d calse only
+	// In 3d case only
 	NEAR,
 	FAAR
 };
@@ -106,6 +106,8 @@ private:
 #pragma region 3d
 
 
+// Class of 3D boundary conditions:
+// - Calculate and apply choosen boundary condidtions to each boundary of modeling fluid domain.
 
 class BCs3D
 {
@@ -116,16 +118,19 @@ public:
 	BCs3D(int rows, int colls, DistributionFunction3D<double> & dfunc);
 	~BCs3D() {}
 
+	//! Prepare ALL values for choosen BC BEFORE Streaming
 	void PrepareValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, BCType const near_bc, BCType far_bc);
+	//! Prepare values for CHOOSEN ONE BC BEFORE Streaming
 	bool PrepareValuesInCurBoundary(Boundary const BC, BCType const bc_type);
 	
-
-	void recordValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, BCType const near_bc, BCType far_bc);
+	//! Record ALL values for choosen BC AFTER Streaming (BC applying itself)
+	void RecordValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, BCType const near_bc, BCType far_bc);
+	//! Record values for choosen ONE BC AFTER Streaming (BC applying itself)
 	void recordValuesOnCurrentBoundary(Boundary const BC, BCType const boundary_condition_type);
+	
 
+	//! Applies periodic boundary conditions
 	void PeriodicBC(Boundary const first, Boundary const second);
-
-
 
 	friend std::ostream & operator<<(std::ostream & os, BCs3D const & BC)
 	{
@@ -182,8 +187,8 @@ public:
 		return os;
 	}
 
-
 private:
+	//! Swap two stored boundary values
 	void swap_id(std::map<int, std::vector<double> > & map, int const from, int const to);
 
 private:
@@ -198,7 +203,7 @@ private:
 	DistributionFunction3D<double>* f_ptr_;
 
 	//! Store index of probability distribution function and it's values on TOP boundary
-	//!	Пример: top_boundary_[1] = { Значения f[1] на верхней границе }
+	//!	Example: top_boundary_[1] = { Store values f[1] on top boundary }
 	std::map<int, std::vector<double> > top_boundary_;
 	std::map<int, std::vector<double> > bottom_boundary_;
 	std::map<int, std::vector<double> > left_boundary_;

@@ -87,7 +87,7 @@ inline void Matrix3D<T>::FillBoundarySideWalls(const T value)
 			this->operator()(z, y, colls_ - 1) = value;
 		}
 
-		for (int x = 0; x < rows_; ++x)
+		for (int x = 0; x < colls_; ++x)
 		{
 			this->operator()(z, 0, x) = value;
 			this->operator()(z, rows_ - 1, x) = value;

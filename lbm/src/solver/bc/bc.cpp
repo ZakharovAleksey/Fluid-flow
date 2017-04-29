@@ -477,11 +477,14 @@ void BCs3D::recordValuesOnCurrentBoundary(Boundary const BC, BCType const bc_typ
 			f_ptr_->SetBottomBoundaryValue(f_12->first, f_12->second);
 			f_ptr_->SetBottomBoundaryValue(f_13->first, f_13->second);
 		}
-		else if (bc_type == BCType::BOUNCE_BACK) {
+		else if (bc_type == BCType::BOUNCE_BACK) 
+		{
+			std::cout << "BB BC on TOP is not yet implemented\n";
 			throw;
 		}
-		else if (bc_type == BCType::VON_NEUMAN) {
-			// Пока еще не реализованно
+		else if (bc_type == BCType::VON_NEUMAN) 
+		{
+			std::cout << "Von NEUMAN on TOP is not yet implemented\n";
 			throw;
 		}
 	}
@@ -499,7 +502,9 @@ void BCs3D::recordValuesOnCurrentBoundary(Boundary const BC, BCType const bc_typ
 			f_ptr_->SetTopBoundaryValue(f_17->first, f_17->second);
 			f_ptr_->SetTopBoundaryValue(f_18->first, f_18->second);
 		}
-		else if (bc_type == BCType::BOUNCE_BACK) {
+		else if (bc_type == BCType::BOUNCE_BACK) 
+		{
+			std::cout << "BB BC on BOTTOM is not yet implemented\n";
 			/*auto f_2 = bottom_boundary_.find(2);
 			auto f_5 = bottom_boundary_.find(5);
 			auto f_6 = bottom_boundary_.find(6);
@@ -630,7 +635,7 @@ void BCs3D::recordValuesOnCurrentBoundary(Boundary const BC, BCType const bc_typ
 	}
 }
 
-void BCs3D::recordValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, BCType const near_bc, BCType far_bc)
+void BCs3D::RecordValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, BCType const near_bc, BCType far_bc)
 {
 	recordValuesOnCurrentBoundary(Boundary::TOP, top_bc);
 	recordValuesOnCurrentBoundary(Boundary::BOTTOM, bottm_bc);

@@ -117,8 +117,8 @@ void SRT3DSolver::feqCalculate()
 	int rows = medium_->GetRowsNumber();
 	int colls = medium_->GetColumnsNumber();
 	
+	// Obtain weights for feq calculation in accordance with Dmitry Biculov article
 	std::vector<double> w;
-
 	FillWeightsFor3D(w);
 
 	for (int q = 0; q < kQ3d; ++q) 
@@ -150,12 +150,9 @@ void SRT3DSolver::streaming()
 	const int rows = medium_->GetRowsNumber();
 	const int colls = medium_->GetColumnsNumber();
 
-	subStreamingMiddle(depth, rows, colls);
-	subStreamingTop(depth, rows, colls);
-	subStreamingBottom(depth, rows, colls);
-
-	// Очищаем значения попавшие на границу, так как они уже сохранены в BCs
-	// !!! Делать в BC !!! fluid_->f_.fillBoundaries(0.0);
+	SubStreamingMiddle(depth, rows, colls);
+	SubStreamingTop(depth, rows, colls);
+	SubStreamingBottom(depth, rows, colls);
 }
 
 void SRT3DSolver::collision()
@@ -185,14 +182,41 @@ void SRT3DSolver::solve(int iter_numb)
 		bc.PeriodicBC(Boundary::LEFT, Boundary::RIGHT);
 		bc.PeriodicBC(Boundary::NEAR, Boundary::FAAR);
 
-		bc.recordValuesForBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
+		bc.RecordValuesForBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
 
 		recalculate();
 		feqCalculate();
 	}
+	GetProfile(5);
 }
 
-void SRT3DSolver::subStreamingMiddle(const int depth, const int rows, const int colls)
+void SRT3DSolver::GetProfile(const int chan_numb)
+{
+	std::vector<double> res = fluid_->vy_->GetNFLayer(chan_numb);
+	int colls = fluid_->GetColumnsNumber();
+	int rows = fluid_->GetRowsNumber();
+	int depth = fluid_->GetDepthNumber();
+
+	std::ofstream file;
+	file.open("Data/ex.txt");
+
+	file.precision(3);
+	//int i = 0;
+
+	for (int i = 0; i < res.size(); ++i)
+	{
+		
+		if(i != 0 && (i % (colls - 2) == 0))
+			file << std::endl;
+		file << res.at(i) << " ";
+	}
+
+	file.close();
+	
+	
+}
+
+void SRT3DSolver::SubStreamingMiddle(const int depth, const int rows, const int colls)
 {
 	for (int z = 0; z < depth; ++z)
 	{
@@ -209,7 +233,7 @@ void SRT3DSolver::subStreamingMiddle(const int depth, const int rows, const int 
 	}
 }
 
-void SRT3DSolver::subStreamingTop(const int depth, const int rows, const int colls)
+void SRT3DSolver::SubStreamingTop(const int depth, const int rows, const int colls)
 {
 	for (int z = 0; z < depth - 1; ++z)
 	{
@@ -226,7 +250,7 @@ void SRT3DSolver::subStreamingTop(const int depth, const int rows, const int col
 	}
 }
 
-void SRT3DSolver::subStreamingBottom(const int depth, const int rows, const int colls)
+void SRT3DSolver::SubStreamingBottom(const int depth, const int rows, const int colls)
 {
 	for (int z = depth - 1; z > 0; --z)
 	{

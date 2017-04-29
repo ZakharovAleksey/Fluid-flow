@@ -92,9 +92,9 @@ int main()
 
 	// >>> 3D case
 
-	int x{ 15 };
-	int y{ 15 };
-	int z{ 15 };
+	int x{ 10 };
+	int y{ 35 };
+	int z{ 10 };
 
 	//MatrixTest();
 
@@ -102,7 +102,7 @@ int main()
 	Medium3D m(z,y,x);
 
 	SRT3DSolver srt(1.0, m, f);
-	srt.solve(80);
+	srt.solve(50);
 
 	// >>> 
 

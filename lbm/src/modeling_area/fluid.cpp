@@ -64,7 +64,7 @@ void Fluid3D::PoiseuilleIC(double const dvx)
 {
 	for(int z = 1; z < depth_ - 1; ++ z)
 		for (int y = 1; y < rows_ - 1; ++y)
-			vx_->operator()(z, y, 1) += dvx;
+			vy_->operator()(z, y, 1) += dvx;
 }
 
 void Fluid3D::SetDistributionFuncValue(const int q, double const value)
