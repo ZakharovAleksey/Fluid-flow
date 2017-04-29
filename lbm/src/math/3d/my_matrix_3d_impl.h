@@ -26,9 +26,6 @@ template<typename T>
 inline Matrix3D<T>::Matrix3D(int depth, int rows, int colls) : depth_(depth), rows_(rows), colls_(colls)
 {
 	body_.resize(GetTotalSize(), T());
-
-//	for (int i = 0; i < GetTotalSize(); ++i)
-//		body_.at(i) = rand() % 10;
 }
 
 
@@ -80,6 +77,60 @@ inline void Matrix3D<T>::Resize(int new_rows_numb, int new_colls_numb, int new_d
 }
 
 template<typename T>
+inline void Matrix3D<T>::FillBoundarySideWalls(const T value)
+{
+	for (int z = 0; z < depth_; ++z)
+	{
+		for (int y = 0; y < rows_; ++y)
+		{
+			this->operator()(z, y, 0) = value;
+			this->operator()(z, y, colls_ - 1) = value;
+		}
+
+		for (int x = 0; x < rows_; ++x)
+		{
+			this->operator()(z, 0, x) = value;
+			this->operator()(z, rows_ - 1, x) = value;
+		}
+	}
+}
+
+template<typename T>
+inline void Matrix3D<T>::FillLayer(const int z, const T value)
+{
+	for (int y = 0; y < rows_; ++y)
+		for (int x = 0; x < colls_; ++x)
+		{
+			this->operator()(z, y, x) = value;
+		}
+}
+
+template<typename T>
+inline void Matrix3D<T>::FillTopBottomWalls(const T value)
+{
+	FillLayer(0, value);
+	FillLayer(depth_ - 1, value);
+}
+
+template<typename T>
+inline void Matrix3D<T>::FillWithoutBoundary(const T value)
+{
+	for (int z = 1; z < depth_ - 1; ++z)
+		for (int y = 1; y < rows_ - 1; ++y)
+			for (int x = 1; x < colls_ - 1; ++x)
+				body_.at(z * rows_ * colls_ + y * colls_ + x) = value;
+
+}
+
+template<typename T>
+inline void Matrix3D<T>::FillWith(const T value)
+{
+	for (auto & i : body_)
+		i = value;
+}
+
+
+template<typename T>
 inline long double Matrix3D<T>::GetSum() const
 {
 	long double sum{ 0.0 };
@@ -92,85 +143,6 @@ inline long double Matrix3D<T>::GetSum() const
 	}
 
 	return sum;
-
-
-}
-
-template<typename T>
-inline std::vector<T> Matrix3D<T>::GetRow(unsigned const z) const
-{
-	// !!!Rename to GetLayer
-	// Check that row ID less than number of rows
-	std::vector<T> res(rows_ * colls_, T());
-
-	for (int y = 0; y < rows_; ++y)
-	{
-		for (int x = 0; x < colls_; ++x)
-			res.at(y * colls_ + x) = this->operator()(z, y, x);
-	}
-
-	/*assert(y < rows_);
-	std::vector<T> result(depth_ * colls_, T());
-
-	for (int z = 0; z < depth_; ++z)
-	{
-		for (int x = 0; x < colls_; ++x)
-			result.at(z * colls_ + x) = this->operator()(z, y, x);
-	}*/
-	return res;
-}
-
-template<typename T>
-inline void Matrix3D<T>::SetRow(unsigned const z, std::vector<T> const & row)
-{
-	// !!!Rename to SetLayer
-	assert(rows_ * colls_ == row.size());
-
-	for (int y = 0; y < rows_; ++y)
-	{
-		for (int x = 0; x < colls_; ++x)
-			this->operator()(z, y, x) = row.at(y * colls_ + x);
-	}
-
-	//// Check that std::vector<T> row size is equal to columns number of matrix
-	//assert(colls_ * depth_ == row.size());
-
-	//for (int z = 0; z < depth_; ++z)
-	//{
-	//	for (int x = 0; x < colls_; ++x)
-	//		this->operator()(z,y,x) = row.at(z * colls_ + x);
-	//}
-}
-
-template<typename T>
-inline std::vector<T> Matrix3D<T>::GetColumn(unsigned const x) const
-{
-	// Check that coll ID less than number of column
-	assert(x < colls_);
-	std::vector<T> result(depth_ * (rows_ - 2), T());
-
-	int curId = 0;
-	for (int z = 0; z < depth_; ++z)
-	{
-		for (int y = 1; y < rows_ - 1; ++y)
-			result.at(curId++) = this->operator()(z, y, x);
-			//result.at(y - 1) = body_.at(x + y * colls_);
-	}
-	return result;
-}
-
-template<typename T>
-inline void Matrix3D<T>::SetColumn(unsigned const x, std::vector<T> const & coll)
-{
-	// Check that std::vector<T> coll size is equal to rows number of matrix, bsides 2 (left and right boundary index)
-	assert(depth_ * (rows_ - 2) == coll.size());
-
-	int curId = 0;
-	for (int z = 0; z < depth_; ++z)
-	{
-		for (int y = 1; y < rows_ - 1; ++y)
-			this->operator()(z, y, x) = coll.at(curId++);
-	}
 }
 
 template<typename T>
@@ -279,21 +251,6 @@ inline void Matrix3D<T>::Swap(Matrix3D<T>& other)
 
 
 
-
-template<typename T1>
-inline const Matrix3D<T1> operator-(const Matrix3D<T1>& right)
-{
-	Matrix3D<T1> res(right);
-#pragma omp parallel for
-	for (int i = 0; i < right.GetTotalSize(); ++i)
-		res.body_.at(i) *= -1;
-
-	return res;
-}
-
-
-
-
 template<typename T1>
 Matrix3D<T1>& operator+=(Matrix3D<T1>& left, const Matrix3D<T1>& right)
 {
@@ -339,6 +296,16 @@ Matrix3D<T> const operator+(const Matrix3D<T> & left, const Matrix3D<T> & right)
 
 
 
+template<typename T1>
+inline const Matrix3D<T1> operator-(const Matrix3D<T1>& right)
+{
+	Matrix3D<T1> res(right);
+#pragma omp parallel for
+	for (int i = 0; i < right.GetTotalSize(); ++i)
+		res.body_.at(i) *= -1;
+
+	return res;
+}
 
 template<typename T1>
 inline Matrix3D<T1>& operator-=(Matrix3D<T1>& left, const Matrix3D<T1> & right)
@@ -382,6 +349,9 @@ Matrix3D<T> const operator-(const Matrix3D<T> & left, const Matrix3D<T> & right)
 	res -= right;
 	return res;
 }
+
+
+
 
 template<typename T1>
 inline Matrix3D<T1>& operator*=(Matrix3D<T1>& left, const T1 & right)

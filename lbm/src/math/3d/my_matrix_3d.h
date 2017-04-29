@@ -94,92 +94,48 @@ public:
 	// Returns X-dimension size of the current 3d-matrix
 	int const GetCollsNumber() const { return colls_; }
 
-#pragma region Override interface methods
 
-	long double GetSum() const override;
-
-	std::vector<T> GetRow(unsigned const y) const override;
-	std::vector<T> GetColumn(unsigned const x) const override;
-
-	void SetRow(unsigned const y, std::vector<T> const & row) override;
-	void SetColumn(unsigned const x, std::vector<T> const & coll) override;
-
-#pragma endregion
-
-	// Get Top or Bottom layer
+	// Get Top or Bottom layer for 'z' is equal to 0 or depth-1
 	std::vector<T> GetTBLayer(const int z) const;
-	// Get Left or Right layer (without upper and down elements)
+	// Get Left or Right layer for 'x' is equal to 0 or colls-1 (without upper and down elements)
 	std::vector<T> GetLRLayer(const int x) const;
-	// Get Left or Right layer (without upper and down elements)
+	// Get Left or Right layer for 'y' is equal to 0 or rows-1 (without upper and down elements)
 	std::vector<T> GetNFLayer(const int y) const;
 
+	// Set Top or Bottom layer for 'z' is equal to 0 or depth-1 to 'layer'
 	void SetTBLayer(unsigned const z, std::vector<T> const & layer);
+	// Set Left or Right layer for 'x' is equal to 0 or colls-1 to 'layer' (without upper and down elements)
 	void SetLRLayer(unsigned const x, std::vector<T> const & layer);
+	// Set Left or Right layer for 'y' is equal to 0 or rows-1 to 'layer' (without upper and down elements)
 	void SetNFLayer(unsigned const y, std::vector<T> const & layer);
 
-
+	// Override of iMatrix method
+	long double GetSum() const override;
 
 
 #pragma endregion
 
+	// Scalar multiplication on 'other' matrix: each element of matrix multiplies on appropriate element
+	// of 'other' matrix : this[1][2][3] * other[1][2][3]
 	Matrix3D<T> const ScalarMultiplication(Matrix3D<T> const & other);
+	// Times divide on 'other' matrix: each element of matrix divides on appropriate element
+	// of 'other' matrix : this[1][2][3] / other[1][2][3]
 	Matrix3D<T> const TimesDivide(Matrix3D<T> const & other);
 
 	
+	// Override of iMatrix method [As far as I rememder did not used in code because of std::unique_ptr<>]
 	void Resize(int new_rows_numb, int new_colls_numb, int new_depth_numb = 0) override;
 
 	// Filles ONLY side walls of Matrix with 'value' (not TOP and BOTTOM)
-	void FillBoundarySideWalls(T value)
-	{
-		for (int z = 0; z < depth_; ++z)
-		{
-			for (int y = 0; y < rows_; ++y)
-			{
-				this->operator()(z, y, 0) = value;
-				this->operator()(z, y, colls_ - 1) = value;
-			}
-
-			for (int x = 0; x < rows_; ++x)
-			{
-				this->operator()(z, 0, x) = value;
-				this->operator()(z, rows_ - 1, x) = value;
-			}
-		}
-	}
-
+	void FillBoundarySideWalls(const T value);
 	// Filles ONLY ONE layer of Matrix with 'value' (All Oxy plane with fixed 'z')
-	void FillLayer(const int z, const T value)
-	{
-		for (int y = 0; y < rows_; ++y)
-			for (int x = 0; x < colls_; ++x)
-			{
-				this->operator()(z, y, x) = value;
-			}
-	}
-
+	void FillLayer(const int z, const T value);
 	// Filles ONLY TOP and BOTTOM layers with 'value'
-	void FillTopBottomWalls(const T value)
-	{
-		FillLayer(0, value);
-		FillLayer(depth_ - 1, value);
-	}
-
-
-	//  !!! Чисто для тестов - потом убратьЫ !!!
-	void FillWithoutBoundary(T value)
-	{
-		for (int z = 1; z < depth_ - 1; ++z)
-			for (int y = 1; y < rows_ - 1; ++y)
-				for (int x = 1; x < colls_ - 1; ++x)
-					body_.at(z * rows_ * colls_ + y * colls_ + x) = value;
-		
-	}
-	// !!! 
-	void FillWith(T value)
-	{
-		for (auto & i : body_)
-			i = value;
-	}
+	void FillTopBottomWalls(const T value);
+	// Filles all elements of matrix besides it's boundaries with 'value'
+	void FillWithoutBoundary(const T value);
+	// Filles all elements of matrix with 'value'
+	void FillWith(const T value);
 
 
 private:
@@ -192,9 +148,12 @@ private:
 private:
 	// Depth of the matrix (Z-axis size  value)
 	int depth_;
+	// Number of matrix rows (Y-axis size  value)
 	int rows_;
+	// Number of matrix columns (X-axis size  value)
 	int colls_;
 
+	// Body of matrix, stores all matrix elements
 	std::vector<T> body_;
 
 };

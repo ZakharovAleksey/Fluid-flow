@@ -448,10 +448,8 @@ protected:
 
 	// Number of rows in matrix
 	int rows_;
-	
 	// Number of columns in matrix
 	int colls_;
-
 	// Main body of matrix, wich contain all matrix elements
 	std::vector<T> body_;
 
