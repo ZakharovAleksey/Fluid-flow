@@ -1,19 +1,24 @@
 #pragma once
 
 #include"../phys_values/2d/distribution_func_2d.h"
+#include"../phys_values/3d/distribution_func_3d.h"
+
+#pragma region 2d
+
+
 
 //! Weigth for probability distribution function calculation
 const double kW[kQ]{ 4.0 / 9.0, 1.0 / 9.0, 1.0 / 9.0, 1.0 / 9.0, 1.0 / 9.0,
- 				   1.0 / 36.0, 1.0 / 36.0, 1.0 / 36.0, 1.0 / 36.0 };
+		1.0 / 36.0, 1.0 / 36.0, 1.0 / 36.0, 1.0 / 36.0 };
 
 
 /*
-	Directions in D2Q9 model
-	  6   2   5
-	   \  |  /
-	3 --  0  -- 1
-	   /  |  \
-	  7   4   8
+Directions in D2Q9 model
+6   2   5
+\  |  /
+3 --  0  -- 1
+/  |  \
+7   4   8
 */
 
 //! X-components witch determ particle movement
@@ -26,11 +31,43 @@ const double kEy[kQ]{ 0.0, 0.0, 1.0, 0.0, -1.0, 1.0, 1.0, -1.0, -1.0 };
 //const double kEy[kQ]{ 0.0, 0.0, -1.0, 0.0, 1.0, -1.0, -1.0, 1.0, 1.0 };
 
 /*!
-	Interface for different simulation aproaches:
-		- SRT
-		- MRT
-		- Immersed Boundary SRT
+Interface for different simulation aproaches:
+- SRT
+- MRT
+- Immersed Boundary SRT
 */
+
+#pragma endregion
+
+#pragma region 3d
+
+#include<vector>
+
+// This is the vector of weights : initilize in feqCalculation() because it is too big
+
+static void FillWeightsFor3D(std::vector<double> & w)
+{
+	w.resize(kQ3d, 1.0 / 36.0);
+
+	w.at(0) = 12.0 / 36.0;
+	w.at(9) = 2.0 / 36.0;
+	w.at(14) = 2.0 / 36.0;
+
+	for (int i = 1; i <= 4; ++i)
+		w.at(i) = 2.0 / 36.0;
+	
+}
+
+
+// Directions in assordace with Dmitry Biculov article
+const int ex[kQ3d] { 0, 1,   0, -1,   0,  1,   -1, -1,   1, 0,   1,  0,   -1, 0,    0,  1,   0, -1,   0 };
+const int ey[kQ3d] { 0, 0,  -1,  0,   1, -1,   -1,  1,   1, 0,   0, -1,    0, 1,    0,  0,  -1,  0,   1 };
+const int ez[kQ3d] { 0, 0,   0,  0,   0,  0,    0,  0,   0,-1,  -1, -1,   -1,-1,    1,  1,   1,  1,  1 };
+
+#pragma endregion
+
+
+
 class iSolver
 {
 public:

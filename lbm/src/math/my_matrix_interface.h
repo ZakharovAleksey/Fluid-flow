@@ -9,28 +9,19 @@ class iMatrix
 public:
 	
 	virtual ~iMatrix() {}
-
-<<<<<<< HEAD
-	// Returns the sum of all elements of the matrix
-	virtual long double GetSum() const = 0;
 	
-=======
 #pragma region Main methods
 	
 	// Returns the sum of all elements of the matrix
 	virtual long double GetSum() const = 0;
 
->>>>>>> refs/remotes/origin/3d
 	// Returns vector, with values from row with choosen index from matrix
 	virtual std::vector<T> GetRow(unsigned const y) const = 0;
 
 	// Set elements of "y" row in the current matrix equal to values from std::vector "row"
 	virtual void SetRow(unsigned const y, std::vector<T> const & row) = 0;
-<<<<<<< HEAD
-	
-=======
 
->>>>>>> refs/remotes/origin/3d
+
 	// Returns std::vector, with values in range [1 : rows_ - 2] from column with "x" index.
 	virtual std::vector<T> GetColumn(unsigned const x) const = 0;
 

@@ -10,26 +10,21 @@
 
 
 
-/*!
-	SRT approach implementation.
+#pragma region 2d
 
-	Relaxation parameter tau must be bigger then 0.5 to achive good results. 
-	It is better to choose it near 1.0;
+/*!
+SRT approach implementation.
+
+Relaxation parameter tau must be bigger then 0.5 to achive good results.
+It is better to choose it near 1.0;
 
 */
 class SRTsolver : iSolver
 {
 public:
-
-#pragma region Constructor
-
 	SRTsolver(double const tau, Medium & medium, Fluid & fluid);
 	virtual ~SRTsolver() {}
 
-#pragma endregion
-
-#pragma region Methods
-	
 	//! Equilibrium probability distribution function calculation in SRT implementation
 	virtual void feqCalculate();
 
@@ -44,19 +39,52 @@ public:
 	//! Recalculation procedure (recalculate density, velocity) in SRT implementation
 	virtual void recalculate();
 
-#pragma endregion
-
 private:
-
-#pragma region Fields
-
 	//! Relaxation parameter
 	double const tau_;
 
 	Medium* medium_;
 	Fluid* fluid_;
+};
+
 
 #pragma endregion
 
+
+#pragma region 3d
+
+class SRT3DSolver : iSolver
+{
+public:
+	SRT3DSolver(double const tau, Medium3D & medium, Fluid3D & fluid);
+	virtual ~SRT3DSolver() {}
+
+	void feqCalculate() override;
+	void streaming() override;
+	void collision() override;
+	void recalculate() override;
+
+	void solve(int iteration_number) override;
+
+private:
+	void subStreamingMiddle(const int depth, const int rows, const int colls);
+	void subStreamingTop(const int depth, const int rows, const int colls);
+	void subStreamingBottom(const int depth, const int rows, const int colls);
+
+
+
+private:
+	//! Relaxation parameter
+	double const tau_;
+
+	// make them smart pointer
+
+	Medium3D* medium_;
+	Fluid3D* fluid_;
 };
+
+
+#pragma endregion
+
+
 

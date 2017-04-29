@@ -7,7 +7,7 @@
 #include"../2d/my_matrix_2d.h"
 
 template<typename T>
-class Matrix3D : public Matrix2D<T>, public iMatrix<T>
+class Matrix3D : public iMatrix<T>
 {
 public:
 
@@ -106,26 +106,80 @@ public:
 
 #pragma endregion
 
+	// Get Top or Bottom layer
+	std::vector<T> GetTBLayer(const int z) const;
+	// Get Left or Right layer (without upper and down elements)
+	std::vector<T> GetLRLayer(const int x) const;
+	// Get Left or Right layer (without upper and down elements)
+	std::vector<T> GetNFLayer(const int y) const;
+
+	void SetTBLayer(unsigned const z, std::vector<T> const & layer);
+	void SetLRLayer(unsigned const x, std::vector<T> const & layer);
+	void SetNFLayer(unsigned const y, std::vector<T> const & layer);
+
+
+
 
 #pragma endregion
 
 	Matrix3D<T> const ScalarMultiplication(Matrix3D<T> const & other);
+	Matrix3D<T> const TimesDivide(Matrix3D<T> const & other);
 
-
-<<<<<<< HEAD
-
-=======
 	
 	void Resize(int new_rows_numb, int new_colls_numb, int new_depth_numb = 0) override;
 
-	// Чисто для тестов - потом убратьЫ
-	void Fill()
+	// Filles ONLY side walls of Matrix with 'value' (not TOP and BOTTOM)
+	void FillBoundarySideWalls(T value)
 	{
-		for (int i = 0; i < body_.size(); ++i)
-			body_.at(i) = rand() % 100;
-	}
->>>>>>> refs/remotes/origin/3d
+		for (int z = 0; z < depth_; ++z)
+		{
+			for (int y = 0; y < rows_; ++y)
+			{
+				this->operator()(z, y, 0) = value;
+				this->operator()(z, y, colls_ - 1) = value;
+			}
 
+			for (int x = 0; x < rows_; ++x)
+			{
+				this->operator()(z, 0, x) = value;
+				this->operator()(z, rows_ - 1, x) = value;
+			}
+		}
+	}
+
+	// Filles ONLY ONE layer of Matrix with 'value' (All Oxy plane with fixed 'z')
+	void FillLayer(const int z, const T value)
+	{
+		for (int y = 0; y < rows_; ++y)
+			for (int x = 0; x < colls_; ++x)
+			{
+				this->operator()(z, y, x) = value;
+			}
+	}
+
+	// Filles ONLY TOP and BOTTOM layers with 'value'
+	void FillTopBottomWalls(const T value)
+	{
+		FillLayer(0, value);
+		FillLayer(depth_ - 1, value);
+	}
+
+
+	//  !!! Чисто для тестов - потом убратьЫ !!!
+	void FillWithoutBoundary(T value)
+	{
+		for (int z = 1; z < depth_ - 1; ++z)
+			for (int y = 1; y < rows_ - 1; ++y)
+				for (int x = 1; x < colls_ - 1; ++x)
+					body_.at(z * rows_ * colls_ + y * colls_ + x) = value;
+		
+	}
+	// !!! 
+	void FillWith(T value)
+	{
+		for (auto & i : body_)
+			i = value;
+	}
 
 
 private:
@@ -136,9 +190,13 @@ private:
 	int const GetTotalSize() const { return depth_ * rows_ * colls_; }
 
 private:
-
 	// Depth of the matrix (Z-axis size  value)
 	int depth_;
+	int rows_;
+	int colls_;
+
+	std::vector<T> body_;
+
 };
 
 

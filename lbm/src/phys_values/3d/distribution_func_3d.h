@@ -8,7 +8,7 @@
 
 #include<array>
 
-const int kQ3d = 2;
+const int kQ3d = 19;
 
 
 
@@ -86,11 +86,20 @@ public:
 	std::vector<T> GetLeftBoundaryValue(int const q) const override;
 	std::vector<T> GetRightBoundaryValue(int const q) const override;
 
-	
-	void SetTopBoundaryValue(int const q, std::vector<T> const & row) override;
-	void SetBottomBoundaryValue(int const q, std::vector<T> const & row) override;
-	void SetLeftBoundaryValue(int const q, std::vector<T> const & coll) override;
-	void SetRightBoundaryValue(int const q, std::vector<T> const & coll) override;
+	// ! ѕроверить что ближний с индеком таким-то
+	std::vector<T> GetNearBoundaryValue(int const q) const;
+	std::vector<T> GetFarBoundaryValue(int const q) const;
+
+
+	void SetTopBoundaryValue(int const q, std::vector<T> const & layer) override;
+	void SetBottomBoundaryValue(int const q, std::vector<T> const & layer) override;
+	void SetLeftBoundaryValue(int const q, std::vector<T> const & layer) override;
+	void SetRightBoundaryValue(int const q, std::vector<T> const & layer) override;
+
+	void SetNearBoundaryValue(int const q, std::vector<T> const & layer);
+	void SetFarBoundaryValue(int const q, std::vector<T> const & layer);
+
+	void ClearBoundaries();
 
 
 private:

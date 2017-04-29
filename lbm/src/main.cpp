@@ -4,14 +4,9 @@
 #include<omp.h>
 
 #include"math\2d\my_matrix_2d.h"
-<<<<<<< HEAD
-#include"phys_values\macroscopic_param.h"
-#include"phys_values\distribution_func.h"
-=======
 #include"phys_values\2d\macroscopic_param_2d.h"
 #include"phys_values\2d\distribution_func_2d.h"
 
->>>>>>> refs/remotes/origin/3d
 #include"modeling_area\medium.h"
 #include"modeling_area\fluid.h"
 #include"solver\srt.h"
@@ -19,40 +14,67 @@
 
 
 #include"math\3d\my_matrix_3d.h"
-<<<<<<< HEAD
-=======
 #include"phys_values\3d\macroscopic_param_3d.h"
 #include"phys_values\3d\distribution_func_3d.h"
->>>>>>> refs/remotes/origin/3d
+
+
+
+void MatrixTest()
+{
+	int x{ 6 };
+	int y{ 5 };
+	int z{ 4 };
+
+	Matrix3D<int> m(z, y, x);
+
+	for (int zz = 0; zz < z; ++zz)
+		for (int yy = 0; yy < y; ++yy)
+			for (int xx = 0; xx < x; ++xx)
+				m(zz, yy, xx) = rand() % 100;
+
+	std::cout << m << std::endl;
+
+
+	std::vector<int> layer = m.GetTBLayer(z - 2);
+	for (auto & i : layer)
+	{
+		std::cout << i << " ";
+		i = 0;
+	}
+	std::cout << std::endl;
+
+	std::vector<int> layer1 = m.GetLRLayer(x - 2);
+	for (auto & i : layer1)
+	{
+		std::cout << i << " ";
+		i = 1;
+	}
+	std::cout << std::endl;
+
+	std::vector<int> layer2 = m.GetNFLayer(1);
+	for (auto & i : layer2)
+	{
+		std::cout << i << " ";
+		i = 3;
+	}
+	std::cout << std::endl;
+
+	/*m.SetTBLayer(z - 2, layer);
+	m.SetLRLayer(x - 2, layer1);
+	m.SetNFLayer(y - 2, layer2);*/
+
+}
 
 int main()
 {
-	srand(time(NULL));
+
+#pragma region initial
 
 	using std::cout;
 	using std::endl;
+	omp_set_num_threads(1);
 
-
-	omp_set_num_threads(5);
-
-	// Тестирование функционала матриц ------ Реализовать через тесты
-
-	/*Matrix<double> m(5, 4);
-	cout << m;
-	cout << "M rows = " << m.size().first << " M colls = " << m.size().second << endl;
-	std::vector<double> line = m.get_row(2);
-	for (auto i : line)
-		cout << i;
-	std::cout << std::endl;
-	std::vector<double> row = m.get_coll(2);
-	for (auto i : row)
-		cout << i;
-	std::cout << std::endl;
-	m.set_coll(3, row);
-	m.set_row(0, line);
-	cout << m;*/
-
-	// ---------------------------
+	// >>>  2D case 
 
 	/*int X{ 100 };
 	int Y{ 20 };
@@ -62,67 +84,27 @@ int main()
 	f.Poiseuille_IC(0.01);
 
 	SRTsolver solver(1.0, m, f);
-<<<<<<< HEAD
-	solver.solve(10);*/
-=======
 	solver.solve(100);*/
->>>>>>> refs/remotes/origin/3d
 
+	// >>>
 
-	// 3D matrix testing
+#pragma endregion
 
-<<<<<<< HEAD
-	int x{ 3 };
-	int y{ 6 };
-	int z{ 3 };
+	// >>> 3D case
 
-	Matrix3D<int> first(z, y, x);
-	Matrix3D<int> second(x, y, z);
-=======
-	int x{ 4 };
-	int y{ 4 };
-	int z{ 2 };
+	int x{ 15 };
+	int y{ 15 };
+	int z{ 15 };
 
-	DistributionFunction3D<int> fun(z, y, x);
-	std::cout << fun;
+	//MatrixTest();
 
+	Fluid3D f(z, y, x);
+	Medium3D m(z,y,x);
 
+	SRT3DSolver srt(1.0, m, f);
+	srt.solve(1000);
 
-	/*MacroscopicParam3D<int> first(z, y, x);
-	MacroscopicParam3D<int> second(x, y, z);
->>>>>>> refs/remotes/origin/3d
-
-	std::cout << first;
-	std::vector<int> row = first.GetRow(2);
-	std::vector<int> column = first.GetColumn(2);
-
-	for (auto & i : column)
-	{
-		std::cout << i << " ";
-		i += 100;
-	}
-	std::cout << std::endl;
-
-	first.SetColumn(1, column);
-
-<<<<<<< HEAD
-	std::cout << first;
-=======
-	std::cout << first;*/
->>>>>>> refs/remotes/origin/3d
-
-
-
-	/*for (auto i : row)
-		std::cout << i << " ";
-	std::cout << std::endl;
-
-	for (auto & i : row)
-		i += 100;
-
-	first.SetRow(3, row);
-
-	std::cout << first;*/
+	// >>> 
 
 	/*
 		- Продумать структуру для BC!

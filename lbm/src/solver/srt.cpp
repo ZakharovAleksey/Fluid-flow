@@ -1,8 +1,11 @@
 #include"srt.h"
 
-SRTsolver::SRTsolver(double const tau, Medium & medium, Fluid & fluid) : 
-	tau_(tau), 
-	medium_(&medium), 
+#pragma region 2d
+
+
+SRTsolver::SRTsolver(double const tau, Medium & medium, Fluid & fluid) :
+	tau_(tau),
+	medium_(&medium),
 	fluid_(&fluid)
 {
 	assert(medium_->size().first == fluid_->size().first &&
@@ -19,9 +22,9 @@ void SRTsolver::feqCalculate()
 		v = fluid_->vx_ * kEx[q] + fluid_->vy_ * kEy[q];
 
 		fluid_->feq_[q] = kW[q] * fluid_->rho_.ScalarMultiplication(
-			(1.0 + 3.0 * v + 4.5 * v.ScalarMultiplication(v) - 1.5 * 
+			(1.0 + 3.0 * v + 4.5 * v.ScalarMultiplication(v) - 1.5 *
 			(fluid_->vx_.ScalarMultiplication(fluid_->vx_) + fluid_->vy_.ScalarMultiplication(fluid_->vy_)))
-			);
+		);
 	}
 }
 
@@ -34,7 +37,7 @@ void SRTsolver::streaming()
 		for (unsigned y = 0; y < fluid_->size().first; ++y)
 			for (unsigned x = 0; x < fluid_->size().second; ++x)
 				if (medium_->is_fluid(y, x))
-			 		fluid_->f_[q](y - kEy[q], x + kEx[q]) = temp(y, x);
+					fluid_->f_[q](y - kEy[q], x + kEx[q]) = temp(y, x);
 	}
 
 	// Очищаем значения попавшие на границу, так как они уже сохранены в BCs
@@ -69,10 +72,10 @@ void SRTsolver::solve(int iteration_number)
 
 
 		BC.recordValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
-		
+
 		recalculate();
 		fluid_->vx_.SetColumn(1, vx);
-		
+
 		feqCalculate();
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
@@ -94,3 +97,158 @@ void SRTsolver::recalculate()
 }
 
 
+
+
+#pragma endregion
+
+#pragma region 3d
+
+
+SRT3DSolver::SRT3DSolver(double const tau, Medium3D & medium, Fluid3D & fluid) : tau_(tau), medium_(& medium), fluid_(& fluid)
+{
+	assert(medium_->GetDepthNumber() == fluid_->GetDepthNumber());
+	assert(medium_->GetRowsNumber() == fluid_->GetRowsNumber());
+	assert(medium_->GetColumnsNumber() == fluid_->GetColumnsNumber());
+}
+
+void SRT3DSolver::feqCalculate()
+{
+	int depth = medium_->GetDepthNumber();
+	int rows = medium_->GetRowsNumber();
+	int colls = medium_->GetColumnsNumber();
+	
+	std::vector<double> w;
+
+	FillWeightsFor3D(w);
+
+	for (int q = 0; q < kQ3d; ++q) 
+	{
+		// Article : Dmitry Biculov (e_{i}, v) form eq. (3) 
+		Matrix3D<double> v(depth, rows, colls);
+		v = *fluid_->vx_ * (double) ex[q] + *fluid_->vy_ * (double) ey[q] + *fluid_->vz_ * (double) ez[q];
+		// Article : Dmitry Biculov (e_{i}, v)^{2} form eq. (3) 
+		Matrix3D<double> v_sq(depth, rows, colls);
+		v_sq = v.ScalarMultiplication(v);
+		// Article : Dmitry Biculov (v, v)^{2} form eq. (3) 
+		// !!! Copy becauce constant values : deal with it !!!
+		Matrix3D<double> v_x = *fluid_->vx_;
+		Matrix3D<double> v_y = *fluid_->vy_;
+		Matrix3D<double> v_z = *fluid_->vz_;
+
+		Matrix3D<double> v_2(depth, rows, colls);
+		v_2 = v_x.ScalarMultiplication(v_x) + v_y.ScalarMultiplication(v_y) + v_z.ScalarMultiplication(v_z);
+
+
+		fluid_->feq_->operator[](q) = w[q] * fluid_->rho_->ScalarMultiplication(1.0 + 3.0 * v + 4.5 * v_sq - 1.5 * v_2);
+	}
+
+}
+
+void SRT3DSolver::streaming()
+{
+	const int depth = medium_->GetDepthNumber();
+	const int rows = medium_->GetRowsNumber();
+	const int colls = medium_->GetColumnsNumber();
+
+	subStreamingMiddle(depth, rows, colls);
+	subStreamingTop(depth, rows, colls);
+	subStreamingBottom(depth, rows, colls);
+
+	// Очищаем значения попавшие на границу, так как они уже сохранены в BCs
+	// !!! Делать в BC !!! fluid_->f_.fillBoundaries(0.0);
+}
+
+void SRT3DSolver::collision()
+{
+	for (int q = 0; q < kQ3d; ++q)
+		(*fluid_->f_)[q] += ((*fluid_->feq_)[q] - (*fluid_->f_)[q]) / tau_;
+}
+
+void SRT3DSolver::solve(int iter_numb)
+{
+	fluid_->Poiseuille_IC(0.01);
+
+	feqCalculate();
+	for (int q = 0; q < kQ; ++q)
+		(*fluid_->f_)[q] = (*fluid_->feq_)[q];
+
+	BCs3D bc(fluid_->GetRowsNumber(), fluid_->GetColumnsNumber(), *fluid_->f_);
+
+	for (int iter = 0; iter < iter_numb; ++iter)
+	{
+		std::cout << iter << " : ";
+		collision();
+		bc.PrepareValuesForBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
+		streaming();
+
+		bc.PeriodicBC(Boundary::TOP, Boundary::BOTTOM);
+		bc.PeriodicBC(Boundary::LEFT, Boundary::RIGHT);
+		bc.PeriodicBC(Boundary::NEAR, Boundary::FAAR);
+
+		bc.recordValuesForBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
+
+		recalculate();
+		feqCalculate();
+	}
+}
+
+void SRT3DSolver::subStreamingMiddle(const int depth, const int rows, const int colls)
+{
+	for (int z = 0; z < depth; ++z)
+	{
+		for (int q = 0; q < 9; ++q)
+		{
+			Matrix2D<double> temp = fluid_->GetDistributionFuncLayer(z, q);
+			fluid_->SetDistributionFuncLayerValue(z, q, 0.0);
+
+			for (unsigned y = 0; y < rows; ++y)
+				for (unsigned x = 0; x < colls; ++x)
+					if (medium_->IsFluid(z, y, x))
+						fluid_->f_->operator[](q)(z + ez[q], y + ey[q], x + ex[q]) = temp(y, x);
+		}
+	}
+}
+
+void SRT3DSolver::subStreamingTop(const int depth, const int rows, const int colls)
+{
+	for (int z = 0; z < depth - 1; ++z)
+	{
+		for (int q = 9; q < 14; ++q)
+		{
+			Matrix2D<double> temp = fluid_->GetDistributionFuncLayer(z, q);
+			fluid_->SetDistributionFuncLayerValue(z, q, 0.0);
+
+			for (unsigned y = 0; y < rows; ++y)
+				for (unsigned x = 0; x < colls; ++x)
+					if (medium_->IsFluid(z, y, x))
+						fluid_->f_->operator[](q)(z + ez[q], y + ey[q], x + ex[q]) = temp(y, x);
+		}
+	}
+}
+
+void SRT3DSolver::subStreamingBottom(const int depth, const int rows, const int colls)
+{
+	for (int z = depth - 1; z > 0; --z)
+	{
+		for (int q = 14; q < 19; ++q)
+		{
+			Matrix2D<double> temp = fluid_->GetDistributionFuncLayer(z, q);
+			fluid_->SetDistributionFuncLayerValue(z, q, 0.0);
+
+			for (unsigned y = 0; y < rows; ++y)
+				for (unsigned x = 0; x < colls; ++x)
+					if (medium_->IsFluid(z, y, x))
+						fluid_->f_->operator[](q)(z + ez[q], y + ey[q], x + ex[q]) = temp(y, x);
+		}
+	}
+}
+
+void SRT3DSolver::recalculate()
+{
+	fluid_->RecalculateRho();
+	fluid_->RecalculateV();
+
+	std::cout << "Total rho: " << fluid_->TotalRho() << std::endl;
+}
+
+#pragma endregion
