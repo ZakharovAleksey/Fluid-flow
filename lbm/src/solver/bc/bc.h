@@ -21,7 +21,15 @@ enum class Boundary {
 	BOTTOM,
 	RIGHT,
 	LEFT,
+	// In #d calse only
+	NEAR,
+	FAAR
 };
+
+
+#pragma region 2d
+
+
 
 class BCs
 {
@@ -29,14 +37,8 @@ class BCs
 
 public:
 
-#pragma region Constructor
-
 	BCs(unsigned rows, unsigned colls, DistributionFunction<double> & dfunc);
 	~BCs();
-
-#pragma endregion
-
-#pragma region Methods
 
 	/*!
 		Store all needed probability distribution function values on chosen boundary before BC is applying in
@@ -58,7 +60,7 @@ public:
 	//! Record ALL boundaries with already calculated BC distribution function values 
 	void recordValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
 
-#pragma region Boundary Conditions (BCs) implementation
+
 
 	//! Periodic Boundary conditions
 	void periodicBC(Boundary const first, Boundary const second);
@@ -70,10 +72,6 @@ public:
 	//! Пока не возвращем массив плотностей так как с ним меньшие погрешности
 	void vonNeumannBC(Boundary const first, Fluid & fluid, double const vx, std::vector<double> & velocity_x);
 
-#pragma endregion
-
-#pragma endregion
-
 	friend std::ostream & operator<<(std::ostream & os, BCs const & BC);
 
 private:
@@ -81,8 +79,6 @@ private:
 	void swap_id(std::map<int, std::vector<double> > & map, int const from, int const to);
 
 private:
-
-#pragma region Fields
 
 	//! Rows length [equal to rows_ of matrix]  beacuse all nodes takes placr in BC
 	unsigned length_;
@@ -102,6 +98,113 @@ private:
 	//! Store index of probability distribution function and it's values on RIGHT boundary
 	std::map<int, std::vector<double> > right_boundary_;
 
+};
+
 #pragma endregion
 
+
+#pragma region 3d
+
+
+
+class BCs3D
+{
+	friend class Fluid;
+
+public:
+
+	BCs3D(int rows, int colls, DistributionFunction3D<double> & dfunc);
+	~BCs3D() {}
+
+	void PrepareValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, BCType const near_bc, BCType far_bc);
+	bool PrepareValuesInCurBoundary(Boundary const BC, BCType const bc_type);
+	
+
+	void recordValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, BCType const near_bc, BCType far_bc);
+	void recordValuesOnCurrentBoundary(Boundary const BC, BCType const boundary_condition_type);
+
+	void PeriodicBC(Boundary const first, Boundary const second);
+
+
+
+	friend std::ostream & operator<<(std::ostream & os, BCs3D const & BC)
+	{
+		os.precision(3);
+
+		os << "TOP BOUNDARY ------ \n";
+		for (auto i : BC.top_boundary_) {
+			os << "f[" << i.first << "] = ";
+			for (auto j : i.second)
+				os << j << ' ';
+			os << std::endl;
+		}
+
+		os << "BOTTOM BOUNDARY ------ \n";
+		for (auto i : BC.bottom_boundary_) {
+			os << "f[" << i.first << "] = ";
+			for (auto j : i.second)
+				os << j << ' ';
+			os << std::endl;
+		}
+
+		os << "RIGHT BOUNDARY ------ \n";
+		for (auto i : BC.right_boundary_) {
+			os << "f[" << i.first << "] = ";
+			for (auto j : i.second)
+				os << j << ' ';
+			os << std::endl;
+		}
+
+		os << "LEFT BOUNDARY ------ \n";
+		for (auto i : BC.left_boundary_) {
+			os << "f[" << i.first << "] = ";
+			for (auto j : i.second)
+				os << j << ' ';
+			os << std::endl;
+		}
+
+		os << "NEAR BOUNDARY ------ \n";
+		for (auto i : BC.near_boundary_) {
+			os << "f[" << i.first << "] = ";
+			for (auto j : i.second)
+				os << j << ' ';
+			os << std::endl;
+		}
+
+		os << "FAR BOUNDARY ------ \n";
+		for (auto i : BC.far_boundary_) {
+			os << "f[" << i.first << "] = ";
+			for (auto j : i.second)
+				os << j << ' ';
+			os << std::endl;
+		}
+
+		return os;
+	}
+
+
+private:
+	void swap_id(std::map<int, std::vector<double> > & map, int const from, int const to);
+
+private:
+
+	//! Columns height [equal to colls_ - 2 of matrix] because UP and DOWN nodes are already counted in TOP and BOTTOM BC
+	unsigned height_;
+	//! Rows length [equal to rows_ of matrix]  beacuse all nodes takes placr in BC
+	unsigned length_;
+	
+
+	//! Poiner to Fluid distribution function to work with it's boundaries (Попробовать переделать через ссылку)
+	DistributionFunction3D<double>* f_ptr_;
+
+	//! Store index of probability distribution function and it's values on TOP boundary
+	//!	Пример: top_boundary_[1] = { Значения f[1] на верхней границе }
+	std::map<int, std::vector<double> > top_boundary_;
+	std::map<int, std::vector<double> > bottom_boundary_;
+	std::map<int, std::vector<double> > left_boundary_;
+	std::map<int, std::vector<double> > right_boundary_;
+	std::map<int, std::vector<double> > near_boundary_;
+	std::map<int, std::vector<double> > far_boundary_;
 };
+
+#pragma endregion

@@ -92,7 +92,8 @@ public:
 	void RecalculateRho();
 	// Racalculate all three velocities: vx, vy, vz
 	void RecalculateV();
-	
+	// Total rho calculation
+	long double TotalRho();
 
 private:
 

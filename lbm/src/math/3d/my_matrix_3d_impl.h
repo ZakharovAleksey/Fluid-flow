@@ -96,33 +96,49 @@ inline long double Matrix3D<T>::GetSum() const
 }
 
 template<typename T>
-inline std::vector<T> Matrix3D<T>::GetRow(unsigned const y) const
+inline std::vector<T> Matrix3D<T>::GetRow(unsigned const z) const
 {
+	// !!!Rename to GetLayer
 	// Check that row ID less than number of rows
-	assert(y < rows_);
+	std::vector<T> res(rows_ * colls_, T());
+
+	for (int y = 0; y < rows_; ++y)
+	{
+		for (int x = 0; x < colls_; ++x)
+			res.at(y * colls_ + x) = this->operator()(z, y, x);
+	}
+
+	/*assert(y < rows_);
 	std::vector<T> result(depth_ * colls_, T());
 
 	for (int z = 0; z < depth_; ++z)
 	{
-		#pragma omp parallel for
 		for (int x = 0; x < colls_; ++x)
 			result.at(z * colls_ + x) = this->operator()(z, y, x);
-	}
-	return result;
+	}*/
+	return res;
 }
 
 template<typename T>
-inline void Matrix3D<T>::SetRow(unsigned const y, std::vector<T> const & row)
+inline void Matrix3D<T>::SetRow(unsigned const z, std::vector<T> const & row)
 {
-	// Check that std::vector<T> row size is equal to columns number of matrix
-	assert(colls_ * depth_ == row.size());
+	// !!!Rename to SetLayer
+	assert(rows_ * colls_ == row.size());
 
-	for (int z = 0; z < depth_; ++z)
+	for (int y = 0; y < rows_; ++y)
 	{
-		#pragma omp parallel
 		for (int x = 0; x < colls_; ++x)
-			this->operator()(z,y,x) = row.at(z * colls_ + x);
+			this->operator()(z, y, x) = row.at(y * colls_ + x);
 	}
+
+	//// Check that std::vector<T> row size is equal to columns number of matrix
+	//assert(colls_ * depth_ == row.size());
+
+	//for (int z = 0; z < depth_; ++z)
+	//{
+	//	for (int x = 0; x < colls_; ++x)
+	//		this->operator()(z,y,x) = row.at(z * colls_ + x);
+	//}
 }
 
 template<typename T>
@@ -135,7 +151,6 @@ inline std::vector<T> Matrix3D<T>::GetColumn(unsigned const x) const
 	int curId = 0;
 	for (int z = 0; z < depth_; ++z)
 	{
-		#pragma omp parallel for
 		for (int y = 1; y < rows_ - 1; ++y)
 			result.at(curId++) = this->operator()(z, y, x);
 			//result.at(y - 1) = body_.at(x + y * colls_);
@@ -152,11 +167,104 @@ inline void Matrix3D<T>::SetColumn(unsigned const x, std::vector<T> const & coll
 	int curId = 0;
 	for (int z = 0; z < depth_; ++z)
 	{
-		#pragma omp parallel for
 		for (int y = 1; y < rows_ - 1; ++y)
 			this->operator()(z, y, x) = coll.at(curId++);
 	}
 }
+
+template<typename T>
+inline std::vector<T> Matrix3D<T>::GetTBLayer(const int z) const
+{
+	// We could take layers with are NOT boundaries
+	assert(z > 0 && z < depth_ - 1);
+	// This layer is FULL : 
+	// all Oxy plane including all elements
+	std::vector<T> res(rows_ * colls_, T());
+
+	for (int y = 0; y < rows_; ++y)
+	{
+		for (int x = 0; x < colls_; ++x)
+			res.at(y * colls_ + x) = this->operator()(z, y, x);
+	}
+
+	return res;
+}
+
+template<typename T>
+inline std::vector<T> Matrix3D<T>::GetLRLayer(const int x) const
+{
+	// We could take layers with are NOT boundaries
+	assert(x > 0 && x < colls_ - 1);
+	// This layer is NOT FULL : upper and bottom elements is belongs to TOP and BOTTOM BS respectively
+	// all elements of Oyz expect upper and lower elements
+	std::vector<T> res(rows_ * (depth_ - 2), T());
+
+	for (int z = 1; z < depth_ - 1; ++z)
+	{
+		for(int y = 0; y < rows_; ++y)
+			res.at((z - 1) * (rows_) + y) = this->operator()(z, y, x); // (z-1) to fit in vector range
+	}
+
+	return res;
+}
+
+template<typename T>
+inline std::vector<T> Matrix3D<T>::GetNFLayer(const int y) const
+{
+	// We could take layers with are NOT boundaries
+	assert(y > 0 && y < rows_ - 1);
+	// This layer is NOT FULL : upper, bottom, left and right elements is belongs to T B R L boundaries respectively
+	// all elements of Ozx expect upper, lower, left and right elements
+	std::vector<T> res((colls_ - 2) * (depth_ - 2), T());
+
+	for (int z = 1; z < depth_ - 1; ++z)
+	{
+		for (int x = 1; x < colls_ - 1; ++x)
+			res.at((z - 1) * (colls_ - 2) + (x - 1)) = this->operator()(z, y, x); // (z-1),(x-1),(colls-2) to fit in vector range
+	}
+
+	return res;
+}
+
+template<typename T>
+inline void Matrix3D<T>::SetTBLayer(unsigned const z, std::vector<T> const & layer)
+{
+	assert(layer.size() == rows_ * colls_);
+
+	for (int y = 0; y < rows_; ++y)
+	{
+		for (int x = 0; x < colls_; ++x)
+			this->operator()(z, y, x) = layer.at(y * colls_ + x);
+	}
+	
+}
+
+template<typename T>
+inline void Matrix3D<T>::SetLRLayer(unsigned const x, std::vector<T> const & layer)
+{
+	assert(layer.size() == rows_ * (depth_ - 2));
+	
+	for (int z = 1; z < depth_ - 1; ++z)
+	{
+		for (int y = 0; y < rows_; ++y)
+			this->operator()(z, y, x) = layer.at((z - 1) * (rows_) + y);
+	}
+}
+
+template<typename T>
+inline void Matrix3D<T>::SetNFLayer(unsigned const y, std::vector<T> const & layer)
+{
+	assert(layer.size() == (colls_ - 2) * (depth_ - 2));
+
+	for (int z = 1; z < depth_ - 1; ++z)
+	{
+		for (int x = 1; x < colls_ - 1; ++x)
+			this->operator()(z, y, x) = layer.at((z - 1) * (colls_ - 2) + (x - 1));
+	}
+}
+
+
+
 
 template<typename T>
 inline void Matrix3D<T>::Swap(Matrix3D<T>& other)

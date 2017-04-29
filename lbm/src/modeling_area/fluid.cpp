@@ -107,6 +107,11 @@ void Fluid3D::RecalculateV()
 	RecalculateVelocityComponent(vz_, ez);
 }
 
+long double Fluid3D::TotalRho()
+{
+	return rho_->GetSum();
+}
+
 void Fluid3D::RecalculateVelocityComponent(const MacroscopicParamPtr & v_ptr, const int e[])
 {
 	v_ptr->FillWith(0.0);

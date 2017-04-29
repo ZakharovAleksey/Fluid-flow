@@ -106,6 +106,19 @@ public:
 
 #pragma endregion
 
+	// Get Top or Bottom layer
+	std::vector<T> GetTBLayer(const int z) const;
+	// Get Left or Right layer (without upper and down elements)
+	std::vector<T> GetLRLayer(const int x) const;
+	// Get Left or Right layer (without upper and down elements)
+	std::vector<T> GetNFLayer(const int y) const;
+
+	void SetTBLayer(unsigned const z, std::vector<T> const & layer);
+	void SetLRLayer(unsigned const x, std::vector<T> const & layer);
+	void SetNFLayer(unsigned const y, std::vector<T> const & layer);
+
+
+
 
 #pragma endregion
 
@@ -114,6 +127,44 @@ public:
 
 	
 	void Resize(int new_rows_numb, int new_colls_numb, int new_depth_numb = 0) override;
+
+	// Filles ONLY side walls of Matrix with 'value' (not TOP and BOTTOM)
+	void FillBoundarySideWalls(T value)
+	{
+		for (int z = 0; z < depth_; ++z)
+		{
+			for (int y = 0; y < rows_; ++y)
+			{
+				this->operator()(z, y, 0) = value;
+				this->operator()(z, y, colls_ - 1) = value;
+			}
+
+			for (int x = 0; x < rows_; ++x)
+			{
+				this->operator()(z, 0, x) = value;
+				this->operator()(z, rows_ - 1, x) = value;
+			}
+		}
+	}
+
+	// Filles ONLY ONE layer of Matrix with 'value' (All Oxy plane with fixed 'z')
+	void FillLayer(const int z, const T value)
+	{
+		for (int y = 0; y < rows_; ++y)
+			for (int x = 0; x < colls_; ++x)
+			{
+				this->operator()(z, y, x) = value;
+			}
+	}
+
+	// Filles ONLY TOP and BOTTOM layers with 'value'
+	void FillTopBottomWalls(const T value)
+	{
+		FillLayer(0, value);
+		FillLayer(depth_ - 1, value);
+	}
+	
+
 
 	//  !!! Чисто для тестов - потом убратьЫ !!!
 	void FillWithoutBoundary(T value)

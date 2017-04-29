@@ -17,6 +17,54 @@
 #include"phys_values\3d\macroscopic_param_3d.h"
 #include"phys_values\3d\distribution_func_3d.h"
 
+
+void MatrixTest()
+{
+	int x{ 6 };
+	int y{ 5 };
+	int z{ 4 };
+
+	Matrix3D<int> m(z, y, x);
+
+	for (int zz = 0; zz < z; ++zz)
+		for (int yy = 0; yy < y; ++yy)
+			for (int xx = 0; xx < x; ++xx)
+				m(zz, yy, xx) = rand() % 100;
+
+	std::cout << m << std::endl;
+
+
+	std::vector<int> layer = m.GetTBLayer(z - 2);
+	for (auto & i : layer)
+	{
+		std::cout << i << " ";
+		i = 0;
+	}
+	std::cout << std::endl;
+
+	std::vector<int> layer1 = m.GetLRLayer(x - 2);
+	for (auto & i : layer1)
+	{
+		std::cout << i << " ";
+		i = 1;
+	}
+	std::cout << std::endl;
+
+	std::vector<int> layer2 = m.GetNFLayer(1);
+	for (auto & i : layer2)
+	{
+		std::cout << i << " ";
+		i = 3;
+	}
+	std::cout << std::endl;
+
+	/*m.SetTBLayer(z - 2, layer);
+	m.SetLRLayer(x - 2, layer1);
+	m.SetNFLayer(y - 2, layer2);*/
+
+	//std::cout << m;
+}
+
 int main()
 {
 
@@ -47,15 +95,17 @@ int main()
 
 	// 3D matrix testing
 
-	int x{ 4 };
-	int y{ 4 };
-	int z{ 5 };
+	int x{ 15 };
+	int y{ 15 };
+	int z{ 15 };
+
+	//MatrixTest();
 
 	Fluid3D f(z, y, x);
 	Medium3D m(z,y,x);
 
 	SRT3DSolver srt(1.0, m, f);
-	srt.solve(10);
+	srt.solve(1000);
 
 	/*
 		- Продумать структуру для BC!

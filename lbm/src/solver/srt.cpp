@@ -164,19 +164,32 @@ void SRT3DSolver::collision()
 		(*fluid_->f_)[q] += ((*fluid_->feq_)[q] - (*fluid_->f_)[q]) / tau_;
 }
 
-void SRT3DSolver::solve(int iteration_number)
+void SRT3DSolver::solve(int iter_numb)
 {
 	fluid_->Poiseuille_IC(0.01);
 
 	feqCalculate();
-	collision();
-	streaming();
+	for (int q = 0; q < kQ; ++q)
+		(*fluid_->f_)[q] = (*fluid_->feq_)[q];
 
-	std::ofstream myfile;
-	myfile.open("example.txt");
+	BCs3D bc(fluid_->GetRowsNumber(), fluid_->GetColumnsNumber(), *fluid_->f_);
 
-	myfile << *fluid_->f_;
-	myfile.close();
+	for (int iter = 0; iter < iter_numb; ++iter)
+	{
+		std::cout << iter << " : ";
+		collision();
+		bc.PrepareValuesForBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
+		streaming();
+
+		bc.PeriodicBC(Boundary::TOP, Boundary::BOTTOM);
+		bc.PeriodicBC(Boundary::LEFT, Boundary::RIGHT);
+		bc.PeriodicBC(Boundary::NEAR, Boundary::FAAR);
+
+		bc.recordValuesForBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
+
+		recalculate();
+		feqCalculate();
+	}
 }
 
 void SRT3DSolver::subStreamingMiddle(const int depth, const int rows, const int colls)
@@ -234,6 +247,8 @@ void SRT3DSolver::recalculate()
 {
 	fluid_->RecalculateRho();
 	fluid_->RecalculateV();
+
+	std::cout << "Total rho: " << fluid_->TotalRho() << std::endl;
 }
 
 #pragma endregion
