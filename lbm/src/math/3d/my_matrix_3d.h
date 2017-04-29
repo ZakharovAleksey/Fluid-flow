@@ -115,45 +115,45 @@ public:
 
 #pragma endregion
 
-	// Scalar multiplication on 'other' matrix: each element of matrix multiplies on appropriate element
+	//! Scalar multiplication on 'other' matrix: each element of matrix multiplies on appropriate element
 	// of 'other' matrix : this[1][2][3] * other[1][2][3]
 	Matrix3D<T> const ScalarMultiplication(Matrix3D<T> const & other);
-	// Times divide on 'other' matrix: each element of matrix divides on appropriate element
+	//! Times divide on 'other' matrix: each element of matrix divides on appropriate element
 	// of 'other' matrix : this[1][2][3] / other[1][2][3]
 	Matrix3D<T> const TimesDivide(Matrix3D<T> const & other);
 
 	
-	// Override of iMatrix method [As far as I rememder did not used in code because of std::unique_ptr<>]
+	//! Override of iMatrix method [As far as I rememder did not used in code because of std::unique_ptr<>]
 	void Resize(int new_rows_numb, int new_colls_numb, int new_depth_numb = 0) override;
 
-	// Filles ONLY side walls of Matrix with 'value' (not TOP and BOTTOM)
+	//! Filles ONLY side walls of Matrix with 'value' (not TOP and BOTTOM)
 	void FillBoundarySideWalls(const T value);
-	// Filles ONLY ONE layer of Matrix with 'value' (All Oxy plane with fixed 'z')
+	//! Filles ONLY ONE layer of Matrix with 'value' (All Oxy plane with fixed 'z')
 	void FillLayer(const int z, const T value);
-	// Filles ONLY TOP and BOTTOM layers with 'value'
+	//! Filles ONLY TOP and BOTTOM layers with 'value'
 	void FillTopBottomWalls(const T value);
-	// Filles all elements of matrix besides it's boundaries with 'value'
+	//! Filles all elements of matrix besides it's boundaries with 'value'
 	void FillWithoutBoundary(const T value);
-	// Filles all elements of matrix with 'value'
+	//! Filles all elements of matrix with 'value'
 	void FillWith(const T value);
 
 
 private:
 
-	// Swaps current 3d-matrix with 'other' 3d-matrix (No any check on dimension sizes)
+	//! Swaps current 3d-matrix with 'other' 3d-matrix (No any check on dimension sizes)
 	void Swap(Matrix3D<T> & other);
-	// Returns total number of elements in 3D matrix
+	//! Returns total number of elements in 3D matrix
 	int const GetTotalSize() const { return depth_ * rows_ * colls_; }
 
 private:
-	// Depth of the matrix (Z-axis size  value)
+	//! Depth of the matrix (Z-axis size  value)
 	int depth_;
-	// Number of matrix rows (Y-axis size  value)
+	//! Number of matrix rows (Y-axis size  value)
 	int rows_;
-	// Number of matrix columns (X-axis size  value)
+	//! Number of matrix columns (X-axis size  value)
 	int colls_;
 
-	// Body of matrix, stores all matrix elements
+	//! Body of matrix, stores all matrix elements
 	std::vector<T> body_;
 
 };

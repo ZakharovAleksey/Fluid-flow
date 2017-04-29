@@ -9,13 +9,13 @@ class iDistributionFunction
 public:
 	virtual ~iDistributionFunction() {}
 
-
+	//! Gets probability distribution function values on TOP boundary
 	virtual std::vector<T> GetTopBoundaryValues(int const q) const = 0;
-	//! Get probability distribution function values on BOTTOM boundary
+	//! Gets probability distribution function values on BOTTOM boundary
 	virtual  std::vector<T> GetBottomBoundaryValue(int const q) const = 0;
-	//! Get probability distribution function values on LEFT boundary
+	//! Gets probability distribution function values on LEFT boundary
 	virtual std::vector<T> GetLeftBoundaryValue(int const q) const = 0;
-	//! Get probability distribution function values on RIGHT boundary
+	//! Gets probability distribution function values on RIGHT boundary
 	virtual std::vector<T> GetRightBoundaryValue(int const q) const = 0;
 
 	//! Set probability distribution function values on TOP boundary equal to parameter array

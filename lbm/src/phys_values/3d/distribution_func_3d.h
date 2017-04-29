@@ -8,10 +8,18 @@
 
 #include<array>
 
+// Number of velocity directions in D3Q19 model
 const int kQ3d = 19;
 
 
-
+// Class: Probability distribution function in 3D case
+// Consists from array of 3D matrix, which numer is equal to number of velocity directions
+// in choosen model (kQ3d). 
+// For example:
+//	- DisributionFunc[0] - contains probability distribution function which did not move.
+//  - DisributionFunc[1] - contains probability distribution function which move to the right. and so on...
+//
+// Changes in comparison with 2d implementation : add similar methods for new NEAR and FAR boundaries.
 template<typename T>
 class DistributionFunction3D : public iDistributionFunction<T>
 {
@@ -76,37 +84,44 @@ public:
 #pragma endregion
 
 
-
 	// Swaps current matrix with 'other' matrix
 	void Swap(DistributionFunction3D<T> & other);
 
-
+	// Override methods of iDistributionFunction 
 	std::vector<T> GetTopBoundaryValues(int const q) const  override;
 	std::vector<T> GetBottomBoundaryValue(int const q) const override;
 	std::vector<T> GetLeftBoundaryValue(int const q) const override;
 	std::vector<T> GetRightBoundaryValue(int const q) const override;
 
-	// ! ѕроверить что ближний с индеком таким-то
+	//! Gets probability distribution function values on NEAR boundary
 	std::vector<T> GetNearBoundaryValue(int const q) const;
+	//! Gets probability distribution function values on FAR boundary
 	std::vector<T> GetFarBoundaryValue(int const q) const;
 
-
+	// Override methods of iDistributionFunction 
 	void SetTopBoundaryValue(int const q, std::vector<T> const & layer) override;
 	void SetBottomBoundaryValue(int const q, std::vector<T> const & layer) override;
 	void SetLeftBoundaryValue(int const q, std::vector<T> const & layer) override;
 	void SetRightBoundaryValue(int const q, std::vector<T> const & layer) override;
 
+	//! Set probability distribution function values on NEAR boundary equal to 'layer'
 	void SetNearBoundaryValue(int const q, std::vector<T> const & layer);
+	//! Set probability distribution function values on FAR boundary equal to 'layer'
 	void SetFarBoundaryValue(int const q, std::vector<T> const & layer);
 
+	//! Clear all boundaries of distribution function
 	void ClearBoundaries();
 
 
 private:
+	//! Depth of the matrix (Z-axis size  value)
 	int depth_;
+	//! Number of matrix rows (Y-axis size  value)
 	int rows_;
+	//! Number of matrix columns (X-axis size  value)
 	int colls_;
 
+	//! Main body of distribution function, containing all it's components
 	std::array<Matrix3D<T>, kQ3d> body_;
 };
 
