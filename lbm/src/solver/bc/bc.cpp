@@ -339,6 +339,8 @@ bool BCs3D::PrepareValuesInCurBoundary(Boundary const BC, BCType const bc_type)
 	{
 		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK) 
 		{
+			/*for (auto topId : top_ids_)
+				top_boundary_.insert(std::make_pair(topId, f_ptr_->GetTopBoundaryValues(topId)));*/
 			top_boundary_.insert(std::make_pair(9, f_ptr_->GetTopBoundaryValues(9)));
 			top_boundary_.insert(std::make_pair(10, f_ptr_->GetTopBoundaryValues(10)));
 			top_boundary_.insert(std::make_pair(11, f_ptr_->GetTopBoundaryValues(11)));
@@ -355,15 +357,18 @@ bool BCs3D::PrepareValuesInCurBoundary(Boundary const BC, BCType const bc_type)
 		return true;
 	}
 	
-	else if (BC == Boundary::BOTTOM) {
-		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK) {
+	else if (BC == Boundary::BOTTOM) 
+	{
+		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK) 
+		{
 			bottom_boundary_.insert(std::make_pair(14, f_ptr_->GetBottomBoundaryValue(14)));
 			bottom_boundary_.insert(std::make_pair(15, f_ptr_->GetBottomBoundaryValue(15)));
 			bottom_boundary_.insert(std::make_pair(16, f_ptr_->GetBottomBoundaryValue(16)));
 			bottom_boundary_.insert(std::make_pair(17, f_ptr_->GetBottomBoundaryValue(17)));
 			bottom_boundary_.insert(std::make_pair(18, f_ptr_->GetBottomBoundaryValue(18)));
 		}
-		else if (bc_type == BCType::VON_NEUMAN) {
+		else if (bc_type == BCType::VON_NEUMAN) 
+		{
 			// Пока что не реализовано исполькование ГУ типа Фон-Неймана
 			throw;
 		}
@@ -372,7 +377,8 @@ bool BCs3D::PrepareValuesInCurBoundary(Boundary const BC, BCType const bc_type)
 	}
 	
 	else if (BC == Boundary::RIGHT) {
-		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK) {
+		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK) 
+		{
 			right_boundary_.insert(std::make_pair(1, f_ptr_->GetRightBoundaryValue(1)));
 			right_boundary_.insert(std::make_pair(5, f_ptr_->GetRightBoundaryValue(5)));
 			right_boundary_.insert(std::make_pair(8, f_ptr_->GetRightBoundaryValue(8)));
@@ -388,7 +394,8 @@ bool BCs3D::PrepareValuesInCurBoundary(Boundary const BC, BCType const bc_type)
 	}
 
 	else if (BC == Boundary::LEFT) {
-		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK) {
+		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK) 
+		{
 			left_boundary_.insert(std::make_pair(3, f_ptr_->GetLeftBoundaryValue(3)));
 			left_boundary_.insert(std::make_pair(6, f_ptr_->GetLeftBoundaryValue(6)));
 			left_boundary_.insert(std::make_pair(7, f_ptr_->GetLeftBoundaryValue(7)));
@@ -404,7 +411,8 @@ bool BCs3D::PrepareValuesInCurBoundary(Boundary const BC, BCType const bc_type)
 	}
 
 	else if (BC == Boundary::NEAR) {
-		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK) {
+		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK) 
+		{
 			near_boundary_.insert(std::make_pair(4, f_ptr_->GetNearBoundaryValue(4)));
 			near_boundary_.insert(std::make_pair(7, f_ptr_->GetNearBoundaryValue(7)));
 			near_boundary_.insert(std::make_pair(8, f_ptr_->GetNearBoundaryValue(8)));
@@ -420,7 +428,8 @@ bool BCs3D::PrepareValuesInCurBoundary(Boundary const BC, BCType const bc_type)
 	}
 
 	else if (BC == Boundary::FAAR) {
-		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK) {
+		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK) 
+		{
 			far_boundary_.insert(std::make_pair(2, f_ptr_->GetFarBoundaryValue(2)));
 			far_boundary_.insert(std::make_pair(5, f_ptr_->GetFarBoundaryValue(5)));
 			far_boundary_.insert(std::make_pair(6, f_ptr_->GetFarBoundaryValue(6)));
@@ -479,8 +488,17 @@ void BCs3D::recordValuesOnCurrentBoundary(Boundary const BC, BCType const bc_typ
 		}
 		else if (bc_type == BCType::BOUNCE_BACK) 
 		{
-			std::cout << "BB BC on TOP is not yet implemented\n";
-			throw;
+			auto f_14 = top_boundary_.find(14);
+			auto f_15 = top_boundary_.find(15);
+			auto f_16 = top_boundary_.find(16);
+			auto f_17 = top_boundary_.find(17);
+			auto f_18 = top_boundary_.find(18);
+
+			f_ptr_->SetTopBoundaryValue(f_14->first, f_14->second);
+			f_ptr_->SetTopBoundaryValue(f_15->first, f_15->second);
+			f_ptr_->SetTopBoundaryValue(f_16->first, f_16->second);
+			f_ptr_->SetTopBoundaryValue(f_17->first, f_17->second);
+			f_ptr_->SetTopBoundaryValue(f_18->first, f_18->second);
 		}
 		else if (bc_type == BCType::VON_NEUMAN) 
 		{
@@ -488,8 +506,11 @@ void BCs3D::recordValuesOnCurrentBoundary(Boundary const BC, BCType const bc_typ
 			throw;
 		}
 	}
-	else if (BC == Boundary::BOTTOM) {
-		if (bc_type == BCType::PERIODIC) {
+	
+	else if (BC == Boundary::BOTTOM) 
+	{
+		if (bc_type == BCType::PERIODIC) 
+		{
 			auto f_14 = top_boundary_.find(14);
 			auto f_15 = top_boundary_.find(15);
 			auto f_16 = top_boundary_.find(16);
@@ -504,22 +525,27 @@ void BCs3D::recordValuesOnCurrentBoundary(Boundary const BC, BCType const bc_typ
 		}
 		else if (bc_type == BCType::BOUNCE_BACK) 
 		{
-			std::cout << "BB BC on BOTTOM is not yet implemented\n";
-			/*auto f_2 = bottom_boundary_.find(2);
-			auto f_5 = bottom_boundary_.find(5);
-			auto f_6 = bottom_boundary_.find(6);
 
-			f_ptr_->setBottomBoundaryValue(f_2->first, f_2->second);
-			f_ptr_->setBottomBoundaryValue(f_5->first, f_5->second);
-			f_ptr_->setBottomBoundaryValue(f_6->first, f_6->second);*/
-			throw;
+			auto f_9 = bottom_boundary_.find(9);
+			auto f_10 = bottom_boundary_.find(10);
+			auto f_11 = bottom_boundary_.find(11);
+			auto f_12 = bottom_boundary_.find(12);
+			auto f_13 = bottom_boundary_.find(13);
+
+			f_ptr_->SetBottomBoundaryValue(f_9->first, f_9->second);
+			f_ptr_->SetBottomBoundaryValue(f_10->first, f_10->second);
+			f_ptr_->SetBottomBoundaryValue(f_11->first, f_11->second);
+			f_ptr_->SetBottomBoundaryValue(f_12->first, f_12->second);
+			f_ptr_->SetBottomBoundaryValue(f_13->first, f_13->second);
 		}
 		else if (bc_type == BCType::VON_NEUMAN) {
 			// Пока еще не реализованно
 			throw;
 		}
 	}
-	else if (BC == Boundary::RIGHT) {
+	
+	else if (BC == Boundary::RIGHT) 
+	{
 		if (bc_type == BCType::PERIODIC) {
 			auto f_1 = left_boundary_.find(1);
 			auto f_5 = left_boundary_.find(5);
@@ -533,21 +559,8 @@ void BCs3D::recordValuesOnCurrentBoundary(Boundary const BC, BCType const bc_typ
 			f_ptr_->SetLeftBoundaryValue(f_10->first, f_10->second);
 			f_ptr_->SetLeftBoundaryValue(f_15->first, f_15->second);
 		}
-		else if (bc_type == BCType::BOUNCE_BACK ||
-			bc_type == BCType::VON_NEUMAN)
+		else if (bc_type == BCType::BOUNCE_BACK)
 		{
-			/*auto f_1 = left_boundary_.find(1);
-			auto f_5 = left_boundary_.find(5);
-			auto f_8 = left_boundary_.find(8);
-
-			f_ptr_->setLeftBoundaryValue(f_1->first, f_1->second);
-			f_ptr_->setLeftBoundaryValue(f_5->first, f_5->second);
-			f_ptr_->setLeftBoundaryValue(f_8->first, f_8->second);*/
-			throw;
-		}
-	}
-	else if (BC == Boundary::LEFT) {
-		if (bc_type == BCType::PERIODIC) {
 			auto f_3 = right_boundary_.find(3);
 			auto f_6 = right_boundary_.find(6);
 			auto f_7 = right_boundary_.find(7);
@@ -560,21 +573,49 @@ void BCs3D::recordValuesOnCurrentBoundary(Boundary const BC, BCType const bc_typ
 			f_ptr_->SetRightBoundaryValue(f_12->first, f_12->second);
 			f_ptr_->SetRightBoundaryValue(f_17->first, f_17->second);
 		}
-		else if (bc_type == BCType::BOUNCE_BACK) {
-			/*auto f_3 = right_boundary_.find(3);
-			auto f_6 = right_boundary_.find(6);
-			auto f_7 = right_boundary_.find(7);
-
-			f_ptr_->setRightBoundaryValue(f_3->first, f_3->second);
-			f_ptr_->setRightBoundaryValue(f_6->first, f_6->second);
-			f_ptr_->setRightBoundaryValue(f_7->first, f_7->second);*/
+		else if (bc_type == BCType::VON_NEUMAN)
+		{
 			throw;
 		}
-		else if (bc_type == BCType::VON_NEUMAN) {
+	}
+	
+	else if (BC == Boundary::LEFT) 
+	{
+		if (bc_type == BCType::PERIODIC) 
+		{
+			auto f_3 = right_boundary_.find(3);
+			auto f_6 = right_boundary_.find(6);
+			auto f_7 = right_boundary_.find(7);
+			auto f_12 = right_boundary_.find(12);
+			auto f_17 = right_boundary_.find(17);
+
+			f_ptr_->SetRightBoundaryValue(f_3->first, f_3->second);
+			f_ptr_->SetRightBoundaryValue(f_6->first, f_6->second);
+			f_ptr_->SetRightBoundaryValue(f_7->first, f_7->second);
+			f_ptr_->SetRightBoundaryValue(f_12->first, f_12->second);
+			f_ptr_->SetRightBoundaryValue(f_17->first, f_17->second);
+		}
+		else if (bc_type == BCType::BOUNCE_BACK) 
+		{
+			auto f_1 = left_boundary_.find(1);
+			auto f_5 = left_boundary_.find(5);
+			auto f_8 = left_boundary_.find(8);
+			auto f_10 = left_boundary_.find(10);
+			auto f_15 = left_boundary_.find(15);
+
+			f_ptr_->SetLeftBoundaryValue(f_1->first, f_1->second);
+			f_ptr_->SetLeftBoundaryValue(f_5->first, f_5->second);
+			f_ptr_->SetLeftBoundaryValue(f_8->first, f_8->second);
+			f_ptr_->SetLeftBoundaryValue(f_10->first, f_10->second);
+			f_ptr_->SetLeftBoundaryValue(f_15->first, f_15->second);
+		}
+		else if (bc_type == BCType::VON_NEUMAN) 
+		{
 			// Пока еще не реализованно
 			throw;
 		}
 	}
+	
 	else if (BC == Boundary::NEAR) {
 		if (bc_type == BCType::PERIODIC) {
 			auto f_4 = far_boundary_.find(4);
@@ -589,23 +630,8 @@ void BCs3D::recordValuesOnCurrentBoundary(Boundary const BC, BCType const bc_typ
 			f_ptr_->SetFarBoundaryValue(f_13->first, f_13->second);
 			f_ptr_->SetFarBoundaryValue(f_18->first, f_18->second);
 		}
-		else if (bc_type == BCType::BOUNCE_BACK) {
-			/*auto f_3 = right_boundary_.find(3);
-			auto f_6 = right_boundary_.find(6);
-			auto f_7 = right_boundary_.find(7);
-
-			f_ptr_->setRightBoundaryValue(f_3->first, f_3->second);
-			f_ptr_->setRightBoundaryValue(f_6->first, f_6->second);
-			f_ptr_->setRightBoundaryValue(f_7->first, f_7->second);*/
-			throw;
-		}
-		else if (bc_type == BCType::VON_NEUMAN) {
-			// Пока еще не реализованно
-			throw;
-		}
-	}
-	else if (BC == Boundary::FAAR) {
-		if (bc_type == BCType::PERIODIC) {
+		else if (bc_type == BCType::BOUNCE_BACK) 
+		{
 			auto f_2 = near_boundary_.find(2);
 			auto f_5 = near_boundary_.find(5);
 			auto f_6 = near_boundary_.find(6);
@@ -618,17 +644,45 @@ void BCs3D::recordValuesOnCurrentBoundary(Boundary const BC, BCType const bc_typ
 			f_ptr_->SetNearBoundaryValue(f_11->first, f_11->second);
 			f_ptr_->SetNearBoundaryValue(f_16->first, f_16->second);
 		}
-		else if (bc_type == BCType::BOUNCE_BACK) {
-			/*auto f_3 = right_boundary_.find(3);
-			auto f_6 = right_boundary_.find(6);
-			auto f_7 = right_boundary_.find(7);
-
-			f_ptr_->setRightBoundaryValue(f_3->first, f_3->second);
-			f_ptr_->setRightBoundaryValue(f_6->first, f_6->second);
-			f_ptr_->setRightBoundaryValue(f_7->first, f_7->second);*/
+		else if (bc_type == BCType::VON_NEUMAN) 
+		{
+			// Пока еще не реализованно
 			throw;
 		}
-		else if (bc_type == BCType::VON_NEUMAN) {
+	}
+	
+	else if (BC == Boundary::FAAR) {
+		if (bc_type == BCType::PERIODIC) 
+		{
+			auto f_2 = near_boundary_.find(2);
+			auto f_5 = near_boundary_.find(5);
+			auto f_6 = near_boundary_.find(6);
+			auto f_11 = near_boundary_.find(11);
+			auto f_16 = near_boundary_.find(16);
+
+			f_ptr_->SetNearBoundaryValue(f_2->first, f_2->second);
+			f_ptr_->SetNearBoundaryValue(f_5->first, f_5->second);
+			f_ptr_->SetNearBoundaryValue(f_6->first, f_6->second);
+			f_ptr_->SetNearBoundaryValue(f_11->first, f_11->second);
+			f_ptr_->SetNearBoundaryValue(f_16->first, f_16->second);
+		}
+		else if (bc_type == BCType::BOUNCE_BACK) 
+		{
+			auto f_4 = far_boundary_.find(4);
+			auto f_7 = far_boundary_.find(7);
+			auto f_8 = far_boundary_.find(8);
+			auto f_13 = far_boundary_.find(13);
+			auto f_18 = far_boundary_.find(18);
+			
+
+			f_ptr_->SetFarBoundaryValue(f_4->first, f_4->second);
+			f_ptr_->SetFarBoundaryValue(f_7->first, f_7->second);
+			f_ptr_->SetFarBoundaryValue(f_8->first, f_8->second);
+			f_ptr_->SetFarBoundaryValue(f_13->first, f_13->second);
+			f_ptr_->SetFarBoundaryValue(f_18->first, f_18->second);
+		}
+		else if (bc_type == BCType::VON_NEUMAN) 
+		{
 			// Пока еще не реализованно
 			throw;
 		}
@@ -661,6 +715,58 @@ void BCs3D::PeriodicBC(Boundary const first, Boundary const second)
 		throw;
 	}
 		
+}
+
+void BCs3D::BounceBackBC(Boundary const first)
+{
+	if (first == Boundary::TOP) 
+	{
+		swap_id(top_boundary_, 9, 14);
+		swap_id(top_boundary_, 10, 17);
+		swap_id(top_boundary_, 11, 18);
+		swap_id(top_boundary_, 12, 15);
+		swap_id(top_boundary_, 13, 16);
+	}
+	else if (first == Boundary::BOTTOM) 
+	{
+		swap_id(bottom_boundary_, 14, 9);
+		swap_id(bottom_boundary_, 15, 12);
+		swap_id(bottom_boundary_, 16, 13);
+		swap_id(bottom_boundary_, 17, 10);
+		swap_id(bottom_boundary_, 18, 11);
+	}
+	else if (first == Boundary::LEFT) 
+	{
+		swap_id(left_boundary_, 3, 1);
+		swap_id(left_boundary_, 6, 8);
+		swap_id(left_boundary_, 7, 5);
+		swap_id(left_boundary_, 12, 15);
+		swap_id(left_boundary_, 17, 10);
+	}
+	else if (first == Boundary::RIGHT) 
+	{
+		swap_id(right_boundary_, 1, 3);
+		swap_id(right_boundary_, 5, 7);
+		swap_id(right_boundary_, 8, 6);
+		swap_id(right_boundary_, 10, 17);
+		swap_id(right_boundary_, 15, 12);
+	}
+	else if (first == Boundary::NEAR)
+	{
+		swap_id(near_boundary_, 4, 2);
+		swap_id(near_boundary_, 7, 5);
+		swap_id(near_boundary_, 8, 6);
+		swap_id(near_boundary_, 13, 16);
+		swap_id(near_boundary_, 18, 11);
+	}
+	else if (first == Boundary::FAAR)
+	{
+		swap_id(far_boundary_, 2, 4);
+		swap_id(far_boundary_, 5, 7);
+		swap_id(far_boundary_, 6, 8);
+		swap_id(far_boundary_, 11, 18);
+		swap_id(far_boundary_, 16, 13);
+	}
 }
 
 void BCs3D::swap_id(std::map<int, std::vector<double>>& map, int const from, int const to)

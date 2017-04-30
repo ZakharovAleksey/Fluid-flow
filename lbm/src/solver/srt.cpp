@@ -175,44 +175,83 @@ void SRT3DSolver::solve(int iter_numb)
 	{
 		std::cout << iter << " : ";
 		collision();
-		bc.PrepareValuesForBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
+		bc.PrepareValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
+		//bc.PrepareValuesForBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
 		streaming();
 
-		bc.PeriodicBC(Boundary::TOP, Boundary::BOTTOM);
+		/*bc.PeriodicBC(Boundary::TOP, Boundary::BOTTOM);
 		bc.PeriodicBC(Boundary::LEFT, Boundary::RIGHT);
-		bc.PeriodicBC(Boundary::NEAR, Boundary::FAAR);
+		bc.PeriodicBC(Boundary::NEAR, Boundary::FAAR);*/
+		bc.BounceBackBC(Boundary::TOP);
+		bc.BounceBackBC(Boundary::BOTTOM);
+		bc.BounceBackBC(Boundary::LEFT);
+		bc.BounceBackBC(Boundary::RIGHT);
+		bc.BounceBackBC(Boundary::NEAR);
+		bc.BounceBackBC(Boundary::FAAR);
 
-		bc.RecordValuesForBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
+		bc.RecordValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
+		//bc.RecordValuesForBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
 
 		recalculate();
 		feqCalculate();
+
+		if (iter % 10 == 0)
+			GetProfile(15, iter);
 	}
-	GetProfile(5);
+	
 }
 
-void SRT3DSolver::GetProfile(const int chan_numb)
+void SRT3DSolver::GetProfile(const int chan_numb, const int iter_numb)
 {
 	std::vector<double> res = fluid_->vy_->GetNFLayer(chan_numb);
 	int colls = fluid_->GetColumnsNumber();
 	int rows = fluid_->GetRowsNumber();
 	int depth = fluid_->GetDepthNumber();
 
-	std::ofstream file;
-	file.open("Data/ex.txt");
-
-	file.precision(3);
-	//int i = 0;
-
-	for (int i = 0; i < res.size(); ++i)
-	{
-		
-		if(i != 0 && (i % (colls - 2) == 0))
-			file << std::endl;
-		file << res.at(i) << " ";
-	}
-
-	file.close();
 	
+
+	std::string name = "Data/ex" + std::to_string(iter_numb) + ".txt";
+	if (WriteHeatMapInFile(name, res, colls - 2))
+	{
+		std::cout << "Data writing complete successfully!\n";
+	}
+	
+	
+}
+
+bool SRT3DSolver::WriteHeatMapInFile(const std::string & file_name, const std::vector<double>& data, const int lenght)
+{
+	std::ofstream file;
+	file.open(file_name);
+	if (file.is_open())
+	{
+		file.precision(3);
+
+		for (int i = 0; i < data.size(); ++i)
+		{
+			// If this is laset element in the row
+			if (i != 0 && ((i + 1) % lenght == 0))
+			{
+				// If it is not last element in list we need to and endl
+				if (i != data.size() - 1)
+					file << data.at(i) << std::endl;
+				// If it is las element in list we need no endl
+				else
+					file << data.at(i);
+			}
+			else
+				file << data.at(i) << " ";
+		}
+
+		file.close();
+		return true;
+	}
+	else
+	{
+		std::cout << "Could not open file: " << file_name << " on writing!\n";
+	}
+	return false;
+
 	
 }
 

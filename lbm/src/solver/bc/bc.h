@@ -131,6 +131,8 @@ public:
 
 	//! Applies periodic boundary conditions
 	void PeriodicBC(Boundary const first, Boundary const second);
+	//! Applies bounce back boundary conditions
+	void BounceBackBC(Boundary const first);
 
 	friend std::ostream & operator<<(std::ostream & os, BCs3D const & BC)
 	{
@@ -192,6 +194,15 @@ private:
 	void swap_id(std::map<int, std::vector<double> > & map, int const from, int const to);
 
 private:
+
+
+	const std::vector<int> top_ids_{ 9,10,11,12,13 };
+	const std::vector<int> bottom_ids_{ 14,15,16,17,18 };
+	const std::vector<int> left_ids_{ 3,6,7,12,17 };
+	const std::vector<int> right_ids_{ 1,5,8,10,15 };
+	const std::vector<int> near_ids_{ 4,7,8,13,18 };
+	const std::vector<int> far_ids_{ 2,5,6,11,16 };
+	
 
 	//! Columns height [equal to colls_ - 2 of matrix] because UP and DOWN nodes are already counted in TOP and BOTTOM BC
 	unsigned height_;

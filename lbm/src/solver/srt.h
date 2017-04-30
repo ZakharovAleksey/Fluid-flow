@@ -74,7 +74,10 @@ public:
 	void solve(int iteration_number) override;
 
 
-	void GetProfile(const int chan_numb);
+	void GetProfile(const int chan_numb, const int iter_numb);
+	//! Implements correct hetmap writing in file ('length' is a number of elements in one line)
+	bool WriteHeatMapInFile(const std::string & file_name, const std::vector<double> & data, const int lenght);
+
 
 private:
 	//! Implementation of streaming for 0-8 velocity directions
