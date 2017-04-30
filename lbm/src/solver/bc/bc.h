@@ -122,7 +122,8 @@ public:
 	void PrepareValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, BCType const near_bc, BCType far_bc);
 	//! Prepare values for CHOOSEN ONE BC BEFORE Streaming
 	bool PrepareValuesInCurBoundary(Boundary const BC, BCType const bc_type);
-	
+	bool WriteBoundaryValues(BCType const bc_type, std::map<int, std::vector<double> > & bc_boundary, const std::vector<int> & bc_ids, std::vector<double>(DistributionFunction3D<double>::*ptrToFunc)(int)const);
+
 	//! Record ALL values for choosen BC AFTER Streaming (BC applying itself)
 	void RecordValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, BCType const near_bc, BCType far_bc);
 	//! Record values for choosen ONE BC AFTER Streaming (BC applying itself)
