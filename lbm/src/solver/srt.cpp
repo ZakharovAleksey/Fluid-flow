@@ -175,22 +175,22 @@ void SRT3DSolver::solve(int iter_numb)
 	{
 		std::cout << iter << " : ";
 		collision();
-		bc.PrepareValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
-		//bc.PrepareValuesForBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
+		//bc.PrepareValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
+		bc.PrepareValuesForAllBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
 		streaming();
 
-		/*bc.PeriodicBC(Boundary::TOP, Boundary::BOTTOM);
+		bc.PeriodicBC(Boundary::TOP, Boundary::BOTTOM);
 		bc.PeriodicBC(Boundary::LEFT, Boundary::RIGHT);
-		bc.PeriodicBC(Boundary::NEAR, Boundary::FAAR);*/
-		bc.BounceBackBC(Boundary::TOP);
+		bc.PeriodicBC(Boundary::NEAR, Boundary::FAAR);
+		/*bc.BounceBackBC(Boundary::TOP);
 		bc.BounceBackBC(Boundary::BOTTOM);
 		bc.BounceBackBC(Boundary::LEFT);
 		bc.BounceBackBC(Boundary::RIGHT);
 		bc.BounceBackBC(Boundary::NEAR);
-		bc.BounceBackBC(Boundary::FAAR);
+		bc.BounceBackBC(Boundary::FAAR);*/
 
-		bc.RecordValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
-		//bc.RecordValuesForBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
+		//bc.RecordValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
+		bc.RecordValuesForAllBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
 
 		recalculate();
 		feqCalculate();

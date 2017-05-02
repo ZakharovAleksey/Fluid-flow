@@ -102,7 +102,7 @@ int main()
 	Medium3D m(z,y,x);
 
 	SRT3DSolver srt(1.0, m, f);
-	srt.solve(50);
+	srt.solve(51);
 
 	// >>> 
 

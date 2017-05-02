@@ -119,17 +119,11 @@ public:
 	~BCs3D() {}
 
 	//! Prepare ALL values for choosen BC BEFORE Streaming
-	void PrepareValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, BCType const near_bc, BCType far_bc);
-	//! Prepare values for CHOOSEN ONE BC BEFORE Streaming
-	bool PrepareValuesInCurBoundary(Boundary const BC, BCType const bc_type);
-	bool WriteBoundaryValues(BCType const bc_type, std::map<int, std::vector<double> > & bc_boundary, const std::vector<int> & bc_ids, std::vector<double>(DistributionFunction3D<double>::*ptrToFunc)(int)const);
-
+	void PrepareValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, BCType const near_bc, BCType far_bc);
 	//! Record ALL values for choosen BC AFTER Streaming (BC applying itself)
-	void RecordValuesForBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, BCType const near_bc, BCType far_bc);
-	//! Record values for choosen ONE BC AFTER Streaming (BC applying itself)
-	void recordValuesOnCurrentBoundary(Boundary const BC, BCType const boundary_condition_type);
+	void RecordValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, BCType const near_bc, BCType far_bc);
 	
-
+	
 	//! Applies periodic boundary conditions
 	void PeriodicBC(Boundary const first, Boundary const second);
 	//! Applies bounce back boundary conditions
@@ -191,12 +185,23 @@ public:
 	}
 
 private:
+
+	//! Prepare values for CHOOSEN ONE BC BEFORE Streaming
+	bool PrepareValuesForSingleBC(Boundary const BC, BCType const bc_type);
+	//! Writes a single distribution function components to an appropriate class field
+	bool WriteBoundaryValues(BCType const bc_type, std::map<int, std::vector<double> > & bc_boundary, const std::vector<int> & bc_ids, std::vector<double>(DistributionFunction3D<double>::*ptrToFunc)(int)const);
+
+	//! Record values for choosen ONE BC AFTER Streaming (BC applying itself)
+	bool RecordValuesForSingleBC(Boundary const BC, BCType const boundary_condition_type);
+	//! Records a single component distribution function component boundary to appropriate boundary of distribution function
+	bool RecordBoundaryValues(BCType const bc_type, std::map<int, std::vector<double> > & bc_boundary, const std::vector<int> & bc_ids, void(DistributionFunction3D<double>::* ptrToFunc)(int const, std::vector<double> const &));
+
 	//! Swap two stored boundary values
 	void swap_id(std::map<int, std::vector<double> > & map, int const from, int const to);
 
 private:
 
-
+	//! Indexes of velocity components on appropriate boundaries
 	const std::vector<int> top_ids_{ 9,10,11,12,13 };
 	const std::vector<int> bottom_ids_{ 14,15,16,17,18 };
 	const std::vector<int> left_ids_{ 3,6,7,12,17 };
