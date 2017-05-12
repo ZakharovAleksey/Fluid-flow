@@ -24,6 +24,19 @@ std::vector<T> operator+(std::vector<T> const & left, std::vector<T> const & rig
 	return result;
 }
 
+
+template<typename T>
+std::vector<T>& operator+=(Matrix3D<T>& left, const Matrix3D<T>& right)
+{
+	assert(left.size() == right.size());
+
+	for (int i = 0; i < result.size(); ++i)
+		left.at(i) += right.at(i);
+
+	return left;
+}
+
+
 template <typename T>
 std::vector<T> operator-(std::vector<T> const & left, std::vector<T> const & right)
 {

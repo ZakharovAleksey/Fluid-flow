@@ -76,7 +76,7 @@ int main()
 
 	// >>>  2D case 
 
-	/*int X{ 100 };
+	int X{ 100 };
 	int Y{ 20 };
 	Fluid f(Y, X);
 	Medium m(Y, X);
@@ -84,7 +84,7 @@ int main()
 	f.Poiseuille_IC(0.01);
 
 	SRTsolver solver(1.0, m, f);
-	solver.solve(100);*/
+	solver.solve(100);
 
 	// >>>
 
@@ -92,17 +92,17 @@ int main()
 
 	// >>> 3D case
 
-	int x{ 10 }; // 10
-	int y{ 35 }; // 35
-	int z{ 10 }; // 10
+	//int x{ 10 }; // 10
+	//int y{ 35 }; // 35
+	//int z{ 10 }; // 10
 
-	//MatrixTest();
+	////MatrixTest();
 
-	Fluid3D f(z, y, x);
-	Medium3D m(z,y,x);
+	//Fluid3D f(z, y, x);
+	//Medium3D m(z,y,x);
 
-	SRT3DSolver srt(1.0, m, f);
-	srt.solve(51);
+	//SRT3DSolver srt(1.0, m, f);
+	//srt.solve(51);
 
 	// >>> 
 

@@ -60,7 +60,7 @@ void SRTsolver::solve(int iteration_number)
 
 	for (int iter = 0; iter < iteration_number; ++iter) {
 		collision();
-		BC.prepareValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
 
 		streaming();
 
@@ -71,7 +71,7 @@ void SRTsolver::solve(int iteration_number)
 		BC.vonNeumannBC(Boundary::LEFT, *fluid_, 0.01, vx);
 
 
-		BC.recordValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
 
 		recalculate();
 		fluid_->vx_.SetColumn(1, vx);
@@ -175,28 +175,33 @@ void SRT3DSolver::solve(int iter_numb)
 	{
 		std::cout << iter << " : ";
 		collision();
-		//bc.PrepareValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
-		bc.PrepareValuesForAllBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
+		bc.PrepareValuesForAllBC(BCType::VON_NEUMAN, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
+		//bc.PrepareValuesForAllBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
 		streaming();
 
-		bc.PeriodicBC(Boundary::TOP, Boundary::BOTTOM);
+		/*bc.PeriodicBC(Boundary::TOP, Boundary::BOTTOM);
 		bc.PeriodicBC(Boundary::LEFT, Boundary::RIGHT);
-		bc.PeriodicBC(Boundary::NEAR, Boundary::FAAR);
-		/*bc.BounceBackBC(Boundary::TOP);
+		bc.PeriodicBC(Boundary::NEAR, Boundary::FAAR);*/
+		bc.VonNeumannBC(Boundary::TOP, 0.0, 0.0, 0.01);
+		//bc.BounceBackBC(Boundary::TOP);
 		bc.BounceBackBC(Boundary::BOTTOM);
 		bc.BounceBackBC(Boundary::LEFT);
 		bc.BounceBackBC(Boundary::RIGHT);
 		bc.BounceBackBC(Boundary::NEAR);
-		bc.BounceBackBC(Boundary::FAAR);*/
+		bc.BounceBackBC(Boundary::FAAR);
 
-		//bc.RecordValuesForBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
-		bc.RecordValuesForAllBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
+		bc.RecordValuesForAllBC(BCType::VON_NEUMAN, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
+		//bc.RecordValuesForAllBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
 
 		recalculate();
+		fluid_->vz_->SetTBLayer(1, std::vector<double>(fluid_->GetColumnsNumber() * fluid_->GetRowsNumber(), 0.01));
+
+		//std::cout << *fluid_->vz_;
+
 		feqCalculate();
 
-		if (iter % 10 == 0)
-			GetProfile(15, iter);
+		/*if (iter % 10 == 0)
+			GetProfile(15, iter);*/
 	}
 	
 }
