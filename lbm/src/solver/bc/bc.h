@@ -61,23 +61,9 @@ public:
 	void BounceBackBC(Boundary const first);
 
 	//! Пока не возвращем массив плотностей так как с ним меньшие погрешности
-	void VonNeumannBC(Boundary const first, Fluid & fluid, double const vx, std::vector<double> & velocity_x);
-
-	void VonNeumannBC1(Boundary const first, Fluid & fluid, double const vx, double const vy)
-	{
-		if (first == Boundary::TOP)
-			VonNeumannBC1(first, fluid, mid_width_ids_, top_ids_, vx, vy);
-		else if(first == Boundary::BOTTOM)
-			VonNeumannBC1(first, fluid, mid_width_ids_, bottom_ids_, vx, vy);
-		else if (first == Boundary::LEFT)
-			VonNeumannBC1(first, fluid, mid_height_ids_, left_ids_, vx, vy);
-		else if (first == Boundary::RIGHT)
-			VonNeumannBC1(first, fluid, mid_height_ids_, right_ids_, vx, vy);
-	}
-
-	void VonNeumannBC1(Boundary const first, Fluid& fluid, 
-		const std::vector<int> ids_1, const std::vector<int> ids_2,
-		double const vx = 0.0, double const vy = 0.0);
+	void VonNeumannBC_OLD(Boundary const first, Fluid & fluid, double const vx, std::vector<double> & velocity_x);
+	//! Applies Von-Neumann boundary conditions (constant velocity flow on choosen boundary)
+	void VonNeumannBC(Boundary const first, Fluid & fluid, double const vx, double const vy);
 
 	friend std::ostream & operator<<(std::ostream & os, BCs const & BC);
 
@@ -97,6 +83,10 @@ private:
 
 	//! Swap two stored boundary values
 	void SwapId(std::map<int, std::vector<double> > & map, int const from, int const to);
+
+	//! Applies Von-Neumann boundary conditions inside public function (changing ids)
+	void VonNeumannBC1(Boundary const first, Fluid& fluid, const std::vector<int> ids_1, const std::vector<int> ids_2, double const vx = 0.0, double const vy = 0.0);
+
 
 private:
 

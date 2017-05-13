@@ -76,7 +76,7 @@ int main()
 
 	// >>>  2D case 
 
-	int X{ 20 }; //100
+	int X{ 30 }; //100
 	int Y{ 20 };
 	Fluid f(Y, X);
 	Medium m(Y, X);

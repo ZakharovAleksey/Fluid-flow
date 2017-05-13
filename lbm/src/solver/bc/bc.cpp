@@ -269,7 +269,7 @@ void BCs::BounceBackBC(Boundary const first)
 	}
 }
 
-void BCs::VonNeumannBC(Boundary const first, Fluid & fluid, double const vx, std::vector<double> & velocity_x)
+void BCs::VonNeumannBC_OLD(Boundary const first, Fluid & fluid, double const vx, std::vector<double> & velocity_x)
 {
 	// Подготовка векторов, куда запишутся скорость и плотность на границе
 	if (vx != 0.0) 
@@ -309,16 +309,41 @@ void BCs::VonNeumannBC(Boundary const first, Fluid & fluid, double const vx, std
 	}
 }
 
-void BCs::VonNeumannBC1(Boundary const first, Fluid & fluid, 
-	const std::vector<int> ids_1, const std::vector<int> ids_2, 
-	double const vx, double const vy)
+void BCs::VonNeumannBC(Boundary const first, Fluid & fluid, double const vx, double const vy)
 {
-	std::vector<double> vel_x(fluid.size().second, vx);
-	std::vector<double> vel_y(fluid.size().second, vy);
+	switch (first)
+	{
+	case Boundary::TOP:
+		VonNeumannBC1(first, fluid, mid_width_ids_, top_ids_, vx, vy);
+		break;
+	case Boundary::BOTTOM:
+		VonNeumannBC1(first, fluid, mid_width_ids_, bottom_ids_, vx, vy);
+		break;
+	case Boundary::LEFT:
+		VonNeumannBC1(first, fluid, mid_height_ids_, left_ids_, vx, vy);
+		break;
+	case Boundary::RIGHT:
+		VonNeumannBC1(first, fluid, mid_height_ids_, right_ids_, vx, vy);
+		break;
+	default:
+		std::cout << "Try to apply Von-Neumann BC to wrong boundary type.\n";
+		break;
+	}
+}
+
+void BCs::VonNeumannBC1(Boundary const first, Fluid & fluid, const std::vector<int> ids_1, const std::vector<int> ids_2, double const vx, double const vy)
+{
+	// Arrays with incoming velocities for further calcuations
+
+	const int x_size = fluid.size().second;
+	const int y_size = fluid.size().first - 2;
+
+	std::vector<double> vel_x(x_size, vx);
+	std::vector<double> vel_y(y_size, vy);
 
 	if (first == Boundary::TOP)
 	{
-		std::vector<double> rho(fluid.size().second, 0.0);
+		std::vector<double> rho(x_size, 0.0);
 
 		for (auto id : ids_1)
 			rho = rho + top_boundary_.at(id);
@@ -344,7 +369,7 @@ void BCs::VonNeumannBC1(Boundary const first, Fluid & fluid,
 	}
 	else if (first == Boundary::BOTTOM)
 	{
-		std::vector<double> rho(fluid.size().second, 0.0);
+		std::vector<double> rho(x_size, 0.0);
 
 		for (auto id : ids_1)
 			rho = rho + bottom_boundary_.at(id);
@@ -370,7 +395,7 @@ void BCs::VonNeumannBC1(Boundary const first, Fluid & fluid,
 	}
 	else if (first == Boundary::LEFT)
 	{
-		std::vector<double> rho(fluid.size().first - 2, 0.0);
+		std::vector<double> rho(y_size, 0.0);
 
 		for (auto id : ids_1)
 			rho = rho + left_boundary_.at(id);
@@ -397,7 +422,7 @@ void BCs::VonNeumannBC1(Boundary const first, Fluid & fluid,
 	}
 	else if (first == Boundary::RIGHT)
 	{
-		std::vector<double> rho(fluid.size().first - 2, 0.0);
+		std::vector<double> rho(y_size, 0.0);
 
 		for (auto id : ids_1)
 			rho = rho + right_boundary_.at(id);

@@ -66,12 +66,12 @@ void SRTsolver::solve(int iteration_number)
 		streaming();
 
 		//BC.BounceBackBC(Boundary::TOP);
-		BC.VonNeumannBC1(Boundary::TOP, *fluid_, 0.01, 0.0);
+		BC.VonNeumannBC(Boundary::TOP, *fluid_, 0.01, 0.0);
 		BC.BounceBackBC(Boundary::BOTTOM);
 		//BC.BounceBackBC(Boundary::RIGHT);
 		/*std::vector<double> vx;
 		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.01, vx);*/
-		BC.VonNeumannBC1(Boundary::RIGHT, *fluid_, 0.00, 0.01);
+		BC.VonNeumannBC(Boundary::RIGHT, *fluid_, 0.00, 0.01);
 		BC.BounceBackBC(Boundary::LEFT);
 
 		//BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
