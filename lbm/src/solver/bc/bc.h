@@ -69,6 +69,12 @@ public:
 		{
 			VonNeumannBC1(first, fluid, mid_width_ids_, top_ids_, vx, vy);
 		}
+		else if(first == Boundary::BOTTOM)
+		{
+			VonNeumannBC1(first, fluid, mid_width_ids_, bottom_ids_, vx, vy);
+		}
+		else if (first == Boundary::LEFT)
+			VonNeumannBC1(first, fluid, mid_height_ids_, left_ids_, vx, vy);
 	}
 
 	void VonNeumannBC1(Boundary const first, Fluid& fluid, 

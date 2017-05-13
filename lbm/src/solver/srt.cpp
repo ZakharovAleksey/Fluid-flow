@@ -61,28 +61,29 @@ void SRTsolver::solve(int iteration_number)
 	for (int iter = 0; iter < iteration_number; ++iter) {
 		collision();
 		//BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
-		BC.PrepareValuesForAllBC(BCType::VON_NEUMAN, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
+		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
 
 		streaming();
 
-		//BC.BounceBackBC(Boundary::TOP);
-		BC.VonNeumannBC1(Boundary::TOP, *fluid_, 0.01, 0.01);
+		BC.BounceBackBC(Boundary::TOP);
 		BC.BounceBackBC(Boundary::BOTTOM);
 		BC.BounceBackBC(Boundary::RIGHT);
 		/*std::vector<double> vx;
 		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.01, vx);*/
-		BC.BounceBackBC(Boundary::LEFT);
+		BC.VonNeumannBC1(Boundary::LEFT, *fluid_, 0.0, 0.01);
+		//BC.BounceBackBC(Boundary::LEFT);
 
 		//BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
-		BC.RecordValuesForAllBC(BCType::VON_NEUMAN, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
+		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
 
 		recalculate();
 		//fluid_->vx_.SetColumn(1, vx);
-		std::vector<double> vx(fluid_->size().second, 0.01);
-		std::vector<double> vy(fluid_->size().second, 0.01);
-		fluid_->vx_.SetRow(1, vx);
-		fluid_->vy_.SetRow(1, vy);
-
+		std::vector<double> vx(fluid_->size().first - 2, 0.00); // fluid_->size().second для top, bottom | fluid_->size().first - 2 - для left, right
+		std::vector<double> vy(fluid_->size().first - 2, 0.01);
+		/*fluid_->vx_.SetRow(fluid_->size().second - 1, vx);
+		fluid_->vy_.SetRow(fluid_->size().second - 1, vy);*/
+		fluid_->vx_.SetColumn(1, vx);
+		fluid_->vy_.SetColumn(1, vy);
 
 		feqCalculate();
 

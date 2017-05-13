@@ -335,7 +335,7 @@ void BCs::VonNeumannBC1(Boundary const first, Fluid & fluid,
 		top_boundary_.insert(std::make_pair(7, top_boundary_.at(5) + temp - (vy / 6.0 + vx / 2.0) * rho));
 		top_boundary_.insert(std::make_pair(8, top_boundary_.at(6) - temp - (vy / 6.0 - vx / 2.0) * rho));
 
-
+		// + set velocities to 1 row after recalculation
 		for (auto id : ids_1)
 			top_boundary_.erase(id);
 
@@ -344,6 +344,55 @@ void BCs::VonNeumannBC1(Boundary const first, Fluid & fluid,
 	}
 	else if (first == Boundary::BOTTOM)
 	{
+		std::vector<double> rho(fluid.size().second, 0.0);
+
+		for (auto id : ids_1)
+			rho = rho + bottom_boundary_.at(id);
+		for (auto id : ids_2)
+			rho = rho + bottom_boundary_.at(id) * 2.0;
+
+		rho = rho / (1.0 + vy);
+
+		bottom_boundary_.insert(std::make_pair(2, bottom_boundary_.at(4) + 2.0 / 3.0 * rho * vy));
+
+
+		std::vector<double> temp = (bottom_boundary_.at(1) - bottom_boundary_.at(3)) / 2.0;
+
+		bottom_boundary_.insert(std::make_pair(5, bottom_boundary_.at(7) - temp + (vy / 6.0 + vx / 2.0) * rho));
+		bottom_boundary_.insert(std::make_pair(6, bottom_boundary_.at(8) + temp + (vy / 6.0 - vx / 2.0) * rho));
+
+		// + set velocities to fluid->size().second - 1 row after recalculation
+		for (auto id : ids_1)
+			bottom_boundary_.erase(id);
+
+		for (auto id : ids_2)
+			bottom_boundary_.erase(id);
+	}
+	else if (first == Boundary::LEFT)
+	{
+		std::vector<double> rho(fluid.size().first - 2, 0.0);
+
+		for (auto id : ids_1)
+			rho = rho + left_boundary_.at(id);
+		for (auto id : ids_2)
+			rho = rho + left_boundary_.at(id) * 2.0;
+
+		rho = rho / (1.0 - vx);
+
+		left_boundary_.insert(std::make_pair(1, left_boundary_.at(3) + 2.0 / 3.0 * rho * vx));
+
+
+		std::vector<double> temp = (left_boundary_.at(2) - left_boundary_.at(4)) / 2.0;
+
+		left_boundary_.insert(std::make_pair(5, left_boundary_.at(7) - temp + (vx / 6.0 + vy / 2.0) * rho));
+		left_boundary_.insert(std::make_pair(8, left_boundary_.at(6) + temp + (vx / 6.0 - vy / 2.0) * rho));
+
+		// + set velocities to fluid->size().second - 1 row after recalculation
+		for (auto id : ids_1)
+			left_boundary_.erase(id);
+
+		for (auto id : ids_2)
+			left_boundary_.erase(id);
 
 	}
 
