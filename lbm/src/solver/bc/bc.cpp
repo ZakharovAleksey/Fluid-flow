@@ -231,7 +231,7 @@ bool BCs::RecordBoundaryValues(BCType const bc_type, std::map<int, std::vector<d
 }
 
 
-void BCs::periodicBC(Boundary const first, Boundary const second)
+void BCs::PeriodicBC(Boundary const first, Boundary const second)
 {
 	if (first == Boundary::LEFT && second == Boundary::RIGHT)
 		left_boundary_.swap(right_boundary_);
@@ -241,7 +241,7 @@ void BCs::periodicBC(Boundary const first, Boundary const second)
 		throw;
 }
 
-void BCs::bounceBackBC(Boundary const first)
+void BCs::BounceBackBC(Boundary const first)
 {
 	if (first == Boundary::TOP) 
 	{
@@ -269,8 +269,7 @@ void BCs::bounceBackBC(Boundary const first)
 	}
 }
 
-void BCs::vonNeumannBC(Boundary const first, Fluid & fluid, double const vx, 
-	std::vector<double> & velocity_x)
+void BCs::VonNeumannBC(Boundary const first, Fluid & fluid, double const vx, std::vector<double> & velocity_x)
 {
 	// Подготовка векторов, куда запишутся скорость и плотность на границе
 	if (vx != 0.0) 
@@ -286,6 +285,7 @@ void BCs::vonNeumannBC(Boundary const first, Fluid & fluid, double const vx,
 	if (first == Boundary::LEFT) 
 	{
 		std::vector<double> density(fluid.size().first - 2, 0.0);
+
 		density = left_boundary_.at(0) + left_boundary_.at(2) + left_boundary_.at(4) +
 			(left_boundary_.at(3) + left_boundary_.at(6) + left_boundary_.at(7)) * 2.0 / (1.0 - vx);
 
@@ -307,6 +307,46 @@ void BCs::vonNeumannBC(Boundary const first, Fluid & fluid, double const vx,
 		left_boundary_.erase(6);
 		left_boundary_.erase(7);
 	}
+}
+
+void BCs::VonNeumannBC1(Boundary const first, Fluid & fluid, 
+	const std::vector<int> ids_1, const std::vector<int> ids_2, 
+	double const vx, double const vy)
+{
+	std::vector<double> vel_x(fluid.size().second, vx);
+	std::vector<double> vel_y(fluid.size().second, vy);
+
+	if (first == Boundary::TOP)
+	{
+		std::vector<double> rho(fluid.size().second, 0.0);
+
+		for (auto id : ids_1)
+			rho = rho + top_boundary_.at(id);
+		for(auto id : ids_2)
+			rho = rho + top_boundary_.at(id) * 2.0;
+
+		rho = rho / (1.0 + vy);
+
+		top_boundary_.insert(std::make_pair(4, top_boundary_.at(2) - 2.0 / 3.0 * rho * vy));
+
+
+		std::vector<double> temp = (top_boundary_.at(1) - top_boundary_.at(3)) / 2.0;
+
+		top_boundary_.insert(std::make_pair(7, top_boundary_.at(5) + temp - (vy / 6.0 + vx / 2.0) * rho));
+		top_boundary_.insert(std::make_pair(8, top_boundary_.at(6) - temp - (vy / 6.0 - vx / 2.0) * rho));
+
+
+		for (auto id : ids_1)
+			top_boundary_.erase(id);
+
+		for (auto id : ids_2)
+			top_boundary_.erase(id);
+	}
+	else if (first == Boundary::BOTTOM)
+	{
+
+	}
+
 }
 
 void BCs::SwapId(std::map<int, std::vector<double>> & map, int const from, int const to)

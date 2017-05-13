@@ -60,33 +60,44 @@ void SRTsolver::solve(int iteration_number)
 
 	for (int iter = 0; iter < iteration_number; ++iter) {
 		collision();
-		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		//BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		BC.PrepareValuesForAllBC(BCType::VON_NEUMAN, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
 
 		streaming();
 
-		BC.bounceBackBC(Boundary::TOP);
-		BC.bounceBackBC(Boundary::BOTTOM);
-		BC.bounceBackBC(Boundary::RIGHT);
-		std::vector<double> vx;
-		BC.vonNeumannBC(Boundary::LEFT, *fluid_, 0.01, vx);
+		//BC.BounceBackBC(Boundary::TOP);
+		BC.VonNeumannBC1(Boundary::TOP, *fluid_, 0.01, 0.01);
+		BC.BounceBackBC(Boundary::BOTTOM);
+		BC.BounceBackBC(Boundary::RIGHT);
+		/*std::vector<double> vx;
+		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.01, vx);*/
+		BC.BounceBackBC(Boundary::LEFT);
 
-
-		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		//BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		BC.RecordValuesForAllBC(BCType::VON_NEUMAN, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
 
 		recalculate();
-		fluid_->vx_.SetColumn(1, vx);
+		//fluid_->vx_.SetColumn(1, vx);
+		std::vector<double> vx(fluid_->size().second, 0.01);
+		std::vector<double> vy(fluid_->size().second, 0.01);
+		fluid_->vx_.SetRow(1, vx);
+		fluid_->vy_.SetRow(1, vy);
+
 
 		feqCalculate();
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
+
+		if (iter % 20 == 0)
+		{
+			fluid_->vy_.WriteToFile("vy", iter);
+			fluid_->vx_.WriteToFile("vx", iter);
+		}
+
 	}
 
 	for (int i = 0; i < fluid_->rows_; ++i)
 		std::cout << fluid_->vx_(i, 5) << "\n";
-
-	fluid_->vx_.WriteColumnToFile("vx", 5, 100);
-	fluid_->vx_.WriteToFile("vx", iteration_number);
-	fluid_->vx_.WriteRowToFile("vx", 5, 100);
 }
 
 void SRTsolver::recalculate()

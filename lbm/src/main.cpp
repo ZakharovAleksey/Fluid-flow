@@ -76,12 +76,12 @@ int main()
 
 	// >>>  2D case 
 
-	int X{ 100 };
+	int X{ 20 }; //100
 	int Y{ 20 };
 	Fluid f(Y, X);
 	Medium m(Y, X);
 
-	f.Poiseuille_IC(0.01);
+	//f.Poiseuille_IC(0.01);
 
 	SRTsolver solver(1.0, m, f);
 	solver.solve(100);

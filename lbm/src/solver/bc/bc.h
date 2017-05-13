@@ -56,13 +56,24 @@ public:
 
 
 	//! Applies periodic boundary conditions
-	void periodicBC(Boundary const first, Boundary const second);
+	void PeriodicBC(Boundary const first, Boundary const second);
 	//! Applies bounce back boundary conditions
-	void bounceBackBC(Boundary const first);
+	void BounceBackBC(Boundary const first);
 
 	//! Пока не возвращем массив плотностей так как с ним меньшие погрешности
-	void vonNeumannBC(Boundary const first, Fluid & fluid, double const vx, std::vector<double> & velocity_x);
+	void VonNeumannBC(Boundary const first, Fluid & fluid, double const vx, std::vector<double> & velocity_x);
 
+	void VonNeumannBC1(Boundary const first, Fluid & fluid, double const vx, double const vy)
+	{
+		if (first == Boundary::TOP)
+		{
+			VonNeumannBC1(first, fluid, mid_width_ids_, top_ids_, vx, vy);
+		}
+	}
+
+	void VonNeumannBC1(Boundary const first, Fluid& fluid, 
+		const std::vector<int> ids_1, const std::vector<int> ids_2,
+		double const vx = 0.0, double const vy = 0.0);
 
 	friend std::ostream & operator<<(std::ostream & os, BCs const & BC);
 

@@ -221,23 +221,30 @@ inline void Matrix2D<T>::WriteToFile(std::string value_name, int const time)
 	std::ofstream os;
 	os.open(full_name);
 
-	if (!os.good()){
+	if (!os.good())
+	{
 		std::cout << "Error! Can not open file to write.\n";
 		return;
 	}
-	else {
+	else 
+	{
 		unsigned cur_position{ 1 };
 
-		for (unsigned y = 0; y < rows_; ++y) {
-			for (unsigned x = 0; x < colls_; ++x) {
+		for (unsigned y = 0; y < rows_; ++y) 
+		{
+			for (unsigned x = 0; x < colls_; ++x) 
+			{
 				os << body_.at(x + y * colls_);
 				if (x != colls_ - 1)
 					os << ' ';
 			}
-			os << endl;
+			if (y != rows_ - 1)
+				os << endl;
+			
 		}
 	}
 	os.close();
+	std::cout << "Iteration " << time << ", data write sucssesfuly finised.\n";
 }
 
 template<typename T>
