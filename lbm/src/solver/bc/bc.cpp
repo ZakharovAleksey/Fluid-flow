@@ -269,185 +269,101 @@ void BCs::BounceBackBC(Boundary const first)
 	}
 }
 
-void BCs::VonNeumannBC_OLD(Boundary const first, Fluid & fluid, double const vx, std::vector<double> & velocity_x)
-{
-	// Подготовка векторов, куда запишутся скорость и плотность на границе
-	if (vx != 0.0) 
-	{
-		if (velocity_x.empty())
-			velocity_x.resize(fluid.size().first - 2, vx);
-		else {
-			velocity_x.clear();
-			velocity_x.resize(fluid.size().first - 2, vx);
-		}
-	}
-
-	if (first == Boundary::LEFT) 
-	{
-		std::vector<double> density(fluid.size().first - 2, 0.0);
-
-		density = left_boundary_.at(0) + left_boundary_.at(2) + left_boundary_.at(4) +
-			(left_boundary_.at(3) + left_boundary_.at(6) + left_boundary_.at(7)) * 2.0 / (1.0 - vx);
-
-		left_boundary_.insert(std::make_pair(1, left_boundary_.at(3) + (density * vx * 2.0 / 3.0)));
-
-		std::vector<double> value = (left_boundary_.at(4) - left_boundary_.at(2)) / 2.0;
-
-		left_boundary_.insert(std::make_pair(5, density * vx / 6.0 + left_boundary_.at(7) + value));
-		left_boundary_.insert(std::make_pair(8, density * vx / 6.0 + left_boundary_.at(6) - value));
-		
-
-		// Матрица которая хранит в себе все значения равные v чтобы заполнить скорости начальными знаениями
-
-		// Теперь, когда вычесленны f[1], f[5], f[8], rho, v - удаляем ненужные поля
-		left_boundary_.erase(0);
-		left_boundary_.erase(2);
-		left_boundary_.erase(3);
-		left_boundary_.erase(4);
-		left_boundary_.erase(6);
-		left_boundary_.erase(7);
-	}
-}
-
 void BCs::VonNeumannBC(Boundary const first, Fluid & fluid, double const vx, double const vy)
 {
+	// Choose size of domain depending on boundary type
+	const int x_size = fluid.size().second;
+	const int y_size = fluid.size().first - 2;
+	const int domainSize = (first == Boundary::TOP || first == Boundary::BOTTOM) ? x_size : y_size;
+
 	switch (first)
 	{
 	case Boundary::TOP:
-		VonNeumannBC1(first, fluid, mid_width_ids_, top_ids_, vx, vy);
+		CalculateVonNeumanBCValues(first, domainSize, top_boundary_, mid_width_ids_, top_ids_, vx, vy);
 		break;
 	case Boundary::BOTTOM:
-		VonNeumannBC1(first, fluid, mid_width_ids_, bottom_ids_, vx, vy);
+		CalculateVonNeumanBCValues(first, domainSize, bottom_boundary_, mid_width_ids_, bottom_ids_, vx, vy);
 		break;
 	case Boundary::LEFT:
-		VonNeumannBC1(first, fluid, mid_height_ids_, left_ids_, vx, vy);
+		CalculateVonNeumanBCValues(first, domainSize, left_boundary_, mid_height_ids_, left_ids_, vx, vy);
 		break;
 	case Boundary::RIGHT:
-		VonNeumannBC1(first, fluid, mid_height_ids_, right_ids_, vx, vy);
+		CalculateVonNeumanBCValues(first, domainSize, right_boundary_, mid_height_ids_, right_ids_, vx, vy);
 		break;
 	default:
-		std::cout << "Try to apply Von-Neumann BC to wrong boundary type.\n";
+		std::cout << "Wrong boundary type while appling Von-Neumann boundary condidtions.\n";
 		break;
 	}
 }
 
-void BCs::VonNeumannBC1(Boundary const first, Fluid & fluid, const std::vector<int> ids_1, const std::vector<int> ids_2, double const vx, double const vy)
+void BCs::CalculateVonNeumanBCValues(Boundary const first, const int size, std::map<int, std::vector<double>> & boundary, 
+	const std::vector<int> ids_1, const std::vector<int> ids_2, 
+	double const vx, double const vy)
 {
-	// Arrays with incoming velocities for further calcuations
+	// Final vector for density and temp for make calculations below easy to understand
+	std::vector<double> rho(size, 0.0);
+	std::vector<double> temp(size, 0.0);
 
-	const int x_size = fluid.size().second;
-	const int y_size = fluid.size().first - 2;
+	// Start density calculation
+	for (auto id : ids_1)
+		rho = rho + boundary.at(id);
+	for (auto id : ids_2)
+		rho = rho + boundary.at(id) * 2.0;
 
-	std::vector<double> vel_x(x_size, vx);
-	std::vector<double> vel_y(y_size, vy);
-
-	if (first == Boundary::TOP)
+	// Steps below depends on chosen boundary: 1. final density calculation and 2. necessary distribution function components calclulations
+	switch (first)
 	{
-		std::vector<double> rho(x_size, 0.0);
-
-		for (auto id : ids_1)
-			rho = rho + top_boundary_.at(id);
-		for(auto id : ids_2)
-			rho = rho + top_boundary_.at(id) * 2.0;
-
+	case Boundary::TOP:
 		rho = rho / (1.0 + vy);
 
-		top_boundary_.insert(std::make_pair(4, top_boundary_.at(2) - 2.0 / 3.0 * rho * vy));
+		boundary.insert(std::make_pair(4, boundary.at(2) - 2.0 / 3.0 * rho * vy));
 
+		temp = (boundary.at(1) - boundary.at(3)) / 2.0;
 
-		std::vector<double> temp = (top_boundary_.at(1) - top_boundary_.at(3)) / 2.0;
-
-		top_boundary_.insert(std::make_pair(7, top_boundary_.at(5) + temp - (vy / 6.0 + vx / 2.0) * rho));
-		top_boundary_.insert(std::make_pair(8, top_boundary_.at(6) - temp - (vy / 6.0 - vx / 2.0) * rho));
-
-		// + set velocities to 1 row after recalculation
-		for (auto id : ids_1)
-			top_boundary_.erase(id);
-
-		for (auto id : ids_2)
-			top_boundary_.erase(id);
-	}
-	else if (first == Boundary::BOTTOM)
-	{
-		std::vector<double> rho(x_size, 0.0);
-
-		for (auto id : ids_1)
-			rho = rho + bottom_boundary_.at(id);
-		for (auto id : ids_2)
-			rho = rho + bottom_boundary_.at(id) * 2.0;
-
+		boundary.insert(std::make_pair(7, boundary.at(5) + temp - (vy / 6.0 + vx / 2.0) * rho));
+		boundary.insert(std::make_pair(8, boundary.at(6) - temp - (vy / 6.0 - vx / 2.0) * rho));
+		break;
+	case Boundary::BOTTOM:
 		rho = rho / (1.0 - vy);
 
-		bottom_boundary_.insert(std::make_pair(2, bottom_boundary_.at(4) + 2.0 / 3.0 * rho * vy));
+		boundary.insert(std::make_pair(2, boundary.at(4) + 2.0 / 3.0 * rho * vy));
 
+		temp = (boundary.at(1) - boundary.at(3)) / 2.0;
 
-		std::vector<double> temp = (bottom_boundary_.at(1) - bottom_boundary_.at(3)) / 2.0;
-
-		bottom_boundary_.insert(std::make_pair(5, bottom_boundary_.at(7) - temp + (vy / 6.0 + vx / 2.0) * rho));
-		bottom_boundary_.insert(std::make_pair(6, bottom_boundary_.at(8) + temp + (vy / 6.0 - vx / 2.0) * rho));
-
-		// + set velocities to fluid->size().second - 1 row after recalculation
-		for (auto id : ids_1)
-			bottom_boundary_.erase(id);
-
-		for (auto id : ids_2)
-			bottom_boundary_.erase(id);
-	}
-	else if (first == Boundary::LEFT)
-	{
-		std::vector<double> rho(y_size, 0.0);
-
-		for (auto id : ids_1)
-			rho = rho + left_boundary_.at(id);
-		for (auto id : ids_2)
-			rho = rho + left_boundary_.at(id) * 2.0;
-
+		boundary.insert(std::make_pair(5, boundary.at(7) - temp + (vy / 6.0 + vx / 2.0) * rho));
+		boundary.insert(std::make_pair(6, boundary.at(8) + temp + (vy / 6.0 - vx / 2.0) * rho));
+		break;
+	case Boundary::LEFT:
 		rho = rho / (1.0 - vx);
 
-		left_boundary_.insert(std::make_pair(1, left_boundary_.at(3) + 2.0 / 3.0 * rho * vx));
+		boundary.insert(std::make_pair(1, boundary.at(3) + 2.0 / 3.0 * rho * vx));
 
+		temp = (boundary.at(2) - boundary.at(4)) / 2.0;
 
-		std::vector<double> temp = (left_boundary_.at(2) - left_boundary_.at(4)) / 2.0;
-
-		left_boundary_.insert(std::make_pair(5, left_boundary_.at(7) - temp + (vx / 6.0 + vy / 2.0) * rho));
-		left_boundary_.insert(std::make_pair(8, left_boundary_.at(6) + temp + (vx / 6.0 - vy / 2.0) * rho));
-
-		// + set velocities to fluid->size().second - 1 row after recalculation
-		for (auto id : ids_1)
-			left_boundary_.erase(id);
-
-		for (auto id : ids_2)
-			left_boundary_.erase(id);
-
-	}
-	else if (first == Boundary::RIGHT)
-	{
-		std::vector<double> rho(y_size, 0.0);
-
-		for (auto id : ids_1)
-			rho = rho + right_boundary_.at(id);
-		for (auto id : ids_2)
-			rho = rho + right_boundary_.at(id) * 2.0;
-
+		boundary.insert(std::make_pair(5, boundary.at(7) - temp + (vx / 6.0 + vy / 2.0) * rho));
+		boundary.insert(std::make_pair(8, boundary.at(6) + temp + (vx / 6.0 - vy / 2.0) * rho));
+		break;
+	case Boundary::RIGHT:
 		rho = rho / (1.0 + vx);
 
-		right_boundary_.insert(std::make_pair(3, right_boundary_.at(1) - 2.0 / 3.0 * rho * vx));
+		boundary.insert(std::make_pair(3, boundary.at(1) - 2.0 / 3.0 * rho * vx));
 
+		temp = (boundary.at(2) - boundary.at(4)) / 2.0;
 
-		std::vector<double> temp = (right_boundary_.at(4) - right_boundary_.at(2)) / 2.0;
-
-		right_boundary_.insert(std::make_pair(6, right_boundary_.at(8) + temp - (vx / 6.0 - vy / 2.0) * rho));
-		right_boundary_.insert(std::make_pair(7, right_boundary_.at(5) - temp + (vx / 6.0 + vy / 2.0) * rho));
-
-		// + set velocities to fluid->size().second - 1 row after recalculation
-		for (auto id : ids_1)
-			right_boundary_.erase(id);
-
-		for (auto id : ids_2)
-			right_boundary_.erase(id);
-
+		boundary.insert(std::make_pair(6, boundary.at(8) - temp - (vx / 6.0 - vy / 2.0) * rho));
+		boundary.insert(std::make_pair(7, boundary.at(5) + temp - (vx / 6.0 + vy / 2.0) * rho));
+		break;
+	default:
+		std::cout << "Wrong boundary type while Calculating Von-Neumann boundary condidtions.\n";
+		break;
 	}
 
+	// Clear map from all incoming data, leaving only necessary distribution function components
+	for (auto id : ids_1)
+		boundary.erase(id);
+
+	for (auto id : ids_2)
+		boundary.erase(id);
 }
 
 void BCs::SwapId(std::map<int, std::vector<double>> & map, int const from, int const to)

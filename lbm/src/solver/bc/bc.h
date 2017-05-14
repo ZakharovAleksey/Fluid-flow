@@ -59,9 +59,6 @@ public:
 	void PeriodicBC(Boundary const first, Boundary const second);
 	//! Applies bounce back boundary conditions
 	void BounceBackBC(Boundary const first);
-
-	//! Пока не возвращем массив плотностей так как с ним меньшие погрешности
-	void VonNeumannBC_OLD(Boundary const first, Fluid & fluid, double const vx, std::vector<double> & velocity_x);
 	//! Applies Von-Neumann boundary conditions (constant velocity flow on choosen boundary)
 	void VonNeumannBC(Boundary const first, Fluid & fluid, double const vx, double const vy);
 
@@ -84,9 +81,11 @@ private:
 	//! Swap two stored boundary values
 	void SwapId(std::map<int, std::vector<double> > & map, int const from, int const to);
 
-	//! Applies Von-Neumann boundary conditions inside public function (changing ids)
-	void VonNeumannBC1(Boundary const first, Fluid& fluid, const std::vector<int> ids_1, const std::vector<int> ids_2, double const vx = 0.0, double const vy = 0.0);
-
+	
+	//! Directly calculate all distribution function components for choosen boundary
+	void CalculateVonNeumanBCValues(Boundary const first, const int size, std::map<int, std::vector<double>> & boundary,
+		/* Ids of disr. functions are necessary for calculations: example for top ew need {0,1,3} and {2,5,6} */const std::vector<int> ids_1, const std::vector<int> ids_2,
+		double const vx, double const vy);
 
 private:
 
