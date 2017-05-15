@@ -78,15 +78,15 @@ int main()
 
 	// !!! Можно создать общую универсальную функцию VonNeumann в которую просто передать номера компонеет котрые надо заполнять наверно с внутренним switchem по знакам между присваиванием!!
 
-	int X{ 30 }; //100
-	int Y{ 20 };
+	int X{ 70 }; //100
+	int Y{ 70 };
 	Fluid f(Y, X);
 	Medium m(Y, X);
 
 	//f.Poiseuille_IC(0.01);
 
 	SRTsolver solver(1.0, m, f);
-	solver.solve(100);
+	solver.solve(500);
 
 	// >>>
 

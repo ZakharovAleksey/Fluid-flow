@@ -8,7 +8,7 @@
 #pragma region 2d
 
 
-BCs::BCs(unsigned rows, unsigned colls, DistributionFunction<double> & dfunc): length_(colls), height_(rows - 2), f_ptr_(&dfunc) { }
+BCs::BCs(DistributionFunction<double> & dfunc): f_ptr_(&dfunc) { }
 
 BCs::~BCs() {}
 

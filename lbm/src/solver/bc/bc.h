@@ -36,15 +36,14 @@ enum class Boundary {
 
 #pragma region 2d
 
-
-
 class BCs
 {
 	friend class Fluid;
 
 public:
 
-	BCs(unsigned rows, unsigned colls, DistributionFunction<double> & dfunc);
+	BCs(DistributionFunction<double> & dfunc);
+
 	~BCs();
 	
 	//! Prepare ALL probability distribution function values for BC applying
@@ -52,7 +51,6 @@ public:
 	void PrepareValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
 	//! Record ALL boundaries with already calculated BC distribution function values 
 	void RecordValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
-
 
 
 	//! Applies periodic boundary conditions
@@ -98,11 +96,6 @@ private:
 	//! Ids of boundaries for Von-Neumann BCs
 	const std::vector<int> mid_height_ids_{ 0,2,4 };
 	const std::vector<int> mid_width_ids_{ 0,1,3 };
-
-	//! Rows length [equal to rows_ of matrix]  beacuse all nodes takes placr in BC
-	unsigned length_;
-	//! Columns height [equal to colls_ - 2 of matrix] because UP and DOWN nodes are already counted in TOP and BOTTOM BC
-	unsigned height_;
 
 	//! Poiner to Fluid distribution function to work with it's boundaries (Попробовать переделать через ссылку)
 	DistributionFunction<double>* f_ptr_;
@@ -231,6 +224,8 @@ private:
 	
 	// For Von Neumann BC
 	const std::vector<int> middle_layer_ids_{ 0,1,2,3,4,5,6,7,8 };
+
+	// !!! Не нужны - их убрать !!!
 
 	//! Columns height [equal to colls_ - 2 of matrix] because UP and DOWN nodes are already counted in TOP and BOTTOM BC
 	unsigned height_;
