@@ -78,15 +78,20 @@ int main()
 
 	// !!! Можно создать общую универсальную функцию VonNeumann в которую просто передать номера компонеет котрые надо заполнять наверно с внутренним switchem по знакам между присваиванием!!
 
-	int X{ 70 }; //100
-	int Y{ 70 };
+	int X{ 30 }; //100
+	int Y{ 30 };
 	Fluid f(Y, X);
 	Medium m(Y, X);
 
+	m.AddCircleInMedium(15, 15, 5);
+
+	std::cout << m;
+
+
 	//f.Poiseuille_IC(0.01);
 
-	SRTsolver solver(1.0, m, f);
-	solver.solve(500);
+	//SRTsolver solver(1.0, m, f);
+	//solver.solve(100);
 
 	// >>>
 

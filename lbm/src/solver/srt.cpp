@@ -181,28 +181,21 @@ void SRT3DSolver::solve(int iter_numb)
 	{
 		std::cout << iter << " : ";
 		collision();
-		bc.PrepareValuesForAllBC(BCType::VON_NEUMAN, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
-		//bc.PrepareValuesForAllBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
+		bc.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
+		
 		streaming();
 
-		/*bc.PeriodicBC(Boundary::TOP, Boundary::BOTTOM);
-		bc.PeriodicBC(Boundary::LEFT, Boundary::RIGHT);
-		bc.PeriodicBC(Boundary::NEAR, Boundary::FAAR);*/
-		bc.VonNeumannBC(Boundary::TOP, 0.0, 0.0, 0.01);
-		//bc.BounceBackBC(Boundary::TOP);
+		bc.BounceBackBC(Boundary::TOP);
 		bc.BounceBackBC(Boundary::BOTTOM);
 		bc.BounceBackBC(Boundary::LEFT);
 		bc.BounceBackBC(Boundary::RIGHT);
 		bc.BounceBackBC(Boundary::NEAR);
 		bc.BounceBackBC(Boundary::FAAR);
 
-		bc.RecordValuesForAllBC(BCType::VON_NEUMAN, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
-		//bc.RecordValuesForAllBC(BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC, BCType::PERIODIC);
+		bc.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
 
 		recalculate();
 		fluid_->vz_->SetTBLayer(1, std::vector<double>(fluid_->GetColumnsNumber() * fluid_->GetRowsNumber(), 0.01));
-
-		//std::cout << *fluid_->vz_;
 
 		feqCalculate();
 

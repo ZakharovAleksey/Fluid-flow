@@ -16,6 +16,8 @@ enum class NodeType : int
 	// In case of 3D LBM additional boundaries
 	NEAR_BOUNDARY		= 5,
 	FAR_BOUNDARY		= 6,
+	// Inside body
+	BODY_IN_FLUID		= 7,
 };
 
 #pragma region 2d
@@ -31,26 +33,21 @@ public:
 
 	bool is_fluid(unsigned y, unsigned x) const;
 
-	/// <summary>
-	/// Resize current Medium with values !!!!!
-	/// </summary>
-	/// <param name="rows"> lol </param>
-	/// <param name="colls"> hah </param>
+	
+	//! Resize current Medium with values  !!! DELETE THIS METHOD AND MAKE USING OINTERS LIKE IN 3D
 	void resize(unsigned rows, unsigned colls);
-
-	friend std::ostream & operator<<(std::ostream & os, Medium const & medium);
 
 	// Переписать через метод size() реализованный у класса Matrix<>
 	std::pair<unsigned int, unsigned int> size() const;
 
+	void AddCircleInMedium(const int x0, const int y0, const int radius);
+
+	friend std::ostream & operator<<(std::ostream & os, Medium const & medium);
+
 private:
-	/// <summary>
-	/// Rows in modaling area
-	/// </summary>
+	//! Number of rows in modeling area
 	unsigned rows_;
-	/// <summary>
-	/// Columns in modaling area
-	/// </summary>
+	//! Number of columns in modeling area
 	unsigned colls_;
 
 	Matrix2D<NodeType> medium_;

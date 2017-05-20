@@ -84,6 +84,25 @@ std::pair<unsigned, unsigned> Medium::size() const
 	return std::make_pair(rows_, colls_);
 }
 
+void Medium::AddCircleInMedium(const int x0, const int y0, const int radius)
+{
+	assert(x0 + radius < colls_ - 1 && x0 - radius > 1);
+	assert(y0 + radius < rows_ - 1 && y0 - radius > 1);
+
+	int xStart = x0 - radius; int xStop = x0 + radius;
+	int yStart = y0 - radius; int yStop = y0 + radius;
+
+	for (int y = yStart; y < yStop; ++y)
+	{
+		for (int x = xStart; x < xStop; ++x)
+		{
+			if ( pow(x- x0, 2) + pow(y - y0, 2) < pow(radius, 2))
+				medium_(y, x) = NodeType::BODY_IN_FLUID;
+		}
+	}
+	int i = 0;
+}
+
 
 std::ostream & operator<<(std::ostream & os, Medium const & medium) {
 
@@ -100,6 +119,8 @@ std::ostream & operator<<(std::ostream & os, Medium const & medium) {
 				os << std::setw(3) << 3;
 			else if (medium.medium_(y, x) == NodeType::RIGHT_BOUNDARY)
 				os << std::setw(3) << 4;
+			else if (medium.medium_(y, x) == NodeType::BODY_IN_FLUID)
+				os << std::setw(3) << 7;
 		}
 		os << std::endl;
 	}
