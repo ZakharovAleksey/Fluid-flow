@@ -164,6 +164,16 @@ public:
 	//! —читает скорость в кажой из €чеек области
 	MacroscopicParam<T> calculateVelocity(const double mas[kQ], MacroscopicParam<T> const & density) const;
 
+	T Get(int q, int y, int x)
+	{
+		return dfunc_body_.at(q)(y, x);
+	}
+
+	void Swap(int q1, int y1, int x1, int q2, int y2, int x2)
+	{
+		std::swap(dfunc_body_.at(q1)(y1, x1), dfunc_body_.at(q2)(y2, x2));
+	}
+
 #pragma endregion
 
 	template<typename T1>

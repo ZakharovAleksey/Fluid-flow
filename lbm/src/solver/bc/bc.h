@@ -62,6 +62,36 @@ public:
 
 	friend std::ostream & operator<<(std::ostream & os, BCs const & BC);
 
+
+	void swap(double& a, double & b)
+	{
+		double temp = a;
+		a = b;
+		b = a;
+	}
+
+	void AdditionalBCs(Medium & medium)
+	{
+		for (int y = 0; y < f_ptr_->size().first; ++y)
+			for (int x = 0; x < f_ptr_->size().second; ++x)
+			{
+				if (medium.Get(y, x) == NodeType::BODY_IN_FLUID)
+				{
+					f_ptr_->Swap(1, y, x, 3, y - ey[3], x + ex[3]);
+					f_ptr_->Swap(3, y, x, 1, y - ey[1], x + ex[1]);
+					f_ptr_->Swap(2, y, x, 4, y - ey[4], x + ex[4]);
+					f_ptr_->Swap(4, y, x, 2, y - ey[2], x + ex[2]);
+					f_ptr_->Swap(5, y, x, 7, y - ey[7], x + ex[7]);
+					f_ptr_->Swap(7, y, x, 5, y - ey[5], x + ex[5]);
+					f_ptr_->Swap(6, y, x, 8, y - ey[8], x + ex[8]);
+					f_ptr_->Swap(8, y, x, 6, y - ey[6], x + ex[6]);
+
+				}
+
+			}
+		int a = 0;
+	}
+
 private:
 
 	//! Prepare values for CHOOSEN ONE BC BEFORE Streaming

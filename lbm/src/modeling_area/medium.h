@@ -44,6 +44,11 @@ public:
 
 	friend std::ostream & operator<<(std::ostream & os, Medium const & medium);
 
+	NodeType Get(const int y, const int x)
+	{
+		return medium_(y, x);
+	}
+
 private:
 	//! Number of rows in modeling area
 	unsigned rows_;

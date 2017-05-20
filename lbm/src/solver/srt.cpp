@@ -77,6 +77,8 @@ void SRTsolver::solve(int iter_numb)
 		
 		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
 
+		BC.AdditionalBCs(*medium_);
+
 		recalculate();
 
 		feqCalculate();
