@@ -99,11 +99,11 @@ void SRTsolver::solve(int iter_numb)
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 
-		if (iter % 50 == 0)
+		if (iter % 10 == 0)
 		{
 			//fluid_->vy_.WriteToFile("vy", iter);
 			fluid_->vx_.WriteToFile("vx", iter);
-			//fluid_->rho_.WriteToFile("rho", iter);
+			fluid_->rho_.WriteToFile("rho", iter);
 		}
 
 	}

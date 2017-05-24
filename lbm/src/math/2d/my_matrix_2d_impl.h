@@ -222,6 +222,8 @@ inline void Matrix2D<T>::WriteToFile(std::string value_name, int const time)
 	std::string path = "Data/";
 	std::string full_name = path + value_name + "[" + std::to_string(rows_) + "x" + std::to_string(colls_) + "]_at_" + std::to_string(time) + "_time_steps.txt";
 	
+	auto max = std::max_element(body_.begin(), body_.end());
+
 	std::ofstream os;
 	os.open(full_name);
 
@@ -238,7 +240,7 @@ inline void Matrix2D<T>::WriteToFile(std::string value_name, int const time)
 		{
 			for (unsigned x = 0; x < colls_; ++x) 
 			{
-				os << body_.at(x + y * colls_);
+				os << body_.at(x + y * colls_) / *max;
 				if (x != colls_ - 1)
 					os << ' ';
 			}

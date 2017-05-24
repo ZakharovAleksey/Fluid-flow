@@ -41,6 +41,9 @@ public:
 	std::pair<unsigned int, unsigned int> size() const;
 
 	void AddCircleInMedium(const int x0, const int y0, const int radius);
+	void AddCircleTopFalf(const int x0, const int y0, const int radius);
+	void AddCircleBottomFalf(const int x0, const int y0, const int radius);
+
 
 	friend std::ostream & operator<<(std::ostream & os, Medium const & medium);
 

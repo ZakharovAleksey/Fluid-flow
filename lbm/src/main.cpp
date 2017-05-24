@@ -83,8 +83,8 @@ int main()
 	Fluid f(Y, X);
 	Medium m(Y, X);
 
-	m.AddCircleInMedium(35, 35, 10);
-
+	m.AddCircleTopFalf(35, 1, 15);
+	m.AddCircleBottomFalf(35, 69, 15);
 	f.AddImmersedBodies(m);
 	
 
@@ -92,7 +92,7 @@ int main()
 	//f.Poiseuille_IC(0.01);
 
 	SRTsolver solver(1.0, m, f);
-	solver.solve(301);
+	solver.solve(101);
 
 	// >>>
 

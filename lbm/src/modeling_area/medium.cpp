@@ -99,7 +99,42 @@ void Medium::AddCircleInMedium(const int x0, const int y0, const int radius)
 				medium_(y, x) = NodeType::BODY_IN_FLUID;
 		}
 	}
-	int i = 0;
+}
+
+void Medium::AddCircleTopFalf(const int x0, const int y0, const int radius)
+{
+	assert(x0 + radius < colls_ - 1 && x0 - radius > 1);
+	assert(y0 < rows_ - 1 && y0 >= 1);
+
+	int xStart = x0 - radius; int xStop = x0 + radius;
+	int yStart = y0; int yStop = y0 + radius;
+
+	for (int y = yStart; y < yStop; ++y)
+	{
+		for (int x = xStart; x < xStop; ++x)
+		{
+			if (pow(x - x0, 2) + pow(y - y0, 2) < pow(radius, 2))
+				medium_(y, x) = NodeType::BODY_IN_FLUID;
+		}
+	}
+}
+
+void Medium::AddCircleBottomFalf(const int x0, const int y0, const int radius)
+{
+	assert(x0 + radius < colls_ - 1 && x0 - radius > 1);
+	assert(y0 <= rows_ - 1 && y0 >= 1);
+
+	int xStart = x0 - radius; int xStop = x0 + radius;
+	int yStart = y0 - radius; int yStop = y0;
+
+	for (int y = yStart; y < yStop; ++y)
+	{
+		for (int x = xStart; x < xStop; ++x)
+		{
+			if (pow(x - x0, 2) + pow(y - y0, 2) < pow(radius, 2))
+				medium_(y, x) = NodeType::BODY_IN_FLUID;
+		}
+	}
 }
 
 
