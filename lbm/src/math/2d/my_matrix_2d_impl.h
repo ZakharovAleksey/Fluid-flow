@@ -75,11 +75,15 @@ inline Matrix2D<T> Matrix2D<T>::TimesDivide(Matrix2D<T> const & other)
 {
 	// Check that rows or columns number of right and left matrix are equal
 	assert(rows_ == other.rows_, colls_ == other.colls_);
-
 	Matrix2D<T> result(*this);
+
 #pragma omp parallel for
 	for (int i = 0; i < result.body_.size(); ++i)
-		result.body_.at(i) /= other.body_.at(i);
+	{
+		// Boundaries consistd form 0 !!!
+		result.body_.at(i) = (other.body_.at(i) == T() && result.body_.at(i) == T()) ? T() : result.body_.at(i) / other.body_.at(i);
+	}
+		
 
 	return result;
 }

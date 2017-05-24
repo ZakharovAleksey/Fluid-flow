@@ -2,8 +2,8 @@
 
 #pragma region 2d
 
-Fluid::Fluid(unsigned rows, unsigned colls) : rows_(rows), colls_(colls) {
-
+Fluid::Fluid(unsigned rows, unsigned colls) : rows_(rows), colls_(colls) 
+{
 	rho_.Resize(rows_, colls_);
 	rho_.FillWithoughtBoundary(1.0);
 	vx_.Resize(rows_, colls_);

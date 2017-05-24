@@ -28,7 +28,6 @@ Medium::Medium() : rows_(0), colls_(0), medium_() {}
 Medium::Medium(unsigned rows, unsigned colls) :
 	rows_(rows), colls_(colls)
 {
-
 	assert(rows_ > 2 && colls_ > 2);
 
 	medium_.Resize(rows_, colls_);

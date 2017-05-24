@@ -24,6 +24,23 @@ public:
 	std::pair<unsigned, unsigned> size() const;
 	void Poiseuille_IC(double const dvx);
 
+	void AddImmersedBodies(const Medium & medium)
+	{
+		assert(medium.size().first == rows_);
+		assert(medium.size().second == colls_);
+
+		for(int y = 1; y < rows_ - 1; ++y)
+			for (int x = 1; x < colls_ - 1; ++x)
+			{
+				if(medium.Get(y,x) == NodeType::BODY_IN_FLUID)
+				{
+					rho_(y, x) = 0.0;
+					vx_(y, x) = 0.0;
+					vy_(y, x) = 0.0;
+				}
+			}
+	}
+
 private:
 
 	//! Rows count for fluid modeling area
@@ -44,7 +61,6 @@ public:
 	DistributionFunction<double> f_;
 	//! Equilibrium probability distribution function field
 	DistributionFunction<double> feq_;
-
 };
 
 #pragma endregion

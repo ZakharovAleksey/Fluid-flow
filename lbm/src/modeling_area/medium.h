@@ -49,6 +49,11 @@ public:
 		return medium_(y, x);
 	}
 
+	NodeType Get(const int y, const int x) const
+	{
+		return medium_(y, x);
+	}
+
 private:
 	//! Number of rows in modeling area
 	unsigned rows_;
@@ -56,6 +61,8 @@ private:
 	unsigned colls_;
 
 	Matrix2D<NodeType> medium_;
+
+	//Matrix2D<NodeType> medium_;
 };
 
 #pragma endregion

@@ -29,7 +29,8 @@ void SRTsolver::feqCalculate()
 
 void SRTsolver::streaming()
 {
-	for (int q = 0; q < kQ; ++q) {
+	for (int q = 0; q < kQ; ++q) 
+	{
 		Matrix2D<double> temp = fluid_->f_[q];
 		fluid_->f_[q].FillWith(0.0);
 
@@ -55,6 +56,8 @@ void SRTsolver::solve(int iter_numb)
 	for (int q = 0; q < kQ; ++q)
 		fluid_->f_[q] = fluid_->feq_[q];
 
+	//std::cout << fluid_->f_;
+
 	BCs BC(fluid_->f_);
 
 	for (int iter = 0; iter < iter_numb; ++iter) 
@@ -64,6 +67,8 @@ void SRTsolver::solve(int iter_numb)
 		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
 
 		streaming();
+
+		BC.PrepareAdditionalBCs(*medium_);
 
 		BC.BounceBackBC(Boundary::TOP);
 		BC.BounceBackBC(Boundary::BOTTOM);
@@ -75,9 +80,18 @@ void SRTsolver::solve(int iter_numb)
 		BC.VonNeumannBC(Boundary::RIGHT, *fluid_, 0.00, 0.01);
 		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.00, -0.01);*/
 		
+		//BC.AdditionalBCs(*medium_);
+
+		BC.AdditionalBounceBackBCs();
+
+		//std::cout << fluid_->f_;
+
 		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
 
-		BC.AdditionalBCs(*medium_);
+		BC.RecordAdditionalBCs();
+	
+		//std::cout << fluid_->f_;
+		
 
 		recalculate();
 
@@ -87,8 +101,9 @@ void SRTsolver::solve(int iter_numb)
 
 		if (iter % 50 == 0)
 		{
-			fluid_->vy_.WriteToFile("vy", iter);
+			//fluid_->vy_.WriteToFile("vy", iter);
 			fluid_->vx_.WriteToFile("vx", iter);
+			//fluid_->rho_.WriteToFile("rho", iter);
 		}
 
 	}

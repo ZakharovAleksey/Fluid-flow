@@ -83,15 +83,16 @@ int main()
 	Fluid f(Y, X);
 	Medium m(Y, X);
 
-	m.AddCircleInMedium(15, 15, 5);
+	m.AddCircleInMedium(35, 35, 10);
 
-	//std::cout << m;
+	f.AddImmersedBodies(m);
+	
 
 
-	f.Poiseuille_IC(0.01);
+	//f.Poiseuille_IC(0.01);
 
 	SRTsolver solver(1.0, m, f);
-	solver.solve(201);
+	solver.solve(301);
 
 	// >>>
 

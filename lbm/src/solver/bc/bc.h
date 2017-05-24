@@ -70,27 +70,62 @@ public:
 		b = a;
 	}
 
-	void AdditionalBCs(Medium & medium)
+	void PrepareAdditionalBCs(Medium & medium)
 	{
-		for (int y = 0; y < f_ptr_->size().first; ++y)
-			for (int x = 0; x < f_ptr_->size().second; ++x)
+		for (int q = 0; q < kQ; ++q)
+		{
+			std::vector<ImmersedBodyVal> v;
+
+			for (int y = 1; y < f_ptr_->size().first - 1; ++y)
 			{
-				if (medium.Get(y, x) == NodeType::BODY_IN_FLUID)
+				for (int x = 1; x < f_ptr_->size().second - 1; ++x)
 				{
-					f_ptr_->Swap(1, y, x, 3, y - ey[3], x + ex[3]);
-					f_ptr_->Swap(3, y, x, 1, y - ey[1], x + ex[1]);
-					f_ptr_->Swap(2, y, x, 4, y - ey[4], x + ex[4]);
-					f_ptr_->Swap(4, y, x, 2, y - ey[2], x + ex[2]);
-					f_ptr_->Swap(5, y, x, 7, y - ey[7], x + ex[7]);
-					f_ptr_->Swap(7, y, x, 5, y - ey[5], x + ex[5]);
-					f_ptr_->Swap(6, y, x, 8, y - ey[8], x + ex[8]);
-					f_ptr_->Swap(8, y, x, 6, y - ey[6], x + ex[6]);
-
+					if (medium.Get(y, x) == NodeType::BODY_IN_FLUID && f_ptr_->Get(q, y, x) != 0.0)
+					{
+						v.push_back(ImmersedBodyVal(y, x, f_ptr_->Get(q, y, x)));
+						f_ptr_->Set(q, y, x, 0.0);
+					}
 				}
-
 			}
-		int a = 0;
+
+			additionalBCs.insert(std::make_pair(q, v));
+		}
+
+		/*for (auto i : additionalBCs)
+		{
+			std::cout << i.first << " : ";
+			for (auto j : i.second)
+				std::cout << j.distrFuncValue_ << "(" << j.y_ << " , " << j.x_ << ") ";
+			std::cout << std::endl;
+		}*/
 	}
+
+	void AdditionalBounceBackBCs()
+	{
+		std::swap(additionalBCs.at(1), additionalBCs.at(3));
+		std::swap(additionalBCs.at(2), additionalBCs.at(4));
+		std::swap(additionalBCs.at(5), additionalBCs.at(7));
+		std::swap(additionalBCs.at(6), additionalBCs.at(8));
+
+		/*for (auto i : additionalBCs)
+		{
+			std::cout << i.first << " : ";
+			for (auto j : i.second)
+				std::cout << j.distrFuncValue_ << "(" << j.y_ << " , " << j.x_ << ") ";
+			std::cout << std::endl;
+		}*/
+	}
+
+	void RecordAdditionalBCs()
+	{
+		for (auto row : additionalBCs)
+		{
+			for (auto j : row.second)
+				f_ptr_->Set(row.first, j.y_ + ey[row.first], j.x_ + ex[row.first], j.distrFuncValue_);
+		}
+		additionalBCs.clear();
+	}
+
 
 private:
 
@@ -136,6 +171,24 @@ private:
 	std::map<int, std::vector<double> > bottom_boundary_;
 	std::map<int, std::vector<double> > left_boundary_;	
 	std::map<int, std::vector<double> > right_boundary_;
+
+
+	// for additional BCs
+
+	struct ImmersedBodyVal
+	{
+		
+		int y_;
+		int x_;
+
+		double distrFuncValue_;
+
+		ImmersedBodyVal(int y, int x, double value) : y_(y), x_(x), distrFuncValue_(value) {}
+	};
+
+	typedef std::map<int, std::vector<ImmersedBodyVal> > VectorOfMap;
+
+	VectorOfMap additionalBCs;
 
 };
 

@@ -5,6 +5,7 @@
 #include"../../math/2d/my_matrix_2d.h"
 #include"../../phys_values/2d/macroscopic_param_2d.h"
 
+#include"../../modeling_area/medium.h"
 
 // Possible number of directions in which pseudo-particles could move.
 unsigned const kQ{ 9 };
@@ -167,6 +168,11 @@ public:
 	T Get(int q, int y, int x)
 	{
 		return dfunc_body_.at(q)(y, x);
+	}
+
+	void Set(int q, int y, int x, double value)
+	{
+		dfunc_body_.at(q)(y, x) = value;
 	}
 
 	void Swap(int q1, int y1, int x1, int q2, int y2, int x2)
