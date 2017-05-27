@@ -13,7 +13,7 @@ template<typename T>
 DistributionFunction<T>::DistributionFunction(unsigned rows, unsigned colls): rows_(rows), colls_(colls) 
 {
 	for (int q = 0; q < kQ; ++q)
-		dfunc_body_.at(q).resize(rows_, colls_);
+		dfunc_body_.at(q).Resize(rows_, colls_);
 }
 
 template<typename T>
@@ -25,7 +25,7 @@ inline DistributionFunction<T>::DistributionFunction(DistributionFunction const 
 {
 	for (int q = 0; q < kQ; ++q) 
 	{
-		dfunc_body_.at(q).resize(rows_, colls_);
+		dfunc_body_.at(q).Resize(rows_, colls_);
 		dfunc_body_.at(q) = other.dfunc_body_.at(q);
 	}
 }

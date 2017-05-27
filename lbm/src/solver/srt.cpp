@@ -1,6 +1,11 @@
 #include"srt.h"
 
+
 #pragma region 2d
+
+
+#pragma region srt simple
+
 
 
 SRTsolver::SRTsolver(double const tau, Medium & medium, Fluid & fluid) :
@@ -118,6 +123,8 @@ void SRTsolver::recalculate()
 	fluid_->vx_ = fluid_->f_.calculateVelocity(kEx, fluid_->rho_);
 	fluid_->vy_ = fluid_->f_.calculateVelocity(kEy, fluid_->rho_);
 }
+
+#pragma endregion
 
 
 

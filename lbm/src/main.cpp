@@ -78,21 +78,31 @@ int main()
 
 	// !!! Можно создать общую универсальную функцию VonNeumann в которую просто передать номера компонеет котрые надо заполнять наверно с внутренним switchem по знакам между присваиванием!!
 
-	int X{ 70 }; //100
-	int Y{ 70 };
+	//int X{ 70 }; //100
+	//int Y{ 70 };
+	//Fluid f(Y, X);
+	//Medium m(Y, X);
+
+	//m.AddCircleTopFalf(35, 1, 15);
+	//m.AddCircleBottomFalf(35, 69, 15);
+	//f.AddImmersedBodies(m);
+	//
+
+	//SRTsolver solver(1.0, m, f);
+	//solver.solve(101);
+
+
+	int X{ 102 }; //100
+	int Y{ 30 };
 	Fluid f(Y, X);
 	Medium m(Y, X);
 
-	m.AddCircleTopFalf(35, 1, 15);
-	m.AddCircleBottomFalf(35, 69, 15);
-	f.AddImmersedBodies(m);
-	
+	ImmersedBody body(102, 30, 32, Point(15, 15), 6);
+
+	IBSolver s(1.0, f,m, body);
+	s.Solve(1001);
 
 
-	//f.Poiseuille_IC(0.01);
-
-	SRTsolver solver(1.0, m, f);
-	solver.solve(101);
 
 	// >>>
 
