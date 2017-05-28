@@ -182,8 +182,26 @@ inline MacroscopicParam<T> DistributionFunction<T>::calculateVelocity(const doub
 	// Переписать сразу в return, тк лишнее копирование НО выпадает error
 	result.TimesDivide(density);
 	return result;
-	
 }
+
+template<typename T>
+inline MacroscopicParam<T> DistributionFunction<T>::calculateVelocity(const double mas[kQ], MacroscopicParam<T> const & density, Matrix2D<double> const & f) const
+{
+	MacroscopicParam<T> result(rows_, colls_);
+	result.FillWith(0.0);
+
+	for (int q = 0; q < kQ; ++q)
+		result += (dfunc_body_.at(q) * mas[q]);
+
+	result += 0.5 * f;
+
+	// Переписать сразу в return, тк лишнее копирование НО выпадает error
+	result.TimesDivide(density);
+	return result;
+}
+
+
+
 
 template<typename T1>
 std::ostream & operator<<(std::ostream & os, DistributionFunction<T1> const & dist_func) {

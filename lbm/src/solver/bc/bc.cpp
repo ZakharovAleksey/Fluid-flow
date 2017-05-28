@@ -466,7 +466,7 @@ bool BCs3D::PrepareValuesForSingleBC(Boundary const BC, BCType const bc_type)
 		return WriteBoundaryValues(bc_type, left_boundary_, left_ids_, ptrToFunc);
 		break;
 
-	case Boundary::NEAR:
+	case Boundary::CLOSE_IN:
 
 		ptrToFunc = &DistributionFunction3D<double>::GetNearBoundaryValue;
 		return WriteBoundaryValues(bc_type, near_boundary_, near_ids_, ptrToFunc);
@@ -540,7 +540,7 @@ void BCs3D::PrepareValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BC
 		PrepareValuesForSingleBC(Boundary::BOTTOM, bottm_bc) &&
 		PrepareValuesForSingleBC(Boundary::LEFT, left_bc) &&
 		PrepareValuesForSingleBC(Boundary::RIGHT, right_bc) && 
-		PrepareValuesForSingleBC(Boundary::NEAR, near_bc) &&
+		PrepareValuesForSingleBC(Boundary::CLOSE_IN, near_bc) &&
 		PrepareValuesForSingleBC(Boundary::FAAR, far_bc) )
 	{
 		// Лог что все значения получилось взять
@@ -621,7 +621,7 @@ bool BCs3D::RecordValuesForSingleBC(Boundary const BC, BCType const bc_type)
 		}
 		break;
 
-	case Boundary::NEAR:
+	case Boundary::CLOSE_IN:
 
 		if (bc_type == BCType::PERIODIC)
 		{
@@ -693,7 +693,7 @@ void BCs3D::RecordValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCT
 		RecordValuesForSingleBC(Boundary::BOTTOM, bottm_bc) &&
 		RecordValuesForSingleBC(Boundary::LEFT, left_bc) &&
 		RecordValuesForSingleBC(Boundary::RIGHT, right_bc) &&
-		RecordValuesForSingleBC(Boundary::NEAR, near_bc) &&
+		RecordValuesForSingleBC(Boundary::CLOSE_IN, near_bc) &&
 		RecordValuesForSingleBC(Boundary::FAAR, far_bc))
 	{
 		f_ptr_->ClearBoundaries();
@@ -713,7 +713,7 @@ void BCs3D::PeriodicBC(Boundary const first, Boundary const second)
 		left_boundary_.swap(right_boundary_);
 	else if (first == Boundary::TOP && second == Boundary::BOTTOM)
 		top_boundary_.swap(bottom_boundary_);
-	else if (first == Boundary::NEAR && second == Boundary::FAAR)
+	else if (first == Boundary::CLOSE_IN && second == Boundary::FAAR)
 		near_boundary_.swap(far_boundary_);
 	else
 	{
@@ -756,7 +756,7 @@ void BCs3D::BounceBackBC(Boundary const first)
 		SwapIds(right_boundary_, 10, 17);
 		SwapIds(right_boundary_, 15, 12);
 	}
-	else if (first == Boundary::NEAR)
+	else if (first == Boundary::CLOSE_IN)
 	{
 		SwapIds(near_boundary_, 4, 2);
 		SwapIds(near_boundary_, 7, 5);

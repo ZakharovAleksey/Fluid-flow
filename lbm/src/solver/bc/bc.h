@@ -22,7 +22,7 @@ enum class Boundary {
 	RIGHT,
 	LEFT,
 	// In 3d case only
-	NEAR,
+	CLOSE_IN,
 	FAAR
 };
 

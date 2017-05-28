@@ -165,6 +165,10 @@ public:
 	//! —читает скорость в кажой из €чеек области
 	MacroscopicParam<T> calculateVelocity(const double mas[kQ], MacroscopicParam<T> const & density) const;
 
+	//! Calculate velocity according to IB-LBM Implementation
+	MacroscopicParam<T> calculateVelocity(const double mas[kQ], MacroscopicParam<T> const & density, Matrix2D<double> const & f) const;
+
+	
 	T Get(int q, int y, int x)
 	{
 		return dfunc_body_.at(q)(y, x);

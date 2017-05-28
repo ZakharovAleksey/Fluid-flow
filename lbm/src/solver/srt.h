@@ -1,7 +1,7 @@
 #pragma once
 
 #include<memory>
-
+#include<windows.h>
 
 #include <fstream> // file streams
 #include <sstream> // string streams
@@ -58,6 +58,7 @@ private:
 
 #pragma region ib-lbm
 
+//! Point in 2D space
 struct Point
 {
 	double x_;
@@ -67,14 +68,21 @@ struct Point
 	Point(double x, double y) : x_(x), y_(y) {}
 };
 
-
+//! Node of immersed in fluid body with
 struct IBNode
 {
+	//! Current node position
 	Point cur_pos_;
+	//! Reference node position
 	Point ref_pos_;
+
+	//! Node velocity along x-axis
 	double vx_;
+	//! Node velocity along y-axis
 	double vy_;
+	//! Elastic force, acting on the node along x-axis
 	double Fx_;
+	//! Elastic force, acting on the node along y-axis
 	double Fy_;
 
 	IBNode() : cur_pos_(), ref_pos_(), vx_(0.0), vy_(0.0), Fx_(0.0), Fy_(0.0) {}
@@ -101,6 +109,7 @@ public:
 	}
 	~ImmersedBody() {}
 
+
 	void CalculateForces()
 	{
 		// Set initial values of force equal to zero
@@ -112,27 +121,16 @@ public:
 
 		const double arcLen = 2.0 * M_PI * radius_ / nodes_num;
 
-		// Calculate strain forces
-		for (int i = 0; i < nodes_num; ++i)
-		{
-			const double distance = SQ(body_.at(i).cur_pos_.x_ - body_.at((i + 1) % nodes_num).cur_pos_.x_) + SQ(body_.at(i).cur_pos_.y_ - body_.at((i + 1) % nodes_num).cur_pos_.y_);
-			const double distance_ref = SQ(body_.at(i).ref_pos_.x_ - body_.at((i + 1) % nodes_num).ref_pos_.x_) + SQ(body_.at(i).ref_pos_.y_ - body_.at((i + 1) % nodes_num).ref_pos_.y_);
+		CalculateStrainForces();
+		CalculateBendingForces();
 
-			const double fx = stiffness_ * (distance - distance_ref) * (body_.at(i).cur_pos_.x_ - body_.at((i + 1) % nodes_num).cur_pos_.x_);
-			const double fy = stiffness_ * (distance - distance_ref) * (body_.at(i).cur_pos_.y_ - body_.at((i + 1) % nodes_num).cur_pos_.y_);
-
-			body_.at(i).Fx_ += -fx;
-			body_.at(i).Fy_ += -fy;
-
-			body_.at((i + 1) % nodes_num).Fx_ += fx;
-			body_.at((i + 1) % nodes_num).Fy_ += fy;
-		}
-
-		// Calculate bending forces
+		
+		/*
 		for (int i = 0; i < nodes_num; ++i)
 		{
 			int prevId = (i - 1 + nodes_num) % nodes_num;
 			int nextId = (i + 1) % nodes_num;
+
 			const double x_l = body_.at(prevId).cur_pos_.x_;
 			const double y_l = body_.at(prevId).cur_pos_.y_;
 			const double x_m = body_.at(i).cur_pos_.x_;
@@ -252,6 +250,7 @@ public:
 			body_.at(nextId).Fx_ += normal_x * force_mag * length_r / (length_l + length_r);
 			body_.at(nextId).Fy_ += normal_y * force_mag * length_r / (length_l + length_r);
 		}
+	*/
 	}
 
 	void SpreadForces(Matrix2D<double> &fx, Matrix2D<double> & fy)
@@ -373,76 +372,242 @@ public:
 
 	}
 
-	void Dispaly(std::string name)
+	//! Writes data about boundary of immersed body to *.txt file
+	void WriteBodyFormToTxt(const int time)
 	{
-		std::ofstream f;
-		f.open(name);
-		if (f.is_open())
-			std::cout << "good\n";
+		int ignore;
+		char buffer[MAX_PATH];
+		GetModuleFileName(NULL, buffer, MAX_PATH);
+		std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+		std::string path = std::string(buffer).substr(0, pos);
 
-		for (int i = 0; i < nodes_num; ++i)
-		{
-			f << body_.at(i).cur_pos_.x_ << " " << body_.at(i).cur_pos_.y_ << std::endl;
-		}
+		path = path.substr(0, path.size() - 6);
 
-		f.close();
-	}
+		std::string comand = "mkdir " + path + "\\Data\\ib_body_txt";
+
+		char *cstr = new char[comand.length() + 1];
+		strcpy(cstr, comand.c_str());
+
+		ignore = system(cstr);
 
 
+		std::string file_name = "Data/body_form_t" + std::to_string(time) + ".txt";
 
-	void write_particle_vtk(int time) {
-
-		/// Create filename
-
-		std::stringstream output_filename;
-		output_filename << "vtk_particle/particle_t" << time << ".vtk";
 		std::ofstream output_file;
+		output_file.open(file_name);
 
-		/// Open file
+		if (output_file.is_open())
+		{
+			for (auto node : body_)
+			{
+				output_file << node.cur_pos_.x_ << " " << node.cur_pos_.y_ << std::endl;
+			}
 
-		output_file.open(output_filename.str().c_str());
+			// Add first point to data in file to display closed boundary
+			output_file << body_.begin()->cur_pos_.x_ << " " << body_.begin()->cur_pos_.y_;
 
-		/// Write VTK header
-
-		output_file << "# vtk DataFile Version 3.0\n";
-		output_file << "particle_state\n";
-		output_file << "ASCII\n";
-		output_file << "DATASET POLYDATA\n";
-
-		/// Write node positions
-
-		output_file << "POINTS " << nodes_num << " float\n";
-
-		for (int n = 0; n < nodes_num; ++n) {
-			output_file << body_.at(n).cur_pos_.x_ << " " << body_.at(n).cur_pos_.y_ << " 0\n";
 		}
-
-		/// Write lines between neighboring nodes
-
-		output_file << "LINES " << nodes_num << " " << 3 * nodes_num << "\n";
-
-		for (int n = 0; n < nodes_num; ++n) {
-			output_file << "2 " << n << " " << (n + 1) % nodes_num << "\n";
-		}
-
-		/// Write vertices
-
-		output_file << "VERTICES 1 " << nodes_num + 1 << "\n";
-		output_file << nodes_num << " ";
-
-		for (int n = 0; n < nodes_num; ++n) {
-			output_file << n << " ";
-		}
-
-		/// Close file
+		else
+			std::cout << "Error! Could not open file " << file_name << " to write form of immersed body. \n";
 
 		output_file.close();
+	}
 
-		return;
+	//! Writes data about boundary of immersed body to *.vtk file
+	void WriteBodyFormToVtk(const int time) 
+	{
+		std::string file_name = "vtk_particle/particle_t" + std::to_string(time) + ".vtk";
+		std::ofstream output_file;
+		output_file.open(file_name);
+
+		if (output_file.is_open())
+		{
+			// Write VTK header
+			output_file << "# vtk DataFile Version 3.0\n";
+			output_file << "particle_state\n";
+			output_file << "ASCII\n";
+			output_file << "DATASET POLYDATA\n";
+
+			// Write node positions
+			output_file << "POINTS " << nodes_num << " float\n";
+
+			for (auto node : body_)
+				output_file << node.cur_pos_.x_ << " " << node.cur_pos_.y_ << " 0\n";
+
+			// Write lines between neighboring nodes
+			output_file << "LINES " << nodes_num << " " << 3 * nodes_num << "\n";
+			
+			for (int i = 0; i < nodes_num; ++i) 
+				output_file << "2 " << i << " " << (i + 1) % nodes_num << "\n";
+
+			// Write vertices
+			output_file << "VERTICES 1 " << nodes_num + 1 << "\n";
+			output_file << nodes_num << " ";
+
+			for (int i = 0; i < nodes_num; ++i) 
+				output_file << i << " ";
+		}
+		else
+			std::cout << "Error! Could not open file " << file_name << " to write form of immersed body. \n";
+
+		output_file.close();
+	}
+
+private:
+
+	//! Calculate strain forces for all nodes of immersed body
+	void CalculateStrainForces()
+	{
+		for (int i = 0; i < nodes_num; ++i)
+		{
+			const double distance = SQ(body_.at(i).cur_pos_.x_ - body_.at((i + 1) % nodes_num).cur_pos_.x_) + SQ(body_.at(i).cur_pos_.y_ - body_.at((i + 1) % nodes_num).cur_pos_.y_);
+			const double distance_ref = SQ(body_.at(i).ref_pos_.x_ - body_.at((i + 1) % nodes_num).ref_pos_.x_) + SQ(body_.at(i).ref_pos_.y_ - body_.at((i + 1) % nodes_num).ref_pos_.y_);
+
+			const double fx = stiffness_ * (distance - distance_ref) * ( body_.at(i).cur_pos_.x_ - body_.at((i + 1) % nodes_num).cur_pos_.x_);
+			const double fy = stiffness_ * (distance - distance_ref) * ( body_.at(i).cur_pos_.y_ - body_.at((i + 1) % nodes_num).cur_pos_.y_);
+
+			// Signs of forces are chosen to satisfy third Newton law
+			body_.at(i).Fx_ += -fx;
+			body_.at(i).Fy_ += -fy;
+
+			body_.at((i + 1) % nodes_num).Fx_ += fx;
+			body_.at((i + 1) % nodes_num).Fy_ += fy;
+		}
+	}
+
+	void CalculateBendingForces()
+	{
+		for (int i = 0; i < nodes_num; ++i)
+		{
+			int prevId = (i - 1 + nodes_num) % nodes_num;
+			int nextId = (i + 1) % nodes_num;
+
+			const double x_l = body_.at(prevId).cur_pos_.x_;
+			const double y_l = body_.at(prevId).cur_pos_.y_;
+			const double x_m = body_.at(i).cur_pos_.x_;
+			const double y_m = body_.at(i).cur_pos_.y_;
+			const double x_r = body_.at(nextId).cur_pos_.x_;
+			const double y_r = body_.at(nextId).cur_pos_.y_;
+
+			const double x_l_ref = body_.at(prevId).ref_pos_.x_;
+			const double y_l_ref = body_.at(prevId).ref_pos_.y_;
+			const double x_m_ref = body_.at(i).ref_pos_.x_;
+			const double y_m_ref = body_.at(i).ref_pos_.y_;
+			const double x_r_ref = body_.at(nextId).ref_pos_.x_;
+			const double y_r_ref = body_.at(nextId).ref_pos_.y_;
+
+
+			// x-координата вектора, соединяющая l и r
+			const double tang_x_ref = x_r_ref - x_l_ref;
+			// y-координата вектора, соединяющая l и r
+			const double tang_y_ref = y_r_ref - y_l_ref;
+			double normal_x_ref;
+			double normal_y_ref;
+
+			// Тут просто задем нормаль так чтобы скалярное произведение вектора нормали на 
+			// вектор разности l и r были перпендикулярны : а разность модулей  для того чтобы 
+			// навпраление было всегда от вне
+			if (abs(tang_x_ref) < abs(tang_y_ref)) {
+				normal_x_ref = 1;
+				normal_y_ref = -tang_x_ref / tang_y_ref;
+			}
+			else {
+				normal_y_ref = 1;
+				normal_x_ref = -tang_y_ref / tang_x_ref;
+			}
+
+			// То же самое для обычныых
+			const double tang_x = x_r - x_l;
+			const double tang_y = y_r - y_l;
+			double normal_x;
+			double normal_y;
+
+			if (abs(tang_x) < abs(tang_y)) {
+				normal_x = 1;
+				normal_y = -tang_x / tang_y;
+			}
+			else {
+				normal_y = 1;
+				normal_x = -tang_y / tang_x;
+			}
+
+			// Просто нормализация вектора
+			const double normal_length_ref = sqrt(SQ(normal_x_ref) + SQ(normal_y_ref));
+			normal_x_ref /= normal_length_ref;
+			normal_y_ref /= normal_length_ref;
+
+			if (normal_x_ref * tang_y_ref - normal_y_ref * tang_x_ref > 0) {
+				normal_x_ref *= -1;
+				normal_y_ref *= -1;
+			}
+
+			const double normal_length = sqrt(SQ(normal_x) + SQ(normal_y));
+			normal_x /= normal_length;
+			normal_y /= normal_length;
+
+			if (normal_x * tang_y - normal_y * tang_x > 0) {
+				normal_x *= -1;
+				normal_y *= -1;
+			}
+			// Angle calculations
+
+			// Скалярное произведение векторов деленное на длину векторов
+			double angle_ref_cos = (x_l_ref - x_m_ref) * (x_m_ref - x_r_ref) + (y_l_ref - y_m_ref) * (y_m_ref - y_r_ref);
+			angle_ref_cos /= (sqrt(SQ(x_l_ref - x_m_ref) + SQ(y_l_ref - y_m_ref)) * sqrt(SQ(x_m_ref - x_r_ref) + SQ(y_m_ref - y_r_ref)));
+
+			// Addition if because of surrounding cos = 1.000000002
+			if (angle_ref_cos > 1.0)
+				angle_ref_cos = 1.0;
+			else if (angle_ref_cos < -1.0)
+				angle_ref_cos = -1.0;
+
+
+			double angle_ref = acos(angle_ref_cos);
+
+			const double convex_x_ref = (x_l_ref + x_r_ref) / 2 - x_m_ref;
+			const double convex_y_ref = (y_l_ref + y_r_ref) / 2 - y_m_ref;
+
+			if (convex_x_ref * normal_x_ref + convex_y_ref * normal_y_ref > 0) {
+				angle_ref *= -1;
+			}
+
+			double angle_cos = (x_l - x_m) * (x_m - x_r) + (y_l - y_m) * (y_m - y_r);
+			angle_cos /= (sqrt(SQ(x_l - x_m) + SQ(y_l - y_m)) * sqrt(SQ(x_m - x_r) + SQ(y_m - y_r)));
+
+			// Addition if because of surrounding cos = 1.000000002
+			if (angle_cos > 1.0)
+				angle_cos = 1.0;
+			else if (angle_cos < -1.0)
+				angle_cos = -1.0;
+
+
+			double angle = acos(angle_cos);
+
+			const double convex_x = (x_l + x_r) / 2 - x_m;
+			const double convex_y = (y_l + y_r) / 2 - y_m;
+
+			if (convex_x * normal_x + convex_y * normal_y > 0) {
+				angle *= -1;
+			}
+			// force calculations 
+			const double force_mag = bending_ * (angle - angle_ref);
+			const double length_l = abs(tang_x * (x_m - x_l) + tang_y * (y_m - y_l));
+			const double length_r = abs(tang_x * (x_m - x_r) + tang_y * (y_m - y_r));
+
+			body_.at(prevId).Fx_ += normal_x * force_mag * length_l / (length_l + length_r);
+			body_.at(prevId).Fy_ += normal_y * force_mag * length_l / (length_l + length_r);
+
+			body_.at(i).Fx_ += -normal_x * force_mag;
+			body_.at(i).Fy_ += -normal_y * force_mag;
+
+			body_.at(nextId).Fx_ += normal_x * force_mag * length_r / (length_l + length_r);
+			body_.at(nextId).Fy_ += normal_y * force_mag * length_r / (length_l + length_r);
+		}
 	}
 
 
 private:
+
 	int domain_x_;
 	int domain_y_;
 	//! Number of Lagragian nodes
@@ -470,10 +635,12 @@ public:
 
 	IBSolver(double tau, Fluid& fluid, Medium & medium, ImmersedBody& body) : tau_(tau)
 	{
-		int ignore; // ignore return value of system calls
-		ignore = system("mkdir vtk_fluid"); // create folder if not existing
-		ignore = system("mkdir vtk_particle"); // create folder if not existing
-		//ignore = system("rm -f data.dat"); // delete file if existing
+		// Ignore return value of system calls
+		int ignore; 
+		// Create folder for VTK fluid data extraction if not 
+		ignore = system("mkdir vtk_fluid"); 
+		// Create folder if not existing
+		ignore = system("mkdir vtk_particle");
 
 
 		std::cout << " --- Input parameters :\n";
@@ -525,17 +692,17 @@ public:
 						fluid_->f_[q](y - kEy[q], x + kEx[q]) = temp(y, x);
 		}
 
-		// Очищаем значения попавшие на границу, так как они уже сохранены в BCs
 		fluid_->f_.fillBoundaries(0.0);
 	}
 
 	void CalculateForces()
 	{
 		double gravity = 0.0;
+
 		for(int y = 0; y < fluid_->size().first; ++y)
 			for (int x = 0; x < fluid_->size().second; ++x)
 			{
-				force_member_.at(0) = (1.0 - 0.5 / tau_) * kW[0] * (3.0 * ((-fluid_->vx_(y, x) * (*fx_)(y,x) + -fluid_->vy_(y, x) * (*fy_)(y, x))));
+				force_member_.at(0) = (1.0 - 0.5 / tau_) * kW[0] * (3.0 * ((-fluid_->vx_(y, x) * ((*fx_)(y,x) + gravity) + -fluid_->vy_(y, x) * (*fy_)(y, x))));
 				force_member_[1] = (1 - 0.5 / tau_) * kW[1] * (3.0 * ((1 - fluid_->vx_(y,x)) * ((*fx_)(y,x) + gravity) + (-fluid_->vy_(y,x)) * (*fy_)(y,x)) + 9.0 * (fluid_->vx_(y,x)) * ((*fx_)(y,x) + gravity));
 				force_member_[2] = (1 - 0.5 / tau_) * kW[2] * (3.0* ((-1 - fluid_->vx_(y,x)) * ((*fx_)(y,x) + gravity) + (-fluid_->vy_(y,x)) * (*fy_)(y,x)) + 9.0 * (fluid_->vx_(y,x)) * ((*fx_)(y,x) + gravity));
 				force_member_[3] = (1 - 0.5 / tau_) * kW[3] * (3.0 * ((-fluid_->vx_(y,x)) * ((*fx_)(y,x) + gravity) + (1 - fluid_->vy_(y,x)) * (*fy_)(y,x)) + 9.0 * (fluid_->vy_(y,x)) * (*fy_)(y,x));
@@ -561,17 +728,17 @@ public:
 	void recalculate()
 	{
 		fluid_->rho_ = fluid_->f_.calculateDensity();
-		fluid_->vx_ = fluid_->f_.calculateVelocity(kEx, fluid_->rho_);
-		fluid_->vy_ = fluid_->f_.calculateVelocity(kEy, fluid_->rho_);
+		fluid_->vx_ = fluid_->f_.calculateVelocity(kEx, fluid_->rho_, *fx_);
+
+		fluid_->vy_ = fluid_->f_.calculateVelocity(kEy, fluid_->rho_, *fy_);
 	}
 
 	void Solve(int iter_numb)
 	{
 		feqCalculate();
+
 		for (int q = 0; q < kQ; ++q)
 			fluid_->f_[q] = fluid_->feq_[q];
-
-		//std::cout << fluid_->f_;
 
 		BCs BC(fluid_->f_);
 
@@ -611,13 +778,10 @@ public:
 
 			if (iter % 10 == 0)
 			{
-				std::string name = "Data/pos_" + std::to_string(iter) + ".txt";
 				fluid_->write_fluid_vtk(iter);
-				body_->write_particle_vtk(iter);
-				//body_->Dispaly(name);
-				//fluid_->vy_.WriteToFile("vy", iter);
+				body_->WriteBodyFormToTxt(iter);
+				body_->WriteBodyFormToVtk(iter);
 				//fluid_->vx_.WriteToFile("vx", iter);
-				//fluid_->rho_.WriteToFile("rho", iter);
 			}
 
 		}

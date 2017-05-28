@@ -213,7 +213,7 @@ void SRT3DSolver::solve(int iter_numb)
 		bc.BounceBackBC(Boundary::BOTTOM);
 		bc.BounceBackBC(Boundary::LEFT);
 		bc.BounceBackBC(Boundary::RIGHT);
-		bc.BounceBackBC(Boundary::NEAR);
+		bc.BounceBackBC(Boundary::CLOSE_IN);
 		bc.BounceBackBC(Boundary::FAAR);
 
 		bc.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);

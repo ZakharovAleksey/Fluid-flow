@@ -88,18 +88,42 @@ public:
 
 		/// Write density difference
 
-		output_file << "SCALARS density_difference float 1\n";
+		output_file << "SCALARS density float 1\n";
 		output_file << "LOOKUP_TABLE default\n";
 
-		for (int Y = 1; Y < Ny - 1; ++Y) {
-			for (int X = 0; X < Nx; ++X) {
-				output_file << rho_(Y, X) - 1 << "\n";
+		for (int Y = 1; Y < Ny - 1; ++Y) 
+		{
+			for (int X = 0; X < Nx; ++X) 
+			{
+				output_file << rho_(Y, X) << "\n";
+			}
+		}
+
+		output_file << "SCALARS vx float 1\n";
+		output_file << "LOOKUP_TABLE default\n";
+
+		for (int Y = 1; Y < Ny - 1; ++Y)
+		{
+			for (int X = 0; X < Nx; ++X)
+			{
+				output_file << vx_(Y, X) << "\n";
+			}
+		}
+
+		output_file << "SCALARS vy float 1\n";
+		output_file << "LOOKUP_TABLE default\n";
+
+		for (int Y = 1; Y < Ny - 1; ++Y)
+		{
+			for (int X = 0; X < Nx; ++X)
+			{
+				output_file << vy_(Y, X) << "\n";
 			}
 		}
 
 		/// Write velocity
 
-		output_file << "VECTORS velocity_vector float\n";
+		output_file << "VECTORS velocity float\n";
 
 		for (int Y = 1; Y < Ny - 1; ++Y) {
 			for (int X = 0; X < Nx; ++X) {

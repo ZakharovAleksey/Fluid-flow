@@ -100,7 +100,7 @@ int main()
 	ImmersedBody body(102, 30, 32, Point(15, 15), 6);
 
 	IBSolver s(1.0, f,m, body);
-	s.Solve(1001);
+	s.Solve(101);
 
 
 
