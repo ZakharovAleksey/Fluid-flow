@@ -375,23 +375,7 @@ public:
 	//! Writes data about boundary of immersed body to *.txt file
 	void WriteBodyFormToTxt(const int time)
 	{
-		int ignore;
-		char buffer[MAX_PATH];
-		GetModuleFileName(NULL, buffer, MAX_PATH);
-		std::string::size_type pos = std::string(buffer).find_last_of("\\/");
-		std::string path = std::string(buffer).substr(0, pos);
-
-		path = path.substr(0, path.size() - 6);
-
-		std::string comand = "mkdir " + path + "\\Data\\ib_body_txt";
-
-		char *cstr = new char[comand.length() + 1];
-		strcpy(cstr, comand.c_str());
-
-		ignore = system(cstr);
-
-
-		std::string file_name = "Data/body_form_t" + std::to_string(time) + ".txt";
+		std::string file_name = "Data/ib_lbm_data/body_form_txt/body_form_t" + std::to_string(time) + ".txt";
 
 		std::ofstream output_file;
 		output_file.open(file_name);
@@ -414,9 +398,10 @@ public:
 	}
 
 	//! Writes data about boundary of immersed body to *.vtk file
-	void WriteBodyFormToVtk(const int time) 
+	void WriteBodyFormToVtk(std::string file_path, const int time) 
 	{
-		std::string file_name = "vtk_particle/particle_t" + std::to_string(time) + ".vtk";
+		std::string file_name = file_path + "\\body_fluid_t" + std::to_string(time) + ".vtk";
+
 		std::ofstream output_file;
 		output_file.open(file_name);
 
@@ -634,13 +619,12 @@ class IBSolver
 public:
 
 	IBSolver(double tau, Fluid& fluid, Medium & medium, ImmersedBody& body) : tau_(tau)
-	{
-		// Ignore return value of system calls
-		int ignore; 
-		// Create folder for VTK fluid data extraction if not 
-		ignore = system("mkdir vtk_fluid"); 
-		// Create folder if not existing
-		ignore = system("mkdir vtk_particle");
+	{ 
+		CreateDataFolder("Data\\ib_lbm_data");
+		CreateDataFolder("Data\\ib_lbm_data\\body_form_txt");
+		CreateDataFolder("Data\\ib_lbm_data\\body_form_vtk");
+		CreateDataFolder("Data\\ib_lbm_data\\fluid_txt");
+		CreateDataFolder("Data\\ib_lbm_data\\fluid_vtk");
 
 
 		std::cout << " --- Input parameters :\n";
@@ -776,11 +760,12 @@ public:
 
 			std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 
-			if (iter % 10 == 0)
+			if (iter % 50 == 0)
 			{
 				fluid_->write_fluid_vtk(iter);
 				body_->WriteBodyFormToTxt(iter);
-				body_->WriteBodyFormToVtk(iter);
+				body_->WriteBodyFormToVtk("Data\\ib_lbm_data\\body_form_vtk", iter);
+				fluid_->vx_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "vx", iter);
 				//fluid_->vx_.WriteToFile("vx", iter);
 			}
 
@@ -788,6 +773,28 @@ public:
 
 		//! Streaming collision bounce back
 
+	}
+
+
+private:
+
+	//! Creates folder for output data if not existed yet
+	void CreateDataFolder(std::string folder_name) const
+	{
+		// Get path to current directory
+		char buffer[MAX_PATH];
+		GetModuleFileName(NULL, buffer, MAX_PATH);
+
+		std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+		std::string path = std::string(buffer).substr(0, pos);
+		path = path.substr(0, path.size() - 6) + "\\" + folder_name;
+
+		char *cstr = new char[path.length() + 1];
+		strcpy(cstr, path.c_str());
+
+		// Create folder if not exist yet
+		if (GetFileAttributes(cstr) == INVALID_FILE_ATTRIBUTES) 
+			CreateDirectory(cstr, NULL);
 	}
 
 

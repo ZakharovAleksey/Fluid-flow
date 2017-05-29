@@ -417,6 +417,38 @@ public:
 	/// <param name="time"> Selected iteration number. </param>
 	void WriteToFile(std::string value_name, int const time);
 
+	void WriteFieldToTxt(std::string path, std::string phys_val, const int time)
+	{
+		std::string file_name = path + "\\" + phys_val + "[" + std::to_string(rows_) + "x" + std::to_string(colls_) + "]_t" + std::to_string(time) + ".txt";
+
+		std::ofstream output_file;
+		output_file.open(file_name);
+
+		if (output_file.is_open())
+		{
+			unsigned cur_position{ 1 };
+
+			for (unsigned y = 0; y < rows_; ++y)
+			{
+				for (unsigned x = 0; x < colls_; ++x)
+				{
+					output_file << this->operator()(y, x);
+					if (x != colls_ - 1)
+						output_file << ' ';
+				}
+				if (y != rows_ - 1)
+					output_file << std::endl;
+
+			}
+		}
+		else
+		{
+			std::cout << "Error! Could not open file " << file_name << " to write data.\n";
+		}
+
+		output_file.close();
+	}
+
 	/// <summary>
 	/// Write down "coll_id" column of selected macroscopic physical value "value_type" at iteration number "time" to *.txt file.
 	/// </summary>
