@@ -4,16 +4,18 @@
 #pragma region 2d
 
 
-#pragma region srt simple
+#pragma region srt
 
-
-
-SRTsolver::SRTsolver(double const tau, Medium & medium, Fluid & fluid) :
-	tau_(tau),
-	medium_(&medium),
-	fluid_(&fluid)
+SRTsolver::SRTsolver(double const tau, Medium & medium, Fluid & fluid) : tau_(tau), medium_(&medium), fluid_(&fluid)
 {
-	assert(medium_->size().first == fluid_->size().first && medium_->size().second == fluid_->size().second);
+	assert(medium_->size().first == fluid_->size().first);
+	assert(medium_->size().second == fluid_->size().second);
+
+	CreateDataFolder("Data");
+	CreateDataFolder("Data\\srt_lbm_data");
+	CreateDataFolder("Data\\srt_lbm_data\\2d");
+	CreateDataFolder("Data\\srt_lbm_data\\2d\\fluid_txt");
+	CreateDataFolder("Data\\srt_lbm_data\\2d\\fluid_vtk");
 }
 
 void SRTsolver::feqCalculate()
@@ -61,15 +63,12 @@ void SRTsolver::Solve(int iter_numb)
 	for (int q = 0; q < kQ; ++q)
 		fluid_->f_[q] = fluid_->feq_[q];
 
-	//std::cout << fluid_->f_;
-
 	BCs BC(fluid_->f_);
 
 	for (int iter = 0; iter < iter_numb; ++iter) 
 	{
 		Collision();
-		//BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
-		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::VON_NEUMAN);
 
 		Streaming();
 
@@ -78,25 +77,13 @@ void SRTsolver::Solve(int iter_numb)
 		BC.BounceBackBC(Boundary::TOP);
 		BC.BounceBackBC(Boundary::BOTTOM);
 		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.01, 0.0);
-		BC.BounceBackBC(Boundary::RIGHT);
-		
-		/*BC.VonNeumannBC(Boundary::TOP, *fluid_, 0.01, 0.0);
-		BC.VonNeumannBC(Boundary::BOTTOM, *fluid_, -0.01, 0.0);
-		BC.VonNeumannBC(Boundary::RIGHT, *fluid_, 0.00, 0.01);
-		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.00, -0.01);*/
-		
-		//BC.AdditionalBCs(*medium_);
+		BC.VonNeumannBC(Boundary::RIGHT, *fluid_, 0.01, 0.0);
 
 		BC.AdditionalBounceBackBCs();
 
-		//std::cout << fluid_->f_;
-
-		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::VON_NEUMAN);
 
 		BC.RecordAdditionalBCs();
-	
-		//std::cout << fluid_->f_;
-		
 
 		Recalculate();
 
@@ -104,17 +91,13 @@ void SRTsolver::Solve(int iter_numb)
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 
-		if (iter % 10 == 0)
+		if (iter % 5 == 0)
 		{
-			//fluid_->vy_.WriteToFile("vy", iter);
-			fluid_->vx_.WriteToFile("vx", iter);
-			fluid_->rho_.WriteToFile("rho", iter);
+			fluid_->vx_.WriteFieldToTxt("Data\\srt_lbm_data\\2d\\fluid_txt", "vx", iter);
+			fluid_->write_fluid_vtk("Data\\srt_lbm_data\\2d\\fluid_vtk", iter);
 		}
 
 	}
-
-	/*for (int i = 0; i < fluid_->rows_; ++i)
-		std::cout << fluid_->vx_(i, 5) << "\n";*/
 }
 
 void SRTsolver::Recalculate()
@@ -122,6 +105,24 @@ void SRTsolver::Recalculate()
 	fluid_->rho_ = fluid_->f_.calculateDensity();
 	fluid_->vx_ = fluid_->f_.calculateVelocity(kEx, fluid_->rho_);
 	fluid_->vy_ = fluid_->f_.calculateVelocity(kEy, fluid_->rho_);
+}
+
+void SRTsolver::CreateDataFolder(std::string folder_name) const
+{
+	// Get path to current directory
+	char buffer[MAX_PATH];
+	GetModuleFileName(NULL, buffer, MAX_PATH);
+
+	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+	std::string path = std::string(buffer).substr(0, pos);
+	path = path.substr(0, path.size() - 6) + "\\" + folder_name;
+
+	char *cstr = new char[path.length() + 1];
+	strcpy(cstr, path.c_str());
+
+	// Create folder if not exist yet
+	if (GetFileAttributes(cstr) == INVALID_FILE_ATTRIBUTES)
+		CreateDirectory(cstr, NULL);
 }
 
 #pragma endregion
@@ -134,11 +135,17 @@ void SRTsolver::Recalculate()
 #pragma region 3d
 
 
-SRT3DSolver::SRT3DSolver(double const tau, Medium3D & medium, Fluid3D & fluid) : tau_(tau), medium_(& medium), fluid_(& fluid)
+SRT3DSolver::SRT3DSolver(double tau, Medium3D & medium, Fluid3D & fluid) : tau_(tau), medium_(& medium), fluid_(& fluid)
 {
 	assert(medium_->GetDepthNumber() == fluid_->GetDepthNumber());
 	assert(medium_->GetRowsNumber() == fluid_->GetRowsNumber());
 	assert(medium_->GetColumnsNumber() == fluid_->GetColumnsNumber());
+
+	CreateDataFolder("Data");
+	CreateDataFolder("Data\\srt_lbm_data");
+	CreateDataFolder("Data\\srt_lbm_data\\3d");
+	CreateDataFolder("Data\\srt_lbm_data\\3d\\fluid_txt");
+	CreateDataFolder("Data\\srt_lbm_data\\3d\\fluid_vtk");
 }
 
 void SRT3DSolver::feqCalculate()
@@ -223,8 +230,8 @@ void SRT3DSolver::Solve(int iter_numb)
 
 		feqCalculate();
 
-		/*if (iter % 10 == 0)
-			GetProfile(15, iter);*/
+		if (iter % 10 == 0)
+			GetProfile(15, iter);
 	}
 	
 }
@@ -332,6 +339,24 @@ void SRT3DSolver::SubStreamingBottom(const int depth, const int rows, const int 
 						fluid_->f_->operator[](q)(z + ez[q], y + ey[q], x + ex[q]) = temp(y, x);
 		}
 	}
+}
+
+void SRT3DSolver::CreateDataFolder(std::string folder_name) const
+{
+	// Get path to current directory
+	char buffer[MAX_PATH];
+	GetModuleFileName(NULL, buffer, MAX_PATH);
+
+	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+	std::string path = std::string(buffer).substr(0, pos);
+	path = path.substr(0, path.size() - 6) + "\\" + folder_name;
+
+	char *cstr = new char[path.length() + 1];
+	strcpy(cstr, path.c_str());
+
+	// Create folder if not exist yet
+	if (GetFileAttributes(cstr) == INVALID_FILE_ATTRIBUTES)
+		CreateDirectory(cstr, NULL);
 }
 
 void SRT3DSolver::Recalculate()

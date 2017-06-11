@@ -81,9 +81,9 @@ protected:
 	//! Number of Lagragian nodes
 	int nodes_num;
 	//! Stiffness modulus 
-	const double stiffness_ = 0.1;
+	const double stiffness_ = 0.15; // 0.1
 	//! Bending modulus
-	const double bending_ = 0.001;
+	const double bending_ = 0.001; // 0.001
 
 	//! Radius of body
 	double radius_;
@@ -107,9 +107,13 @@ class ImmersedCircle : public ImmersedBody
 {
 public:
 	ImmersedCircle(int domainX, int domainY, int nodesNumber, Point center, double radius);
+};
 
-private:
-
+//! Immersed in fluid tromb
+class ImmersedTromb : public ImmersedBody
+{
+public:
+	ImmersedTromb(int domainX, int domainY, int nodesNumber, Point center, double radius);
 };
 
 

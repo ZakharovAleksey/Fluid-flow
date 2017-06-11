@@ -77,18 +77,20 @@ int main()
 
 #pragma region SRT 
 
-	//int X{ 70 }; //100
+	//int X{ 100 }; //100
 	//int Y{ 70 };
 	//Fluid f(Y, X);
 	//Medium m(Y, X);
 
-	//m.AddCircleTopFalf(35, 1, 15);
-	//m.AddCircleBottomFalf(35, 69, 15);
+	//// Add additional static boundaries
+	//m.AddCircleTopFalf(20, 1, 15);
+	//m.AddCircleBottomFalf(50, 69, 15);
+	////m.AddCircleInMedium(100, 35, 10);
 	//f.AddImmersedBodies(m);
 	//
-
+	//// Start solution
 	//SRTsolver solver(1.0, m, f);
-	//solver.Solve(101);
+	//solver.Solve(129);
 
 #pragma endregion
 
@@ -99,10 +101,13 @@ int main()
 	Fluid f(Y, X);
 	Medium m(Y, X);
 
-	std::unique_ptr<ImmersedBody> body(new ImmersedRBC(102, 30, 32, Point(15, 15), 6));
+	// Create immersed object
+	// тут мы пока не обнавл€ем потожение половины узлов UpdatePosition - убрать!! + сощдать погруженный объ€ект - тромб
+	std::unique_ptr<ImmersedBody> body(new ImmersedTromb(102, 30, 32, Point(30, 1), 6));
 
+	// Start solution
 	IBSolver s(1.0, f, m, std::move(body));
-	s.Solve(2001);
+	s.Solve(1501);
 
 #pragma endregion
 
@@ -122,7 +127,7 @@ int main()
 	//Medium3D m(z,y,x);
 
 	//SRT3DSolver srt(1.0, m, f);
-	//srt.solve(51);
+	//srt.Solve(101);
 
 #pragma endregion
 

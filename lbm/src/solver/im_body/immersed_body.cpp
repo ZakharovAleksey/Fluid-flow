@@ -26,6 +26,14 @@ void ImmersedBody::CalculateForces()
 
 	const double arcLen = 2.0 * M_PI * radius_ / nodes_num;
 
+	//for (int n = 0; n < nodes_num; ++n) 
+	//{
+	//	body_.at(n).Fx_ = -stiffness_ * (body_.at(n).cur_pos_.x_ - body_.at(n).ref_pos_.x_) * arcLen;
+	//	body_.at(n).Fy_ = -stiffness_ * (body_.at(n).cur_pos_.y_ - body_.at(n).ref_pos_.y_) * arcLen;
+	//	//particle.node[n].force_x = -particle.stiffness * (particle.node[n].x - particle.node[n].x_ref) * area;
+	//	//particle.node[n].force_y = -particle.stiffness * (particle.node[n].y - particle.node[n].y_ref) * area;
+	//}
+
 	CalculateStrainForces();
 	CalculateBendingForces();
 }
@@ -103,14 +111,14 @@ void ImmersedBody::SpreadVelocity(Fluid & fluid)
 
 void ImmersedBody::UpdatePosition()
 {
-	/// Reset center position
-
+	// Reset center position
 	center_.x_ = 0.0;
 	center_.y_ = 0.0;
 
-	/// Update node and center positions
+	// Update node and center positions
 
-	for (int i = 0; i < nodes_num; ++i)
+	//for (int i = 0; i < nodes_num; ++i)
+	for (int i = nodes_num/2; i < nodes_num; ++i)
 	{
 		body_.at(i).cur_pos_.x_ += body_.at(i).vx_;
 		body_.at(i).cur_pos_.y_ += body_.at(i).vy_;
@@ -388,5 +396,29 @@ ImmersedCircle::ImmersedCircle(int domainX, int domainY, int nodesNumber, Point 
 
 		body_.at(id).cur_pos_.y_ = center_.x_ + radius_ * cos(2.0 * M_PI * (double)id / nodes_num);
 		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.x_;
+	}
+}
+
+ImmersedTromb::ImmersedTromb(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)
+{
+	// Parametrization of the circle shape in 2D (half of circle)
+	double h = radius_ * 4.0 / nodes_num;
+
+	for (int id = 0; id < nodes_num / 2; ++id)
+	{
+		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ - id * h;
+		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
+
+		body_.at(id).cur_pos_.y_ = center_.y_;
+		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
+	}
+
+	for (int id = nodes_num / 2; id < nodes_num; ++id)
+	{
+		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ * cos(2.0 * M_PI * (double)id / nodes_num);
+		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
+
+		body_.at(id).cur_pos_.y_ = center_.y_ - radius_ * sin(2.0 * M_PI * (double)id / nodes_num);
+		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
 	}
 }

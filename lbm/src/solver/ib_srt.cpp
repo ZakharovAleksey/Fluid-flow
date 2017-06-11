@@ -2,6 +2,7 @@
 
 IBSolver::IBSolver(double tau, Fluid & fluid, Medium & medium, std::unique_ptr<ImmersedBody> body) : tau_(tau)
 {
+	CreateDataFolder("Data");
 	CreateDataFolder("Data\\ib_lbm_data");
 	CreateDataFolder("Data\\ib_lbm_data\\body_form_txt");
 	CreateDataFolder("Data\\ib_lbm_data\\body_form_vtk");
@@ -131,6 +132,7 @@ void IBSolver::Solve(int iter_numb)
 		feqCalculate();
 
 		body_->SpreadVelocity(*fluid_);
+		// Не забыть вернуть для движения
 		body_->UpdatePosition();
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
@@ -141,7 +143,6 @@ void IBSolver::Solve(int iter_numb)
 			body_->WriteBodyFormToTxt(iter);
 			body_->WriteBodyFormToVtk("Data\\ib_lbm_data\\body_form_vtk", iter);
 			fluid_->vx_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "vx", iter);
-			//fluid_->vx_.WriteToFile("vx", iter);
 		}
 
 	}
