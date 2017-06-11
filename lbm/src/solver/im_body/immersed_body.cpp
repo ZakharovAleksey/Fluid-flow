@@ -1,38 +1,18 @@
 #include"immersed_body.h"
 
-ImmersedBody::ImmersedBody(int domainX, int domainY, int nodesNumber, Point center, double radius) : 
+#define 	M_PI   3.14159265358979323846
+#define SQ(x) ((x) * (x)) // square function; replaces SQ(x) by ((x) * (x)) in the code
+
+
+ImmersedBody::ImmersedBody() : domain_x_(0), domain_y_(0), nodes_num(0), center_(Point()), radius_(0.0)
+{
+	body_.resize(nodes_num, IBNode());
+}
+
+ImmersedBody::ImmersedBody(int domainX, int domainY, int nodesNumber, Point center, double radius) :
 	domain_x_(domainX), domain_y_(domainY), nodes_num(nodesNumber), center_(center), radius_(radius)
 {
 	body_.resize(nodes_num, IBNode());
-
-	for (int id = 0; id < nodes_num; ++id)
-	{
-		// Figure of immersed body
-		/*body_.at(id).cur_pos_.x_ = center_.x_ + radius_ * sin(2.0 * M_PI * (double)id / nodes_num);
-		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
-
-		body_.at(id).cur_pos_.y_ = center_.x_ + radius_ * cos(2.0 * M_PI * (double)id / nodes_num);
-		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.x_;*/
-
-		body_.at(id).cur_pos_.y_ = center.y_ + radius * sin(2. * M_PI * (double)id / nodes_num);
-		body_.at(id).ref_pos_.y_ = center.y_ + radius * sin(2. * M_PI * (double)id / nodes_num);
-		body_.at(id).cur_pos_.x_ = radius * cos(2. * M_PI * (double)id / nodes_num);
-
-		// Parametrization of the red blood cell shape in 2D
-
-		if (body_.at(id).cur_pos_.x_ > 0)
-		{
-
-			body_.at(id).cur_pos_.x_ = center.x_ + sqrt(1 - SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius)) * (0.207 + 2.00 * SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius) - 1.12 * SQ(SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius))) * radius / 2;
-			body_.at(id).ref_pos_.x_ = center.x_ + sqrt(1 - SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius)) * (0.207 + 2.00 * SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius) - 1.12 * SQ(SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius))) * radius / 2;
-		}
-		else {
-			body_.at(id).cur_pos_.x_ = center.x_ - sqrt(1 - SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius)) * (0.207 + 2.00 * SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius) - 1.12 * SQ(SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius))) * radius / 2;
-			body_.at(id).ref_pos_.x_ = center.x_ - sqrt(1 - SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius)) * (0.207 + 2.00 * SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius) - 1.12 * SQ(SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius))) * radius / 2;
-		}
-
-	}
-
 }
 
 void ImmersedBody::CalculateForces()
@@ -87,9 +67,7 @@ void ImmersedBody::SpreadVelocity(Fluid & fluid)
 {
 	for (int i = 0; i < nodes_num; ++i)
 	{
-
 		// Reset node velocity first since '+=' is used.
-
 		body_.at(i).vx_ = 0.0;
 		body_.at(i).vy_ = 0.0;
 
@@ -375,5 +353,40 @@ void ImmersedBody::CalculateBendingForces()
 
 		body_.at(nextId).Fx_ += normal_x * force_mag * length_r / (length_l + length_r);
 		body_.at(nextId).Fy_ += normal_y * force_mag * length_r / (length_l + length_r);
+	}
+}
+
+ImmersedRBC::ImmersedRBC(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)
+{
+	for (int id = 0; id < nodes_num; ++id)
+	{
+		// Parametrization of the RBC shape in 2D
+		body_.at(id).cur_pos_.y_ = center.y_ + radius * sin(2. * M_PI * (double)id / nodes_num);
+		body_.at(id).ref_pos_.y_ = center.y_ + radius * sin(2. * M_PI * (double)id / nodes_num);
+		body_.at(id).cur_pos_.x_ = radius * cos(2. * M_PI * (double)id / nodes_num);
+
+		if (body_.at(id).cur_pos_.x_ > 0)
+		{
+			body_.at(id).cur_pos_.x_ = center.x_ + sqrt(1 - SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius)) * (0.207 + 2.00 * SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius) - 1.12 * SQ(SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius))) * radius / 2;
+			body_.at(id).ref_pos_.x_ = center.x_ + sqrt(1 - SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius)) * (0.207 + 2.00 * SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius) - 1.12 * SQ(SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius))) * radius / 2;
+		}
+		else 
+		{
+			body_.at(id).cur_pos_.x_ = center.x_ - sqrt(1 - SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius)) * (0.207 + 2.00 * SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius) - 1.12 * SQ(SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius))) * radius / 2;
+			body_.at(id).ref_pos_.x_ = center.x_ - sqrt(1 - SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius)) * (0.207 + 2.00 * SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius) - 1.12 * SQ(SQ((center.y_ - body_.at(id).cur_pos_.y_) / radius))) * radius / 2;
+		}
+	}
+}
+
+ImmersedCircle::ImmersedCircle(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)
+{
+	// Parametrization of the circle shape in 2D
+	for (int id = 0; id < nodes_num; ++id)
+	{
+		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ * sin(2.0 * M_PI * (double)id / nodes_num);
+		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
+
+		body_.at(id).cur_pos_.y_ = center_.x_ + radius_ * cos(2.0 * M_PI * (double)id / nodes_num);
+		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.x_;
 	}
 }

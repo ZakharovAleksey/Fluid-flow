@@ -3,13 +3,14 @@
 #ifndef IMMERSED_BODY_H
 #define IMMERSED_BODY_H
 
-
 #include<memory>
 #include<windows.h>
 
 #include <fstream> // file streams
 #include <sstream> // string streams
 
+#include"..\..\modeling_area\fluid.h"
+#include"..\..\modeling_area\medium.h"
 
 
 //! Point in 2D space
@@ -42,40 +43,38 @@ struct IBNode
 	IBNode() : cur_pos_(), ref_pos_(), vx_(0.0), vy_(0.0), Fx_(0.0), Fy_(0.0) {}
 };
 
-//! Immersed in body fluid
+//! Abstract class of immersed in fluid body
 class ImmersedBody
 {
 public:
 
+	ImmersedBody();
 	ImmersedBody(int domainX, int domainY, int nodesNumber, Point center, double radius);
-	~ImmersedBody() {}
+	virtual ~ImmersedBody() = 0 {}
 
-
+	//! Performs calculation of elastic forces, acting between nodes of immersed boundaries
 	void CalculateForces();
-
+	//! Performs calculation of additional fluid forces 'fx' and 'fy' based on values of elastic forces
 	void SpreadForces(Matrix2D<double> &fx, Matrix2D<double> & fy);
-
+	//! Performs calculation of additional velocities based on values of immersed body nodes velocities
 	void SpreadVelocity(Fluid & fluid);
-
-
-
+	//! Update immersed body current position
 	void UpdatePosition();
+
 
 	//! Writes data about boundary of immersed body to *.txt file
 	void WriteBodyFormToTxt(const int time);
-
 	//! Writes data about boundary of immersed body to *.vtk file
 	void WriteBodyFormToVtk(std::string file_path, const int time);
 
-private:
+protected:
 
-	//! Calculate strain forces for all nodes of immersed body
+	//! Performs calculation of strain forces for all nodes of immersed body
 	void CalculateStrainForces();
-
+	//! Performs calculation of bending forces for all nodes of immersed body
 	void CalculateBendingForces();
 
-
-private:
+protected:
 
 	int domain_x_;
 	int domain_y_;
@@ -95,5 +94,23 @@ private:
 	std::vector<IBNode> body_;
 
 };
+
+//! Immersed in fluid RBC (Red Blood Cell)
+class ImmersedRBC : public ImmersedBody
+{
+public:
+	ImmersedRBC(int domainX, int domainY, int nodesNumber, Point center, double radius);
+};
+
+//! Immersed in fluid Circle
+class ImmersedCircle : public ImmersedBody
+{
+public:
+	ImmersedCircle(int domainX, int domainY, int nodesNumber, Point center, double radius);
+
+private:
+
+};
+
 
 #endif // !IMMERSED_BODY_H

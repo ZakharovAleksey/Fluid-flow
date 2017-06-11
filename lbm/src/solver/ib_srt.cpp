@@ -1,6 +1,6 @@
 #include"ib_srt.h"
 
-IBSolver::IBSolver(double tau, Fluid & fluid, Medium & medium, ImmersedBody & body) : tau_(tau)
+IBSolver::IBSolver(double tau, Fluid & fluid, Medium & medium, std::unique_ptr<ImmersedBody> body) : tau_(tau)
 {
 	CreateDataFolder("Data\\ib_lbm_data");
 	CreateDataFolder("Data\\ib_lbm_data\\body_form_txt");
@@ -14,7 +14,7 @@ IBSolver::IBSolver(double tau, Fluid & fluid, Medium & medium, ImmersedBody & bo
 
 	fluid_ = std::unique_ptr<Fluid>(new Fluid(fluid));
 	medium_ = std::unique_ptr<Medium>(new Medium(medium));
-	body_ = std::unique_ptr<ImmersedBody>(new ImmersedBody(body));
+	body_ = std::move(body);//std::unique_ptr<ImmersedBody>(new ImmersedBody(body));
 
 	int rows = fluid_->size().first;
 	int colls = fluid_->size().second;
@@ -119,14 +119,12 @@ void IBSolver::Solve(int iter_numb)
 		BC.BounceBackBC(Boundary::BOTTOM);
 		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.01, 0.0);
 		BC.VonNeumannBC(Boundary::RIGHT, *fluid_, 0.01, 0.0);
-		//BC.BounceBackBC(Boundary::RIGHT);
 
 		//BC.AdditionalBounceBackBCs();
 
 		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
 
 		//BC.RecordAdditionalBCs();
-
 
 		Recalculate();
 
@@ -139,7 +137,7 @@ void IBSolver::Solve(int iter_numb)
 
 		if (iter % 25 == 0)
 		{
-			fluid_->write_fluid_vtk(iter);
+			fluid_->write_fluid_vtk("Data\\ib_lbm_data\\fluid_vtk", iter);
 			body_->WriteBodyFormToTxt(iter);
 			body_->WriteBodyFormToVtk("Data\\ib_lbm_data\\body_form_vtk", iter);
 			fluid_->vx_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "vx", iter);

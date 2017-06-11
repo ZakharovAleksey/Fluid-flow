@@ -46,96 +46,79 @@ public:
 	}
 
 
-	void write_fluid_vtk(int time) {
+	void write_fluid_vtk(std::string path,  int time) {
 
-		/// Create filename
+		// Create filename
 
-		std::stringstream output_filename;
-		output_filename << "vtk_fluid/fluid_t" << time << ".vtk";
+		path += "/fluid_t" + std::to_string(time) + ".vtk";
+
+		//std::stringstream output_filename;
+		//output_filename << "vtk_fluid/fluid_t" << time << ".vtk";
 		std::ofstream output_file;
 
-		/// Open file
-
-		output_file.open(output_filename.str().c_str());
-
-		/// Write VTK header
-
-		int Nx = size().second;
-		int Ny = size().first;
-
-		output_file << "# vtk DataFile Version 3.0\n";
-		output_file << "fluid_state\n";
-		output_file << "ASCII\n";
-		output_file << "DATASET RECTILINEAR_GRID\n";
-		output_file << "DIMENSIONS " << Nx << " " << Ny - 2 << " 1" << "\n";
-		output_file << "X_COORDINATES " << Nx << " float\n";
-
-		for (int X = 0; X < Nx; ++X) {
-			output_file << X + 0.5 << " ";
-		}
-
-		output_file << "\n";
-		output_file << "Y_COORDINATES " << Ny - 2 << " float\n";
-
-		for (int Y = 1; Y < Ny - 1; ++Y) {
-			output_file << Y - 0.5 << " ";
-		}
-
-		output_file << "\n";
-		output_file << "Z_COORDINATES " << 1 << " float\n";
-		output_file << 0 << "\n";
-		output_file << "POINT_DATA " << Nx * (Ny - 2) << "\n";
-
-		/// Write density difference
-
-		output_file << "SCALARS density float 1\n";
-		output_file << "LOOKUP_TABLE default\n";
-
-		for (int Y = 1; Y < Ny - 1; ++Y) 
+		output_file.open(path); //output_filename.str().c_str());
+		if (output_file.is_open())
 		{
-			for (int X = 0; X < Nx; ++X) 
-			{
-				output_file << rho_(Y, X) << "\n";
-			}
-		}
 
-		output_file << "SCALARS vx float 1\n";
-		output_file << "LOOKUP_TABLE default\n";
+			// Write VTK header
 
-		for (int Y = 1; Y < Ny - 1; ++Y)
-		{
+			int Nx = size().second;
+			int Ny = size().first;
+
+			output_file << "# vtk DataFile Version 3.0\n";
+			output_file << "fluid_state\n";
+			output_file << "ASCII\n";
+			output_file << "DATASET RECTILINEAR_GRID\n";
+			output_file << "DIMENSIONS " << Nx << " " << Ny - 2 << " 1" << "\n";
+			output_file << "X_COORDINATES " << Nx << " float\n";
+
 			for (int X = 0; X < Nx; ++X)
-			{
-				output_file << vx_(Y, X) << "\n";
-			}
+				output_file << X + 0.5 << " ";
+
+			output_file << "\n";
+			output_file << "Y_COORDINATES " << Ny - 2 << " float\n";
+
+			for (int Y = 1; Y < Ny - 1; ++Y)
+				output_file << Y - 0.5 << " ";
+
+			output_file << "\n";
+			output_file << "Z_COORDINATES " << 1 << " float\n";
+			output_file << 0 << "\n";
+			output_file << "POINT_DATA " << Nx * (Ny - 2) << "\n";
+
+			output_file << "SCALARS density float 1\n";
+			output_file << "LOOKUP_TABLE default\n";
+
+			for (int Y = 1; Y < Ny - 1; ++Y)
+				for (int X = 0; X < Nx; ++X)
+					output_file << rho_(Y, X) << "\n";
+
+			output_file << "SCALARS vx float 1\n";
+			output_file << "LOOKUP_TABLE default\n";
+
+			for (int Y = 1; Y < Ny - 1; ++Y)
+				for (int X = 0; X < Nx; ++X)
+					output_file << vx_(Y, X) << "\n";
+
+			output_file << "SCALARS vy float 1\n";
+			output_file << "LOOKUP_TABLE default\n";
+
+			for (int Y = 1; Y < Ny - 1; ++Y)
+				for (int X = 0; X < Nx; ++X)
+					output_file << vy_(Y, X) << "\n";
+
+			output_file << "VECTORS velocity float\n";
+
+			for (int Y = 1; Y < Ny - 1; ++Y)
+				for (int X = 0; X < Nx; ++X)
+					output_file << vx_(Y, X) << " " << vy_(Y, X) << " 0\n";
 		}
-
-		output_file << "SCALARS vy float 1\n";
-		output_file << "LOOKUP_TABLE default\n";
-
-		for (int Y = 1; Y < Ny - 1; ++Y)
+		else
 		{
-			for (int X = 0; X < Nx; ++X)
-			{
-				output_file << vy_(Y, X) << "\n";
-			}
+			std::cout << "Could not open file for fluid vtk writing!\n";
 		}
-
-		/// Write velocity
-
-		output_file << "VECTORS velocity float\n";
-
-		for (int Y = 1; Y < Ny - 1; ++Y) {
-			for (int X = 0; X < Nx; ++X) {
-				output_file << vx_(Y, X) << " " << vy_(Y, X) << " 0\n";
-			}
-		}
-
-		/// Close file
-
+		
 		output_file.close();
-
-		return;
 	}
 
 private:

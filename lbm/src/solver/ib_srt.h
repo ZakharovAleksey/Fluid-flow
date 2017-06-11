@@ -10,15 +10,15 @@
 #include"im_body\immersed_body.h"
 #include"bc\bc.h"
 
-#define 	M_PI   3.14159265358979323846
-#define SQ(x) ((x) * (x)) // square function; replaces SQ(x) by ((x) * (x)) in the code
+//#define 	M_PI   3.14159265358979323846
+//#define SQ(x) ((x) * (x)) // square function; replaces SQ(x) by ((x) * (x)) in the code
 
 
 class IBSolver : iSolver
 {
 public:
-
-	IBSolver(double tau, Fluid& fluid, Medium & medium, ImmersedBody& body);
+	IBSolver(double tau, Fluid& fluid, Medium & medium, std::unique_ptr<ImmersedBody> body);
+	//IBSolver(double tau, Fluid& fluid, Medium & medium, ImmersedBody& body);
 	~IBSolver() {}
 
 	void feqCalculate() override;

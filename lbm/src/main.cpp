@@ -69,15 +69,13 @@ void MatrixTest()
 int main()
 {
 
-#pragma region initial
-
 	using std::cout;
 	using std::endl;
 	omp_set_num_threads(1);
 
-	// >>>  2D case 
+#pragma region 2D
 
-	// !!! Можно создать общую универсальную функцию VonNeumann в которую просто передать номера компонеет котрые надо заполнять наверно с внутренним switchem по знакам между присваиванием!!
+#pragma region SRT 
 
 	//int X{ 70 }; //100
 	//int Y{ 70 };
@@ -92,23 +90,27 @@ int main()
 	//SRTsolver solver(1.0, m, f);
 	//solver.Solve(101);
 
+#pragma endregion
 
-	int X{ 102 }; //100
+#pragma region IB-LBM
+
+	int X{ 102 };
 	int Y{ 30 };
 	Fluid f(Y, X);
 	Medium m(Y, X);
 
-	ImmersedBody body(102, 30, 32, Point(15, 15), 6);
+	std::unique_ptr<ImmersedBody> body(new ImmersedRBC(102, 30, 32, Point(15, 15), 6));
 
-	IBSolver s(1.0, f,m, body);
-	s.Solve(101);
-
-
-	// >>>
+	IBSolver s(1.0, f, m, std::move(body));
+	s.Solve(2001);
 
 #pragma endregion
 
-	// >>> 3D case
+#pragma endregion
+
+#pragma region 3D
+
+#pragma region SRT
 
 	//int x{ 10 }; // 10
 	//int y{ 35 }; // 35
@@ -122,13 +124,10 @@ int main()
 	//SRT3DSolver srt(1.0, m, f);
 	//srt.solve(51);
 
-	// >>> 
+#pragma endregion
 
-	/*
-		- Продумать структуру для BC!
-		- Реализовать ГУ Фон-Неймана для всех границ (TOP, BOTTOM, RIGHT)
-		- Не распечатывает файл, т.к. нет дирректории DATA
-	*/
+
+#pragma endregion
 
 	return 0;
 }
