@@ -32,7 +32,7 @@ void SRTsolver::feqCalculate()
 	}
 }
 
-void SRTsolver::streaming()
+void SRTsolver::Streaming()
 {
 	for (int q = 0; q < kQ; ++q) 
 	{
@@ -49,13 +49,13 @@ void SRTsolver::streaming()
 	fluid_->f_.fillBoundaries(0.0);
 }
 
-void SRTsolver::collision()
+void SRTsolver::Collision()
 {
 	for (int q = 0; q < kQ; ++q)
 		fluid_->f_[q] += (fluid_->feq_[q] - fluid_->f_[q]) / tau_;
 }
 
-void SRTsolver::solve(int iter_numb)
+void SRTsolver::Solve(int iter_numb)
 {
 	feqCalculate();
 	for (int q = 0; q < kQ; ++q)
@@ -67,11 +67,11 @@ void SRTsolver::solve(int iter_numb)
 
 	for (int iter = 0; iter < iter_numb; ++iter) 
 	{
-		collision();
+		Collision();
 		//BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
 		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
 
-		streaming();
+		Streaming();
 
 		BC.PrepareAdditionalBCs(*medium_);
 
@@ -98,7 +98,7 @@ void SRTsolver::solve(int iter_numb)
 		//std::cout << fluid_->f_;
 		
 
-		recalculate();
+		Recalculate();
 
 		feqCalculate();
 
@@ -117,7 +117,7 @@ void SRTsolver::solve(int iter_numb)
 		std::cout << fluid_->vx_(i, 5) << "\n";*/
 }
 
-void SRTsolver::recalculate()
+void SRTsolver::Recalculate()
 {
 	fluid_->rho_ = fluid_->f_.calculateDensity();
 	fluid_->vx_ = fluid_->f_.calculateVelocity(kEx, fluid_->rho_);
@@ -174,7 +174,7 @@ void SRT3DSolver::feqCalculate()
 
 }
 
-void SRT3DSolver::streaming()
+void SRT3DSolver::Streaming()
 {
 	const int depth = medium_->GetDepthNumber();
 	const int rows = medium_->GetRowsNumber();
@@ -185,13 +185,13 @@ void SRT3DSolver::streaming()
 	SubStreamingBottom(depth, rows, colls);
 }
 
-void SRT3DSolver::collision()
+void SRT3DSolver::Collision()
 {
 	for (int q = 0; q < kQ3d; ++q)
 		(*fluid_->f_)[q] += ((*fluid_->feq_)[q] - (*fluid_->f_)[q]) / tau_;
 }
 
-void SRT3DSolver::solve(int iter_numb)
+void SRT3DSolver::Solve(int iter_numb)
 {
 	fluid_->PoiseuilleIC(0.01);
 
@@ -204,10 +204,10 @@ void SRT3DSolver::solve(int iter_numb)
 	for (int iter = 0; iter < iter_numb; ++iter)
 	{
 		std::cout << iter << " : ";
-		collision();
+		Collision();
 		bc.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
 		
-		streaming();
+		Streaming();
 
 		bc.BounceBackBC(Boundary::TOP);
 		bc.BounceBackBC(Boundary::BOTTOM);
@@ -218,7 +218,7 @@ void SRT3DSolver::solve(int iter_numb)
 
 		bc.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
 
-		recalculate();
+		Recalculate();
 		fluid_->vz_->SetTBLayer(1, std::vector<double>(fluid_->GetColumnsNumber() * fluid_->GetRowsNumber(), 0.01));
 
 		feqCalculate();
@@ -334,7 +334,7 @@ void SRT3DSolver::SubStreamingBottom(const int depth, const int rows, const int 
 	}
 }
 
-void SRT3DSolver::recalculate()
+void SRT3DSolver::Recalculate()
 {
 	fluid_->RecalculateRho();
 	fluid_->RecalculateV();

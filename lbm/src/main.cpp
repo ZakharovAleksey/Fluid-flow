@@ -9,6 +9,7 @@
 
 #include"modeling_area\medium.h"
 #include"modeling_area\fluid.h"
+#include"solver\ib_srt.h"
 #include"solver\srt.h"
 #include"solver\bc\bc.h"
 
@@ -89,7 +90,7 @@ int main()
 	//
 
 	//SRTsolver solver(1.0, m, f);
-	//solver.solve(101);
+	//solver.Solve(101);
 
 
 	int X{ 102 }; //100
@@ -100,8 +101,7 @@ int main()
 	ImmersedBody body(102, 30, 32, Point(15, 15), 6);
 
 	IBSolver s(1.0, f,m, body);
-	s.Solve(1501);
-
+	s.Solve(101);
 
 
 	// >>>
