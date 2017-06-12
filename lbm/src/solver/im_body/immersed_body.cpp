@@ -26,16 +26,19 @@ void ImmersedBody::CalculateForces()
 
 	const double arcLen = 2.0 * M_PI * radius_ / nodes_num;
 
-	//for (int n = 0; n < nodes_num; ++n) 
-	//{
-	//	body_.at(n).Fx_ = -stiffness_ * (body_.at(n).cur_pos_.x_ - body_.at(n).ref_pos_.x_) * arcLen;
-	//	body_.at(n).Fy_ = -stiffness_ * (body_.at(n).cur_pos_.y_ - body_.at(n).ref_pos_.y_) * arcLen;
-	//	//particle.node[n].force_x = -particle.stiffness * (particle.node[n].x - particle.node[n].x_ref) * area;
-	//	//particle.node[n].force_y = -particle.stiffness * (particle.node[n].y - particle.node[n].y_ref) * area;
-	//}
-
 	CalculateStrainForces();
 	CalculateBendingForces();
+
+	for (int n = 0; n < nodes_num; ++n)
+	{
+		if (body_.at(n).type_ == IBNodeType::STATIC)
+		{
+			body_.at(n).Fx_ = -stiffness_ * (body_.at(n).cur_pos_.x_ - body_.at(n).ref_pos_.x_) * arcLen;
+			body_.at(n).Fy_ = -stiffness_ * (body_.at(n).cur_pos_.y_ - body_.at(n).ref_pos_.y_) * arcLen;
+		}
+		//particle.node[n].force_x = -particle.stiffness * (particle.node[n].x - particle.node[n].x_ref) * area;
+		//particle.node[n].force_y = -particle.stiffness * (particle.node[n].y - particle.node[n].y_ref) * area;
+	}
 }
 
 void ImmersedBody::SpreadForces(Matrix2D<double>& fx, Matrix2D<double>& fy)
@@ -117,8 +120,8 @@ void ImmersedBody::UpdatePosition()
 
 	// Update node and center positions
 
-	//for (int i = 0; i < nodes_num; ++i)
-	for (int i = nodes_num/2; i < nodes_num; ++i)
+	for (int i = 0; i < nodes_num; ++i)
+	//for (int i = nodes_num/2; i < nodes_num; ++i)
 	{
 		body_.at(i).cur_pos_.x_ += body_.at(i).vx_;
 		body_.at(i).cur_pos_.y_ += body_.at(i).vy_;
@@ -219,18 +222,21 @@ void ImmersedBody::CalculateStrainForces()
 {
 	for (int i = 0; i < nodes_num; ++i)
 	{
-		const double distance = SQ(body_.at(i).cur_pos_.x_ - body_.at((i + 1) % nodes_num).cur_pos_.x_) + SQ(body_.at(i).cur_pos_.y_ - body_.at((i + 1) % nodes_num).cur_pos_.y_);
-		const double distance_ref = SQ(body_.at(i).ref_pos_.x_ - body_.at((i + 1) % nodes_num).ref_pos_.x_) + SQ(body_.at(i).ref_pos_.y_ - body_.at((i + 1) % nodes_num).ref_pos_.y_);
+		if (body_.at(i).type_ == IBNodeType::MOVING)
+		{
+			const double distance = SQ(body_.at(i).cur_pos_.x_ - body_.at((i + 1) % nodes_num).cur_pos_.x_) + SQ(body_.at(i).cur_pos_.y_ - body_.at((i + 1) % nodes_num).cur_pos_.y_);
+			const double distance_ref = SQ(body_.at(i).ref_pos_.x_ - body_.at((i + 1) % nodes_num).ref_pos_.x_) + SQ(body_.at(i).ref_pos_.y_ - body_.at((i + 1) % nodes_num).ref_pos_.y_);
 
-		const double fx = stiffness_ * (distance - distance_ref) * (body_.at(i).cur_pos_.x_ - body_.at((i + 1) % nodes_num).cur_pos_.x_);
-		const double fy = stiffness_ * (distance - distance_ref) * (body_.at(i).cur_pos_.y_ - body_.at((i + 1) % nodes_num).cur_pos_.y_);
+			const double fx = stiffness_ * (distance - distance_ref) * (body_.at(i).cur_pos_.x_ - body_.at((i + 1) % nodes_num).cur_pos_.x_);
+			const double fy = stiffness_ * (distance - distance_ref) * (body_.at(i).cur_pos_.y_ - body_.at((i + 1) % nodes_num).cur_pos_.y_);
 
-		// Signs of forces are chosen to satisfy third Newton law
-		body_.at(i).Fx_ += -fx;
-		body_.at(i).Fy_ += -fy;
+			// Signs of forces are chosen to satisfy third Newton law
+			body_.at(i).Fx_ += -fx;
+			body_.at(i).Fy_ += -fy;
 
-		body_.at((i + 1) % nodes_num).Fx_ += fx;
-		body_.at((i + 1) % nodes_num).Fy_ += fy;
+			body_.at((i + 1) % nodes_num).Fx_ += fx;
+			body_.at((i + 1) % nodes_num).Fy_ += fy;
+		}
 	}
 }
 
@@ -238,129 +244,132 @@ void ImmersedBody::CalculateBendingForces()
 {
 	for (int i = 0; i < nodes_num; ++i)
 	{
-		int prevId = (i - 1 + nodes_num) % nodes_num;
-		int nextId = (i + 1) % nodes_num;
+		if (body_.at(i).type_ == IBNodeType::MOVING)
+		{
+			int prevId = (i - 1 + nodes_num) % nodes_num;
+			int nextId = (i + 1) % nodes_num;
 
-		const double x_l = body_.at(prevId).cur_pos_.x_;
-		const double y_l = body_.at(prevId).cur_pos_.y_;
-		const double x_m = body_.at(i).cur_pos_.x_;
-		const double y_m = body_.at(i).cur_pos_.y_;
-		const double x_r = body_.at(nextId).cur_pos_.x_;
-		const double y_r = body_.at(nextId).cur_pos_.y_;
+			const double x_l = body_.at(prevId).cur_pos_.x_;
+			const double y_l = body_.at(prevId).cur_pos_.y_;
+			const double x_m = body_.at(i).cur_pos_.x_;
+			const double y_m = body_.at(i).cur_pos_.y_;
+			const double x_r = body_.at(nextId).cur_pos_.x_;
+			const double y_r = body_.at(nextId).cur_pos_.y_;
 
-		const double x_l_ref = body_.at(prevId).ref_pos_.x_;
-		const double y_l_ref = body_.at(prevId).ref_pos_.y_;
-		const double x_m_ref = body_.at(i).ref_pos_.x_;
-		const double y_m_ref = body_.at(i).ref_pos_.y_;
-		const double x_r_ref = body_.at(nextId).ref_pos_.x_;
-		const double y_r_ref = body_.at(nextId).ref_pos_.y_;
+			const double x_l_ref = body_.at(prevId).ref_pos_.x_;
+			const double y_l_ref = body_.at(prevId).ref_pos_.y_;
+			const double x_m_ref = body_.at(i).ref_pos_.x_;
+			const double y_m_ref = body_.at(i).ref_pos_.y_;
+			const double x_r_ref = body_.at(nextId).ref_pos_.x_;
+			const double y_r_ref = body_.at(nextId).ref_pos_.y_;
 
 
-		// x-координата вектора, соединяющая l и r
-		const double tang_x_ref = x_r_ref - x_l_ref;
-		// y-координата вектора, соединяющая l и r
-		const double tang_y_ref = y_r_ref - y_l_ref;
-		double normal_x_ref;
-		double normal_y_ref;
+			// x-координата вектора, соединяющая l и r
+			const double tang_x_ref = x_r_ref - x_l_ref;
+			// y-координата вектора, соединяющая l и r
+			const double tang_y_ref = y_r_ref - y_l_ref;
+			double normal_x_ref;
+			double normal_y_ref;
 
-		// Тут просто задем нормаль так чтобы скалярное произведение вектора нормали на 
-		// вектор разности l и r были перпендикулярны : а разность модулей  для того чтобы 
-		// навпраление было всегда от вне
-		if (abs(tang_x_ref) < abs(tang_y_ref)) {
-			normal_x_ref = 1;
-			normal_y_ref = -tang_x_ref / tang_y_ref;
+			// Тут просто задем нормаль так чтобы скалярное произведение вектора нормали на 
+			// вектор разности l и r были перпендикулярны : а разность модулей  для того чтобы 
+			// навпраление было всегда от вне
+			if (abs(tang_x_ref) < abs(tang_y_ref)) {
+				normal_x_ref = 1;
+				normal_y_ref = -tang_x_ref / tang_y_ref;
+			}
+			else {
+				normal_y_ref = 1;
+				normal_x_ref = -tang_y_ref / tang_x_ref;
+			}
+
+			// То же самое для обычныых
+			const double tang_x = x_r - x_l;
+			const double tang_y = y_r - y_l;
+			double normal_x;
+			double normal_y;
+
+			if (abs(tang_x) < abs(tang_y)) {
+				normal_x = 1;
+				normal_y = -tang_x / tang_y;
+			}
+			else {
+				normal_y = 1;
+				normal_x = -tang_y / tang_x;
+			}
+
+			// Просто нормализация вектора
+			const double normal_length_ref = sqrt(SQ(normal_x_ref) + SQ(normal_y_ref));
+			normal_x_ref /= normal_length_ref;
+			normal_y_ref /= normal_length_ref;
+
+			if (normal_x_ref * tang_y_ref - normal_y_ref * tang_x_ref > 0) {
+				normal_x_ref *= -1;
+				normal_y_ref *= -1;
+			}
+
+			const double normal_length = sqrt(SQ(normal_x) + SQ(normal_y));
+			normal_x /= normal_length;
+			normal_y /= normal_length;
+
+			if (normal_x * tang_y - normal_y * tang_x > 0) {
+				normal_x *= -1;
+				normal_y *= -1;
+			}
+			// Angle calculations
+
+			// Скалярное произведение векторов деленное на длину векторов
+			double angle_ref_cos = (x_l_ref - x_m_ref) * (x_m_ref - x_r_ref) + (y_l_ref - y_m_ref) * (y_m_ref - y_r_ref);
+			angle_ref_cos /= (sqrt(SQ(x_l_ref - x_m_ref) + SQ(y_l_ref - y_m_ref)) * sqrt(SQ(x_m_ref - x_r_ref) + SQ(y_m_ref - y_r_ref)));
+
+			// Addition if because of surrounding cos = 1.000000002
+			if (angle_ref_cos > 1.0)
+				angle_ref_cos = 1.0;
+			else if (angle_ref_cos < -1.0)
+				angle_ref_cos = -1.0;
+
+
+			double angle_ref = acos(angle_ref_cos);
+
+			const double convex_x_ref = (x_l_ref + x_r_ref) / 2 - x_m_ref;
+			const double convex_y_ref = (y_l_ref + y_r_ref) / 2 - y_m_ref;
+
+			if (convex_x_ref * normal_x_ref + convex_y_ref * normal_y_ref > 0) {
+				angle_ref *= -1;
+			}
+
+			double angle_cos = (x_l - x_m) * (x_m - x_r) + (y_l - y_m) * (y_m - y_r);
+			angle_cos /= (sqrt(SQ(x_l - x_m) + SQ(y_l - y_m)) * sqrt(SQ(x_m - x_r) + SQ(y_m - y_r)));
+
+			// Addition if because of surrounding cos = 1.000000002
+			if (angle_cos > 1.0)
+				angle_cos = 1.0;
+			else if (angle_cos < -1.0)
+				angle_cos = -1.0;
+
+
+			double angle = acos(angle_cos);
+
+			const double convex_x = (x_l + x_r) / 2 - x_m;
+			const double convex_y = (y_l + y_r) / 2 - y_m;
+
+			if (convex_x * normal_x + convex_y * normal_y > 0) {
+				angle *= -1;
+			}
+			// force calculations 
+			const double force_mag = bending_ * (angle - angle_ref);
+			const double length_l = abs(tang_x * (x_m - x_l) + tang_y * (y_m - y_l));
+			const double length_r = abs(tang_x * (x_m - x_r) + tang_y * (y_m - y_r));
+
+			body_.at(prevId).Fx_ += normal_x * force_mag * length_l / (length_l + length_r);
+			body_.at(prevId).Fy_ += normal_y * force_mag * length_l / (length_l + length_r);
+
+			body_.at(i).Fx_ += -normal_x * force_mag;
+			body_.at(i).Fy_ += -normal_y * force_mag;
+
+			body_.at(nextId).Fx_ += normal_x * force_mag * length_r / (length_l + length_r);
+			body_.at(nextId).Fy_ += normal_y * force_mag * length_r / (length_l + length_r);
 		}
-		else {
-			normal_y_ref = 1;
-			normal_x_ref = -tang_y_ref / tang_x_ref;
-		}
-
-		// То же самое для обычныых
-		const double tang_x = x_r - x_l;
-		const double tang_y = y_r - y_l;
-		double normal_x;
-		double normal_y;
-
-		if (abs(tang_x) < abs(tang_y)) {
-			normal_x = 1;
-			normal_y = -tang_x / tang_y;
-		}
-		else {
-			normal_y = 1;
-			normal_x = -tang_y / tang_x;
-		}
-
-		// Просто нормализация вектора
-		const double normal_length_ref = sqrt(SQ(normal_x_ref) + SQ(normal_y_ref));
-		normal_x_ref /= normal_length_ref;
-		normal_y_ref /= normal_length_ref;
-
-		if (normal_x_ref * tang_y_ref - normal_y_ref * tang_x_ref > 0) {
-			normal_x_ref *= -1;
-			normal_y_ref *= -1;
-		}
-
-		const double normal_length = sqrt(SQ(normal_x) + SQ(normal_y));
-		normal_x /= normal_length;
-		normal_y /= normal_length;
-
-		if (normal_x * tang_y - normal_y * tang_x > 0) {
-			normal_x *= -1;
-			normal_y *= -1;
-		}
-		// Angle calculations
-
-		// Скалярное произведение векторов деленное на длину векторов
-		double angle_ref_cos = (x_l_ref - x_m_ref) * (x_m_ref - x_r_ref) + (y_l_ref - y_m_ref) * (y_m_ref - y_r_ref);
-		angle_ref_cos /= (sqrt(SQ(x_l_ref - x_m_ref) + SQ(y_l_ref - y_m_ref)) * sqrt(SQ(x_m_ref - x_r_ref) + SQ(y_m_ref - y_r_ref)));
-
-		// Addition if because of surrounding cos = 1.000000002
-		if (angle_ref_cos > 1.0)
-			angle_ref_cos = 1.0;
-		else if (angle_ref_cos < -1.0)
-			angle_ref_cos = -1.0;
-
-
-		double angle_ref = acos(angle_ref_cos);
-
-		const double convex_x_ref = (x_l_ref + x_r_ref) / 2 - x_m_ref;
-		const double convex_y_ref = (y_l_ref + y_r_ref) / 2 - y_m_ref;
-
-		if (convex_x_ref * normal_x_ref + convex_y_ref * normal_y_ref > 0) {
-			angle_ref *= -1;
-		}
-
-		double angle_cos = (x_l - x_m) * (x_m - x_r) + (y_l - y_m) * (y_m - y_r);
-		angle_cos /= (sqrt(SQ(x_l - x_m) + SQ(y_l - y_m)) * sqrt(SQ(x_m - x_r) + SQ(y_m - y_r)));
-
-		// Addition if because of surrounding cos = 1.000000002
-		if (angle_cos > 1.0)
-			angle_cos = 1.0;
-		else if (angle_cos < -1.0)
-			angle_cos = -1.0;
-
-
-		double angle = acos(angle_cos);
-
-		const double convex_x = (x_l + x_r) / 2 - x_m;
-		const double convex_y = (y_l + y_r) / 2 - y_m;
-
-		if (convex_x * normal_x + convex_y * normal_y > 0) {
-			angle *= -1;
-		}
-		// force calculations 
-		const double force_mag = bending_ * (angle - angle_ref);
-		const double length_l = abs(tang_x * (x_m - x_l) + tang_y * (y_m - y_l));
-		const double length_r = abs(tang_x * (x_m - x_r) + tang_y * (y_m - y_r));
-
-		body_.at(prevId).Fx_ += normal_x * force_mag * length_l / (length_l + length_r);
-		body_.at(prevId).Fy_ += normal_y * force_mag * length_l / (length_l + length_r);
-
-		body_.at(i).Fx_ += -normal_x * force_mag;
-		body_.at(i).Fy_ += -normal_y * force_mag;
-
-		body_.at(nextId).Fx_ += normal_x * force_mag * length_r / (length_l + length_r);
-		body_.at(nextId).Fy_ += normal_y * force_mag * length_r / (length_l + length_r);
 	}
 }
 
@@ -368,6 +377,8 @@ ImmersedRBC::ImmersedRBC(int domainX, int domainY, int nodesNumber, Point center
 {
 	for (int id = 0; id < nodes_num; ++id)
 	{
+		body_.at(id).type_ = IBNodeType::MOVING;
+
 		// Parametrization of the RBC shape in 2D
 		body_.at(id).cur_pos_.y_ = center.y_ + radius * sin(2. * M_PI * (double)id / nodes_num);
 		body_.at(id).ref_pos_.y_ = center.y_ + radius * sin(2. * M_PI * (double)id / nodes_num);
@@ -388,9 +399,11 @@ ImmersedRBC::ImmersedRBC(int domainX, int domainY, int nodesNumber, Point center
 
 ImmersedCircle::ImmersedCircle(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)
 {
-	// Parametrization of the circle shape in 2D
 	for (int id = 0; id < nodes_num; ++id)
 	{
+		body_.at(id).type_ = IBNodeType::MOVING;
+
+		// Parametrization of the circle shape in 2D
 		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ * sin(2.0 * M_PI * (double)id / nodes_num);
 		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
 
@@ -406,6 +419,8 @@ ImmersedTromb::ImmersedTromb(int domainX, int domainY, int nodesNumber, Point ce
 
 	for (int id = 0; id < nodes_num / 2; ++id)
 	{
+		body_.at(id).type_ = IBNodeType::STATIC;
+
 		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ - id * h;
 		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
 
@@ -415,6 +430,8 @@ ImmersedTromb::ImmersedTromb(int domainX, int domainY, int nodesNumber, Point ce
 
 	for (int id = nodes_num / 2; id < nodes_num; ++id)
 	{
+		body_.at(id).type_ = IBNodeType::MOVING;
+
 		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ * cos(2.0 * M_PI * (double)id / nodes_num);
 		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
 

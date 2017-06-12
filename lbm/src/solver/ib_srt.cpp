@@ -118,8 +118,10 @@ void IBSolver::Solve(int iter_numb)
 
 		BC.BounceBackBC(Boundary::TOP);
 		BC.BounceBackBC(Boundary::BOTTOM);
-		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.01, 0.0);
-		BC.VonNeumannBC(Boundary::RIGHT, *fluid_, 0.01, 0.0);
+		double vx = 0.01; // (iter % 1000 == 0) ? 0.001 : 0.0;
+		std::cout << "vx = " << vx << std::endl;
+		BC.VonNeumannBC(Boundary::LEFT, *fluid_, vx, 0.0);
+		BC.VonNeumannBC(Boundary::RIGHT, *fluid_, 0.0, 0.0);
 
 		//BC.AdditionalBounceBackBCs();
 

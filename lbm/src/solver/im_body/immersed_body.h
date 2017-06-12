@@ -23,6 +23,12 @@ struct Point
 	Point(double x, double y) : x_(x), y_(y) {}
 };
 
+enum class IBNodeType
+{
+	STATIC = 0,
+	MOVING = 1,
+};
+
 //! Single node of immersed in fluid body
 struct IBNode
 {
@@ -40,7 +46,9 @@ struct IBNode
 	//! Elastic force, acting on the node along y-axis
 	double Fy_;
 
-	IBNode() : cur_pos_(), ref_pos_(), vx_(0.0), vy_(0.0), Fx_(0.0), Fy_(0.0) {}
+	IBNodeType type_;
+
+	IBNode() : cur_pos_(), ref_pos_(), vx_(0.0), vy_(0.0), Fx_(0.0), Fy_(0.0), type_(IBNodeType::STATIC) {}
 };
 
 //! Abstract class of immersed in fluid body
@@ -81,7 +89,7 @@ protected:
 	//! Number of Lagragian nodes
 	int nodes_num;
 	//! Stiffness modulus 
-	const double stiffness_ = 0.15; // 0.1
+	const double stiffness_ = 0.1; // 0.1
 	//! Bending modulus
 	const double bending_ = 0.001; // 0.001
 
