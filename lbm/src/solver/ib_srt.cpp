@@ -26,6 +26,35 @@ IBSolver::IBSolver(double tau, Fluid & fluid, Medium & medium, std::unique_ptr<I
 	force_member_.resize(kQ, 0.0);
 }
 
+IBSolver::IBSolver(double tau, Fluid & fluid, Medium & medium, std::vector<ImmersedBody*> bodies) : tau_(tau)
+{
+	CreateDataFolder("Data");
+	CreateDataFolder("Data\\ib_lbm_data");
+	CreateDataFolder("Data\\ib_lbm_data\\body_form_txt");
+	CreateDataFolder("Data\\ib_lbm_data\\body_form_vtk");
+	CreateDataFolder("Data\\ib_lbm_data\\fluid_txt");
+	CreateDataFolder("Data\\ib_lbm_data\\fluid_vtk");
+
+
+	std::cout << " --- Input parameters :\n";
+	std::cout << "nu = " << (tau - 0.5) / 3.0 << std::endl;
+
+	fluid_ = std::unique_ptr<Fluid>(new Fluid(fluid));
+	medium_ = std::unique_ptr<Medium>(new Medium(medium));
+
+	int i = 0;
+	for (const auto& e : bodies)
+		im_bodies_.push_back(bodies.at(i++));
+
+	int rows = fluid_->size().first;
+	int colls = fluid_->size().second;
+
+	fx_ = std::make_unique<Matrix2D<double>>(rows, colls);
+	fy_ = std::make_unique<Matrix2D<double>>(rows, colls);
+
+	force_member_.resize(kQ, 0.0);
+}
+
 void IBSolver::feqCalculate()
 {
 	// Проверить надо ли, или без нее все нормально
@@ -106,8 +135,24 @@ void IBSolver::Solve(int iter_numb)
 
 	for (int iter = 0; iter < iter_numb; ++iter)
 	{
-		body_->CalculateForces();
-		body_->SpreadForces(*fx_, *fy_);
+		// Clean fx, fy fields
+		fx_->FillWith(0.0);
+		fy_->FillWith(0.0);
+
+		for (auto& i : im_bodies_)
+		{
+			i->CalculateForces();
+			//i->SpreadForces(*fx_, *fy_);
+		}
+
+		Interaction(im_bodies_.at(2), im_bodies_.at(0));
+		Interaction(im_bodies_.at(2), im_bodies_.at(1));
+
+		for (auto& i : im_bodies_)
+		{
+			//i->CalculateForces();
+			i->SpreadForces(*fx_, *fy_);
+		}
 
 		Collision();
 		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::VON_NEUMAN);
@@ -118,10 +163,10 @@ void IBSolver::Solve(int iter_numb)
 
 		BC.BounceBackBC(Boundary::TOP);
 		BC.BounceBackBC(Boundary::BOTTOM);
-		double vx = 0.01; // (iter % 1000 == 0) ? 0.001 : 0.0;
-		std::cout << "vx = " << vx << std::endl;
+
+		double vx = 0.001; 
 		BC.VonNeumannBC(Boundary::LEFT, *fluid_, vx, 0.0);
-		BC.VonNeumannBC(Boundary::RIGHT, *fluid_, 0.0, 0.0);
+		BC.VonNeumannBC(Boundary::RIGHT, *fluid_, vx, 0.0);
 
 		//BC.AdditionalBounceBackBCs();
 
@@ -133,24 +178,28 @@ void IBSolver::Solve(int iter_numb)
 
 		feqCalculate();
 
-		body_->SpreadVelocity(*fluid_);
-		// Не забыть вернуть для движения
-		body_->UpdatePosition();
+		for (auto& i : im_bodies_)
+		{
+			i->SpreadVelocity(*fluid_);
+			i->UpdatePosition();
+		}
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 
 		if (iter % 25 == 0)
 		{
 			fluid_->write_fluid_vtk("Data\\ib_lbm_data\\fluid_vtk", iter);
-			body_->WriteBodyFormToTxt(iter);
-			body_->WriteBodyFormToVtk("Data\\ib_lbm_data\\body_form_vtk", iter);
+
+			for (int i = 0; i < im_bodies_.size(); ++i)
+			{
+				im_bodies_.at(i)->WriteBodyFormToTxt(iter, i);
+				im_bodies_.at(i)->WriteBodyFormToVtk("Data\\ib_lbm_data\\body_form_vtk", i, iter);
+			}
+
 			fluid_->vx_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "vx", iter);
 		}
 
 	}
-
-	//! Streaming collision bounce back
-
 }
 
 void IBSolver::CreateDataFolder(std::string folder_name) const

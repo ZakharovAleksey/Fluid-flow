@@ -102,12 +102,21 @@ int main()
 	Medium m(Y, X);
 
 	// Create immersed object
-	// тут мы пока не обнавл€ем потожение половины узлов UpdatePosition - убрать!! + сощдать погруженный объ€ект - тромб
-	std::unique_ptr<ImmersedBody> body(new ImmersedCircle(102, 30, 32, Point(15, 15), 6)); // TROMB (102, 30, 32, Point(30, 1), 6));
+	//std::unique_ptr<ImmersedBody> body1(new ImmersedCircle(102, 30, 32, Point(15, 15), 6)); // TROMB (102, 30, 32, Point(30, 1), 6));
+	//std::unique_ptr<ImmersedBody> body2(new ImmersedCircle(102, 30, 32, Point(50, 15), 6)); // TROMB (102, 30, 32, Point(30, 1), 6));
+
+	ImmersedBody* body1 (new ImmersedBottomTromb(102, 30, 32, Point(1, 30), 6)); // TROMB (102, 30, 32, Point(1, 30), 6)); // ImmersedCircle(102, 30, 32, Point(15, 15), 6));
+	ImmersedBody* body2 (new ImmersedTopTromb(102, 30, 32, Point(27, 30), 6));
+	ImmersedBody* body3(new ImmersedRBC(102, 30, 32, Point(15, 20), 6));
+
+	std::vector<ImmersedBody*> bodies;
+	bodies.push_back(body2);
+	bodies.push_back(body1);
+	bodies.push_back(body3);
 
 	// Start solution
-	IBSolver s(1.0, f, m, std::move(body));
-	s.Solve(501);
+	IBSolver s(1.0, f, m, bodies); //std::move(body));
+	s.Solve(20001);
 
 #pragma endregion
 

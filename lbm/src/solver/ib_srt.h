@@ -10,14 +10,13 @@
 #include"im_body\immersed_body.h"
 #include"bc\bc.h"
 
-//#define 	M_PI   3.14159265358979323846
-//#define SQ(x) ((x) * (x)) // square function; replaces SQ(x) by ((x) * (x)) in the code
-
 
 class IBSolver : iSolver
 {
 public:
 	IBSolver(double tau, Fluid& fluid, Medium & medium, std::unique_ptr<ImmersedBody> body);
+	IBSolver(double tau, Fluid& fluid, Medium & medium, std::vector<ImmersedBody*> bodies);
+
 	//IBSolver(double tau, Fluid& fluid, Medium & medium, ImmersedBody& body);
 	~IBSolver() {}
 
@@ -32,7 +31,6 @@ private:
 
 	//! Performs calculation of external force terms from immersed boundary on fluid
 	void CalculateForces();
-
 	//! Creates folder for output data if not existed yet
 	void CreateDataFolder(std::string folder_name) const;
 
@@ -53,5 +51,8 @@ private:
 	std::unique_ptr<Matrix2D<double>> fy_;
 
 	std::vector<double> force_member_;
+
+	// Add many immersed bodies
+	std::vector<ImmersedBody*> im_bodies_;
 
 };

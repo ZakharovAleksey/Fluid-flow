@@ -29,22 +29,20 @@ void ImmersedBody::CalculateForces()
 	CalculateStrainForces();
 	CalculateBendingForces();
 
-	for (int n = 0; n < nodes_num; ++n)
+	for (int i = 0; i < nodes_num; ++i)
 	{
-		if (body_.at(n).type_ == IBNodeType::STATIC)
+		if (body_.at(i).type_ == IBNodeType::STATIC)
 		{
-			body_.at(n).Fx_ = -stiffness_ * (body_.at(n).cur_pos_.x_ - body_.at(n).ref_pos_.x_) * arcLen;
-			body_.at(n).Fy_ = -stiffness_ * (body_.at(n).cur_pos_.y_ - body_.at(n).ref_pos_.y_) * arcLen;
+			body_.at(i).Fx_ = -stiffness_ * (body_.at(i).cur_pos_.x_ - body_.at(i).ref_pos_.x_) * arcLen;
+			body_.at(i).Fy_ = -stiffness_ * (body_.at(i).cur_pos_.y_ - body_.at(i).ref_pos_.y_) * arcLen;
 		}
-		//particle.node[n].force_x = -particle.stiffness * (particle.node[n].x - particle.node[n].x_ref) * area;
-		//particle.node[n].force_y = -particle.stiffness * (particle.node[n].y - particle.node[n].y_ref) * area;
 	}
 }
 
 void ImmersedBody::SpreadForces(Matrix2D<double>& fx, Matrix2D<double>& fy)
 {
-	fx.FillWith(0.0);
-	fy.FillWith(0.0);
+	//fx.FillWith(0.0);
+	//fy.FillWith(0.0);
 
 	for (int i = 0; i < nodes_num; ++i)
 	{
@@ -121,7 +119,6 @@ void ImmersedBody::UpdatePosition()
 	// Update node and center positions
 
 	for (int i = 0; i < nodes_num; ++i)
-	//for (int i = nodes_num/2; i < nodes_num; ++i)
 	{
 		body_.at(i).cur_pos_.x_ += body_.at(i).vx_;
 		body_.at(i).cur_pos_.y_ += body_.at(i).vy_;
@@ -154,9 +151,9 @@ void ImmersedBody::UpdatePosition()
 
 }
 
-void ImmersedBody::WriteBodyFormToTxt(const int time)
+void ImmersedBody::WriteBodyFormToTxt(const int time, const int body_id)
 {
-	std::string file_name = "Data/ib_lbm_data/body_form_txt/body_form_t" + std::to_string(time) + ".txt";
+	std::string file_name = "Data/ib_lbm_data/body_form_txt/body_form" + std::to_string(body_id) + "_t" + std::to_string(time) + ".txt";
 
 	std::ofstream output_file;
 	output_file.open(file_name);
@@ -178,9 +175,9 @@ void ImmersedBody::WriteBodyFormToTxt(const int time)
 	output_file.close();
 }
 
-void ImmersedBody::WriteBodyFormToVtk(std::string file_path, const int time)
+void ImmersedBody::WriteBodyFormToVtk(std::string file_path, const int body_id, const int time)
 {
-	std::string file_name = file_path + "\\body_fluid_t" + std::to_string(time) + ".vtk";
+	std::string file_name = file_path + "\\body_form" + std::to_string(body_id) + "_t" + std::to_string(time) + ".vtk";
 
 	std::ofstream output_file;
 	output_file.open(file_name);
@@ -412,7 +409,7 @@ ImmersedCircle::ImmersedCircle(int domainX, int domainY, int nodesNumber, Point 
 	}
 }
 
-ImmersedTromb::ImmersedTromb(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)
+ImmersedBottomTromb::ImmersedBottomTromb(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)
 {
 	// Parametrization of the circle shape in 2D (half of circle)
 	double h = radius_ * 4.0 / nodes_num;
@@ -430,7 +427,7 @@ ImmersedTromb::ImmersedTromb(int domainX, int domainY, int nodesNumber, Point ce
 
 	for (int id = nodes_num / 2; id < nodes_num; ++id)
 	{
-		body_.at(id).type_ = IBNodeType::MOVING;
+		body_.at(id).type_ = IBNodeType::STATIC; // Moveing
 
 		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ * cos(2.0 * M_PI * (double)id / nodes_num);
 		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
@@ -438,4 +435,33 @@ ImmersedTromb::ImmersedTromb(int domainX, int domainY, int nodesNumber, Point ce
 		body_.at(id).cur_pos_.y_ = center_.y_ - radius_ * sin(2.0 * M_PI * (double)id / nodes_num);
 		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
 	}
+}
+
+ImmersedTopTromb::ImmersedTopTromb(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)
+{
+	// Parametrization of the circle shape in 2D (half of circle)
+	double h = radius_ * 4.0 / nodes_num;
+
+	for (int id = 0; id < nodes_num / 2; ++id)
+	{
+		body_.at(id).type_ = IBNodeType::STATIC;
+
+		body_.at(id).cur_pos_.x_ = center_.x_ - radius_ + id * h;
+		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
+
+		body_.at(id).cur_pos_.y_ = center_.y_;
+		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
+	}
+
+	for (int id = nodes_num / 2; id < nodes_num; ++id)
+	{
+		body_.at(id).type_ = IBNodeType::STATIC; // Moving
+
+		body_.at(id).cur_pos_.x_ = center_.x_ - radius_ * cos(2.0 * M_PI * (double)id / nodes_num);
+		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
+
+		body_.at(id).cur_pos_.y_ = center_.y_ + radius_ * sin(2.0 * M_PI * (double)id / nodes_num);
+		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
+	}
+
 }
