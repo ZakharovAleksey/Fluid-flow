@@ -325,3 +325,23 @@ std::ostream & operator<<(std::ostream & os, Matrix2D<T1> const & matrix) {
 	
 	return os;
 }
+
+template<typename T>
+Matrix2D<T> CalculateModulus(const Matrix2D<T> & physValX, const  Matrix2D<T> & physValY)
+{
+	int size_y = physValX.Size().first;
+	int size_x = physValX.Size().second;
+
+	Matrix2D<T> res(size_y, size_x);
+	res.FillWith(0.0);
+
+	for (int y = 0; y < size_y; ++y)
+	{
+		for (int x = 0; x < size_x; ++x)
+		{
+			res(y, x) = std::sqrt(physValX(y, x) * physValX(y, x) + physValY(y, x) * physValY(y, x));
+		}
+	}
+
+	return res;
+}

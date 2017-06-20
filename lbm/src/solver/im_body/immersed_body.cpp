@@ -370,6 +370,9 @@ void ImmersedBody::CalculateBendingForces()
 	}
 }
 
+
+
+
 ImmersedRBC::ImmersedRBC(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)
 {
 	for (int id = 0; id < nodes_num; ++id)
@@ -427,7 +430,7 @@ ImmersedBottomTromb::ImmersedBottomTromb(int domainX, int domainY, int nodesNumb
 
 	for (int id = nodes_num / 2; id < nodes_num; ++id)
 	{
-		body_.at(id).type_ = IBNodeType::STATIC; // Moveing
+		body_.at(id).type_ = IBNodeType::MOVING; // Moveing
 
 		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ * cos(2.0 * M_PI * (double)id / nodes_num);
 		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
@@ -455,7 +458,7 @@ ImmersedTopTromb::ImmersedTopTromb(int domainX, int domainY, int nodesNumber, Po
 
 	for (int id = nodes_num / 2; id < nodes_num; ++id)
 	{
-		body_.at(id).type_ = IBNodeType::STATIC; // Moving
+		body_.at(id).type_ = IBNodeType::MOVING; // Moving
 
 		body_.at(id).cur_pos_.x_ = center_.x_ - radius_ * cos(2.0 * M_PI * (double)id / nodes_num);
 		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
@@ -464,4 +467,142 @@ ImmersedTopTromb::ImmersedTopTromb(int domainX, int domainY, int nodesNumber, Po
 		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
 	}
 
+}
+
+ImmersedTopRect::ImmersedTopRect(int domainX, int domainY, int nodesNumber, Point center, double  width, double height) : ImmersedBody(domainX, domainY, nodesNumber, center, (width + height) / M_PI)
+{
+	double x_start = center.x_ - width / 2;
+	double y_start = center.y_ + height / 2;
+
+	double x_step = width / nodesNumber * 4.0;
+	double y_step = height / nodesNumber * 4.0;
+
+	// TOP
+	int j = 0;
+
+	for (int i = 0; i < nodesNumber / 4; ++i)
+	{
+		body_.at(i).type_ = IBNodeType::STATIC;
+
+		body_.at(i).cur_pos_.x_ = x_start + j * x_step;
+		body_.at(i).ref_pos_.x_ = x_start + j * x_step;
+
+		body_.at(i).cur_pos_.y_ = y_start;
+		body_.at(i).ref_pos_.y_ = y_start;
+		j++;
+	}
+
+	// RIGHT
+	j = 0;
+
+	for (int i = nodesNumber / 4; i < nodesNumber / 2; ++i)
+	{
+		body_.at(i).type_ = IBNodeType::MOVING;
+
+		body_.at(i).cur_pos_.x_ = x_start + width;
+		body_.at(i).ref_pos_.x_ = x_start + width;
+
+		body_.at(i).cur_pos_.y_ = y_start - j * y_step;
+		body_.at(i).ref_pos_.y_ = y_start - j * y_step;
+		j++;
+	}
+	
+	// BOTTOM
+	j = 0;
+
+	for (int i = nodesNumber / 2; i <  3 * nodesNumber / 4; ++i)
+	{
+		body_.at(i).type_ = IBNodeType::MOVING;
+
+		body_.at(i).cur_pos_.x_ = x_start + width - j * x_step;
+		body_.at(i).ref_pos_.x_ = x_start + width - j * x_step;
+
+		body_.at(i).cur_pos_.y_ = y_start - height;
+		body_.at(i).ref_pos_.y_ = y_start - height;
+		j++;
+	}
+
+	// LEFT
+	j = 0;
+
+	for (int i = 3 * nodesNumber / 4; i < nodesNumber; ++i)
+	{
+		body_.at(i).type_ = IBNodeType::MOVING;
+
+		body_.at(i).cur_pos_.x_ = x_start;
+		body_.at(i).ref_pos_.x_ = x_start;
+
+		body_.at(i).cur_pos_.y_ = y_start - height + j * y_step;
+		body_.at(i).ref_pos_.y_ = y_start - height + j * y_step;
+		j++;
+	}
+}
+
+ImmersedBottomRect::ImmersedBottomRect(int domainX, int domainY, int nodesNumber, Point center, double width, double height) : ImmersedBody(domainX, domainY, nodesNumber, center, (width + height) / M_PI)
+{
+	double x_start = center.x_ - width / 2;
+	double y_start = center.y_ + height / 2;
+
+	double x_step = width / nodesNumber * 4.0;
+	double y_step = height / nodesNumber * 4.0;
+
+	// TOP
+	int j = 0;
+
+	for (int i = 0; i < nodesNumber / 4; ++i)
+	{
+		body_.at(i).type_ = IBNodeType::MOVING;
+
+		body_.at(i).cur_pos_.x_ = x_start + j * x_step;
+		body_.at(i).ref_pos_.x_ = x_start + j * x_step;
+
+		body_.at(i).cur_pos_.y_ = y_start;
+		body_.at(i).ref_pos_.y_ = y_start;
+		j++;
+	}
+
+	// RIGHT
+	j = 0;
+
+	for (int i = nodesNumber / 4; i < nodesNumber / 2; ++i)
+	{
+		body_.at(i).type_ = IBNodeType::MOVING;
+
+		body_.at(i).cur_pos_.x_ = x_start + width;
+		body_.at(i).ref_pos_.x_ = x_start + width;
+
+		body_.at(i).cur_pos_.y_ = y_start - j * y_step;
+		body_.at(i).ref_pos_.y_ = y_start - j * y_step;
+		j++;
+	}
+
+	// BOTTOM
+	j = 0;
+
+	for (int i = nodesNumber / 2; i < 3 * nodesNumber / 4; ++i)
+	{
+		body_.at(i).type_ = IBNodeType::STATIC;
+
+		body_.at(i).cur_pos_.x_ = x_start + width - j * x_step;
+		body_.at(i).ref_pos_.x_ = x_start + width - j * x_step;
+
+		body_.at(i).cur_pos_.y_ = y_start - height;
+		body_.at(i).ref_pos_.y_ = y_start - height;
+		j++;
+	}
+
+	// LEFT
+	j = 0;
+
+	for (int i = 3 * nodesNumber / 4; i < nodesNumber; ++i)
+	{
+		body_.at(i).type_ = IBNodeType::MOVING;
+
+		body_.at(i).cur_pos_.x_ = x_start;
+		body_.at(i).ref_pos_.x_ = x_start;
+
+		body_.at(i).cur_pos_.y_ = y_start - height + j * y_step;
+		body_.at(i).ref_pos_.y_ = y_start - height + j * y_step;
+		j++;
+	}
 }

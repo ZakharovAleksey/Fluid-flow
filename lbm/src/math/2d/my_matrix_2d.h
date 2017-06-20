@@ -333,6 +333,8 @@ public:
 		return body_.at(y * colls_ + x);
 	}
 
+	
+
 	/// <summary>
 	/// Returns values pair, in witch first isequal to rows number, second is equal to columns number
 	/// </summary>
@@ -476,16 +478,12 @@ public:
 
 protected:
 
-#pragma region Fields
-
 	// Number of rows in matrix
 	int rows_;
 	// Number of columns in matrix
 	int colls_;
 	// Main body of matrix, wich contain all matrix elements
 	std::vector<T> body_;
-
-#pragma endregion
 
 };
 

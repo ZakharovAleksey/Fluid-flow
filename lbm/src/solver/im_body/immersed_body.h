@@ -5,6 +5,7 @@
 
 #include<memory>
 #include<windows.h>
+#include<math.h> // for ceil
 
 #include <fstream> // file streams
 #include <sstream> // string streams
@@ -57,6 +58,7 @@ struct IBNode
 //! Abstract class of immersed in fluid body
 class ImmersedBody
 {
+	friend class Microphone;
 public:
 
 	ImmersedBody();
@@ -78,7 +80,7 @@ public:
 	//! Writes data about boundary of immersed body to *.vtk file
 	void WriteBodyFormToVtk(std::string file_path, const int body_id, const int time);
 
-
+	//! First bad version of RBC-Wall interaction
 	friend void Interaction(ImmersedBody* moving_body, ImmersedBody* static_body)
 	{
 		double rc = 1;
@@ -178,6 +180,216 @@ class ImmersedTopTromb : public ImmersedBody
 public:
 	ImmersedTopTromb(int domainX, int domainY, int nodesNumber, Point center, double radius);
 };
+
+
+//! Immersed in fluid tromb
+class ImmersedTopRect : public ImmersedBody
+{
+public:
+	ImmersedTopRect(int domainX, int domainY, int nodesNumber, Point center, double width, double height);
+};
+
+
+//! Immersed in fluid tromb
+class ImmersedBottomRect : public ImmersedBody
+{
+public:
+	ImmersedBottomRect(int domainX, int domainY, int nodesNumber, Point center, double width, double height);
+};
+
+//
+// A ---- B
+//  \    /
+//   \  /
+//    C
+
+class Parabola : public ImmersedBody
+{
+public:
+	Parabola(int domainX, int domainY, int nodesNumber, Point A, Point B, Point C, double width) : ImmersedBody(domainX, domainY, nodesNumber, 0.0, 0.0)
+	{
+		center_.x_ = A.x_ + B.x_ + C.x_ / 3.0;
+		center_.y_ = A.y_ + B.y_ + C.y_ / 3.0;
+		
+		double a = (C.y_ - (C.x_ * (B.y_ - A.y_) + B.x_ * A.y_ - A.x_ * B.y_) / (B.x_ - A.x_)) / (C.x_ * (C.x_ - A.x_ - B.x_) + A.x_ * B.x_);
+		double b = (B.y_ - A.y_) / (B.x_ - A.x_) - a * (A.x_ + B.x_);
+		double c = (B.x_ * A.y_ - A.x_ * B.y_) / (B.x_ - A.x_) + a * A.x_ * B.x_;
+
+		radius_ = std::sqrt(SQ(A.x_ - center_.x_) + SQ(A.y_ - center_.y_));
+
+		double x_start = A.x_;
+		double step = ( B.x_ - A.x_ ) / nodesNumber;
+		body_.resize(nodesNumber, IBNode());
+
+		for (int i = 0; i < nodesNumber; ++i)
+		{
+			body_.at(i).type_ = IBNodeType::STATIC;
+
+			body_.at(i).cur_pos_.x_ = x_start + i * step;
+			body_.at(i).cur_pos_.y_ = a * SQ(body_.at(i).cur_pos_.x_) + b * body_.at(i).cur_pos_.x_ * c;
+
+			body_.at(i).ref_pos_.x_ = body_.at(i).cur_pos_.x_;
+			body_.at(i).ref_pos_.y_ = body_.at(i).cur_pos_.y_;
+		}
+	}
+};
+
+
+//
+//   B
+// C 
+//   A
+
+class Parabola1 : public ImmersedBody
+{
+public:
+	Parabola1(int domainX, int domainY, int nodesNumber, Point A, Point B, Point C, double width) : ImmersedBody(domainX, domainY, nodesNumber, 0.0, 0.0)
+	{
+		center_.x_ = A.x_ + B.x_ + C.x_ / 3.0;
+		center_.y_ = A.y_ + B.y_ + C.y_ / 3.0;
+
+		double a = (C.y_ - (C.x_ * (B.y_ - A.y_) + B.x_ * A.y_ - A.x_ * B.y_) / (B.x_ - A.x_)) / (C.x_ * (C.x_ - A.x_ - B.x_) + A.x_ * B.x_);
+		double b = (B.y_ - A.y_) / (B.x_ - A.x_) - a * (A.x_ + B.x_);
+		double c = (B.x_ * A.y_ - A.x_ * B.y_) / (B.x_ - A.x_) + a * A.x_ * B.x_;
+
+		radius_ = std::sqrt(SQ(A.x_ - center_.x_) + SQ(A.y_ - center_.y_));
+
+		double y_start = A.y_;
+		double step = (B.y_ - A.y_) / nodesNumber;
+		body_.resize(nodesNumber, IBNode());
+
+		for (int i = 0; i < nodesNumber; ++i)
+		{
+			body_.at(i).type_ = IBNodeType::STATIC;
+
+			body_.at(i).cur_pos_.y_ = y_start + i * step;
+			body_.at(i).cur_pos_.x_ = a * SQ(body_.at(i).cur_pos_.y_) + b * body_.at(i).cur_pos_.y_ * c;
+
+			body_.at(i).ref_pos_.x_ = body_.at(i).cur_pos_.x_;
+			body_.at(i).ref_pos_.y_ = body_.at(i).cur_pos_.y_;
+		}
+	}
+};
+
+
+class Microphone
+{
+public:
+
+	Microphone()
+	{
+		CreateDataFolder("Data\\ib_lbm_data\\spectrum_data");
+	}
+
+	~Microphone() {}
+
+	void PerformMeasurements(const int iter, const std::vector<ImmersedBody*> & im_bodies, const MacroscopicParam<double> & physVal, std::string physValName)
+	{
+		std::cout << "Perform Measurements\n";
+
+		std::ofstream output_file;
+		std::string fileName = "Data\\ib_lbm_data\\spectrum_data\\spectrum_" + physValName + ".txt";
+		(iter == 0 ) ? (output_file.open(fileName)) : output_file.open(fileName, std::ios_base::app);
+
+		if (iter == 0)
+		{
+			output_file << "time\t";
+			for (int i = 0; i < im_bodies.size(); ++i)
+			{
+				if (i != im_bodies.size() - 1)
+					output_file << "body" << std::to_string(i) << "\t";
+				else
+					output_file << "body" << std::to_string(i) << "\n";
+			}
+		}
+		
+
+		if (output_file.is_open())
+		{
+			std::vector<double> res;
+
+			for (auto imBody : im_bodies)
+			{
+				double totalValue = 0.0;
+
+				for (auto node : imBody->body_)
+				{
+					std::vector<std::pair<int, int>> ids;
+
+					double curX = node.cur_pos_.x_;
+					double curY = node.cur_pos_.y_;
+
+					// Check if position is integer values (in this case it match with eulerian grid node)
+					bool isYinteger = (curY == ceil(curY)) ? true : false;
+					bool isXinteger = (curX == ceil(curX)) ? true : false;
+
+					if (!isYinteger && !isXinteger)
+					{
+						ids.push_back(std::make_pair(floor(curY), floor(curX)));
+						ids.push_back(std::make_pair(floor(curY), ceil(curX)));
+						ids.push_back(std::make_pair(ceil(curY), floor(curX)));
+						ids.push_back(std::make_pair(ceil(curY), ceil(curX)));
+					}
+					else if (isYinteger && !isXinteger)
+					{
+						ids.push_back(std::make_pair(curY, floor(curX)));
+						ids.push_back(std::make_pair(curY, ceil(curX)));
+					}
+					else if (!isYinteger && isXinteger)
+					{
+						ids.push_back(std::make_pair(floor(curY), curX));
+						ids.push_back(std::make_pair(ceil(curY), curX));
+					}
+					else
+						ids.push_back(std::make_pair(curY, curX));
+
+					// Calculate average value for all nodes
+					for (auto id : ids)
+					{
+						totalValue += physVal(id.first, id.second);
+					}
+					totalValue /= ids.size();
+				}
+
+				res.push_back(totalValue);
+			}
+			
+			output_file << iter << "\t";
+			for (auto val : res)
+				output_file << val << "\t";
+			output_file << "\n";
+			res.clear();
+		}
+		else
+		{
+			std::cout << "Could not open file Data\\ib_lbm_data\\spectrum_data\\spectrum.txt for spectrum writing. \n";
+		}
+
+		output_file.close();
+	}
+
+
+private:
+	void CreateDataFolder(std::string folder_name) const
+	{
+		// Get path to current directory
+		char buffer[MAX_PATH];
+		GetModuleFileName(NULL, buffer, MAX_PATH);
+
+		std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+		std::string path = std::string(buffer).substr(0, pos);
+		path = path.substr(0, path.size() - 6) + "\\" + folder_name;
+
+		char *cstr = new char[path.length() + 1];
+		strcpy(cstr, path.c_str());
+
+		// Create folder if not exist yet
+		if (GetFileAttributes(cstr) == INVALID_FILE_ATTRIBUTES)
+			CreateDirectory(cstr, NULL);
+	}
+
+};
+
 
 
 #endif // !IMMERSED_BODY_H

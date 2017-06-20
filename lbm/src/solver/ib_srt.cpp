@@ -131,10 +131,14 @@ void IBSolver::Solve(int iter_numb)
 		fluid_->f_[q] = fluid_->feq_[q];
 
 	BCs BC(fluid_->f_);
-
+	Microphone mic;
 
 	for (int iter = 0; iter < iter_numb; ++iter)
 	{
+		mic.PerformMeasurements(iter, im_bodies_, fluid_->vx_, "vx");
+		mic.PerformMeasurements(iter, im_bodies_, fluid_->vx_, "vy");
+		mic.PerformMeasurements(iter, im_bodies_, fluid_->vx_, "rho");
+
 		// Clean fx, fy fields
 		fx_->FillWith(0.0);
 		fy_->FillWith(0.0);
@@ -145,8 +149,9 @@ void IBSolver::Solve(int iter_numb)
 			//i->SpreadForces(*fx_, *fy_);
 		}
 
-		Interaction(im_bodies_.at(2), im_bodies_.at(0));
-		Interaction(im_bodies_.at(2), im_bodies_.at(1));
+		// Deal with RBC-Wall intearaction
+		//Interaction(im_bodies_.at(2), im_bodies_.at(0));
+		//Interaction(im_bodies_.at(2), im_bodies_.at(1));
 
 		for (auto& i : im_bodies_)
 		{
@@ -197,6 +202,8 @@ void IBSolver::Solve(int iter_numb)
 			}
 
 			fluid_->vx_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "vx", iter);
+			fluid_->vy_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "vy", iter);
+			fluid_->rho_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "rho", iter);
 		}
 
 	}
