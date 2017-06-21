@@ -19,8 +19,8 @@
 //! Point in 2D space
 struct Point
 {
-	double x_;
 	double y_;
+	double x_;
 
 	Point() : x_(0.0), y_(0.0) {}
 	Point(double y, double x) : y_(y), x_(x) {}
@@ -206,68 +206,10 @@ public:
 class Parabola : public ImmersedBody
 {
 public:
-	Parabola(int domainX, int domainY, int nodesNumber, Point A, Point B, Point C, double width) : ImmersedBody(domainX, domainY, nodesNumber, 0.0, 0.0)
+	Parabola(int domainX, int domainY, int nodesNumber, Point A, Point B, Point C) : ImmersedBody(domainX, domainY, nodesNumber, Point(), 0.0)
 	{
-		center_.x_ = A.x_ + B.x_ + C.x_ / 3.0;
-		center_.y_ = A.y_ + B.y_ + C.y_ / 3.0;
+		// перерписать
 		
-		double a = (C.y_ - (C.x_ * (B.y_ - A.y_) + B.x_ * A.y_ - A.x_ * B.y_) / (B.x_ - A.x_)) / (C.x_ * (C.x_ - A.x_ - B.x_) + A.x_ * B.x_);
-		double b = (B.y_ - A.y_) / (B.x_ - A.x_) - a * (A.x_ + B.x_);
-		double c = (B.x_ * A.y_ - A.x_ * B.y_) / (B.x_ - A.x_) + a * A.x_ * B.x_;
-
-		radius_ = std::sqrt(SQ(A.x_ - center_.x_) + SQ(A.y_ - center_.y_));
-
-		double x_start = A.x_;
-		double step = ( B.x_ - A.x_ ) / nodesNumber;
-		body_.resize(nodesNumber, IBNode());
-
-		for (int i = 0; i < nodesNumber; ++i)
-		{
-			body_.at(i).type_ = IBNodeType::STATIC;
-
-			body_.at(i).cur_pos_.x_ = x_start + i * step;
-			body_.at(i).cur_pos_.y_ = a * SQ(body_.at(i).cur_pos_.x_) + b * body_.at(i).cur_pos_.x_ * c;
-
-			body_.at(i).ref_pos_.x_ = body_.at(i).cur_pos_.x_;
-			body_.at(i).ref_pos_.y_ = body_.at(i).cur_pos_.y_;
-		}
-	}
-};
-
-
-//
-//   B
-// C 
-//   A
-
-class Parabola1 : public ImmersedBody
-{
-public:
-	Parabola1(int domainX, int domainY, int nodesNumber, Point A, Point B, Point C, double width) : ImmersedBody(domainX, domainY, nodesNumber, 0.0, 0.0)
-	{
-		center_.x_ = A.x_ + B.x_ + C.x_ / 3.0;
-		center_.y_ = A.y_ + B.y_ + C.y_ / 3.0;
-
-		double a = (C.y_ - (C.x_ * (B.y_ - A.y_) + B.x_ * A.y_ - A.x_ * B.y_) / (B.x_ - A.x_)) / (C.x_ * (C.x_ - A.x_ - B.x_) + A.x_ * B.x_);
-		double b = (B.y_ - A.y_) / (B.x_ - A.x_) - a * (A.x_ + B.x_);
-		double c = (B.x_ * A.y_ - A.x_ * B.y_) / (B.x_ - A.x_) + a * A.x_ * B.x_;
-
-		radius_ = std::sqrt(SQ(A.x_ - center_.x_) + SQ(A.y_ - center_.y_));
-
-		double y_start = A.y_;
-		double step = (B.y_ - A.y_) / nodesNumber;
-		body_.resize(nodesNumber, IBNode());
-
-		for (int i = 0; i < nodesNumber; ++i)
-		{
-			body_.at(i).type_ = IBNodeType::STATIC;
-
-			body_.at(i).cur_pos_.y_ = y_start + i * step;
-			body_.at(i).cur_pos_.x_ = a * SQ(body_.at(i).cur_pos_.y_) + b * body_.at(i).cur_pos_.y_ * c;
-
-			body_.at(i).ref_pos_.x_ = body_.at(i).cur_pos_.x_;
-			body_.at(i).ref_pos_.y_ = body_.at(i).cur_pos_.y_;
-		}
 	}
 };
 

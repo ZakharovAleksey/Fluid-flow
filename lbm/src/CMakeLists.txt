@@ -36,6 +36,8 @@ set(
 	"solver/ib_srt.cpp"
 	"solver/srt.cpp"
 	"solver/bc/bc.cpp"
+	"solver/mrt.h"
+	"solver/mrt.cpp"
 	"main.cpp"
 )
 

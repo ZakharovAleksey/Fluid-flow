@@ -135,9 +135,9 @@ void IBSolver::Solve(int iter_numb)
 
 	for (int iter = 0; iter < iter_numb; ++iter)
 	{
-		mic.PerformMeasurements(iter, im_bodies_, fluid_->vx_, "vx");
-		mic.PerformMeasurements(iter, im_bodies_, fluid_->vx_, "vy");
-		mic.PerformMeasurements(iter, im_bodies_, fluid_->vx_, "rho");
+		//mic.PerformMeasurements(iter, im_bodies_, fluid_->vx_, "vx");
+		//mic.PerformMeasurements(iter, im_bodies_, fluid_->vx_, "vy");
+		//mic.PerformMeasurements(iter, im_bodies_, fluid_->vx_, "rho");
 
 		// Clean fx, fy fields
 		fx_->FillWith(0.0);

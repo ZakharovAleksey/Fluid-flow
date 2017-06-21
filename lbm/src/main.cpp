@@ -11,6 +11,7 @@
 #include"modeling_area\fluid.h"
 #include"solver\ib_srt.h"
 #include"solver\srt.h"
+#include"solver\mrt.h"
 #include"solver\bc\bc.h"
 
 
@@ -96,15 +97,14 @@ int main()
 
 #pragma region MRT
 
-
-	int X{ 50 }; //100
-	int Y{ 50 };
+	int X{ 250 }; //100
+	int Y{ 250 };
 	Fluid f(Y, X);
 	Medium m(Y, X);
 
 	// Start solution
 	MRTSolver solver(0.5008, m, f); // tau = 0.5008
-	solver.Solve(7001);
+	solver.Solve(25001);
 
 #pragma endregion
 
@@ -120,16 +120,18 @@ int main()
 	////std::unique_ptr<ImmersedBody> body1(new ImmersedCircle(102, 30, 32, Point(15, 15), 6)); // TROMB (102, 30, 32, Point(30, 1), 6));
 	////std::unique_ptr<ImmersedBody> body2(new ImmersedCircle(102, 30, 32, Point(50, 15), 6)); // TROMB (102, 30, 32, Point(30, 1), 6));
 
-	//ImmersedBody* body1 (new ImmersedBottomTromb(102, 30, 32, Point(1, 30), 6)); // TROMB (102, 30, 32, Point(1, 30), 6)); // ImmersedCircle(102, 30, 32, Point(15, 15), 6));
-	//ImmersedBody* body2 (new ImmersedTopTromb(102, 30, 32, Point(27, 30), 6));
+	////ImmersedBody* body1 (new ImmersedBottomTromb(102, 30, 32, Point(1, 30), 6)); // TROMB (102, 30, 32, Point(1, 30), 6)); // ImmersedCircle(102, 30, 32, Point(15, 15), 6));
+	////ImmersedBody* body2 (new ImmersedTopTromb(102, 30, 32, Point(27, 30), 6));
 	////ImmersedBody* body3(new ImmersedRBC(102, 30, 32, Point(15, 20), 6));
+
+	//ImmersedBody* body2(new Parabola(102, 30, 32, Point(10, 30), Point(10, 80), Point(20, 55)));
 
 	////ImmersedBody* body2(new ImmersedTopRect(102, 30, 32, Point(21, 50), 6, 13));
 	////ImmersedBody* body1(new ImmersedBottomRect(102, 30, 32, Point(7, 50), 6, 13));
 
 	//std::vector<ImmersedBody*> bodies;
 	//bodies.push_back(body2);
-	//bodies.push_back(body1);
+	////bodies.push_back(body1);
 	////bodies.push_back(body3);
 
 	//// Start solution
