@@ -13,7 +13,7 @@
 #include"..\..\modeling_area\fluid.h"
 #include"..\..\modeling_area\medium.h"
 
-
+# define M_PI 3.14159265358979323846  /* pi */
 #define SQ(x) ((x) * (x)) // square function; replaces SQ(x) by ((x) * (x)) in the code
 
 //! Point in 2D space
@@ -62,7 +62,7 @@ class ImmersedBody
 public:
 
 	ImmersedBody();
-	ImmersedBody(int domainX, int domainY, int nodesNumber, Point center, double radius);
+	ImmersedBody(int domainX, int domainY, int nodesNumber);
 	virtual ~ImmersedBody() = 0 {}
 
 	//! Performs calculation of elastic forces, acting between nodes of immersed boundaries
@@ -126,6 +126,8 @@ public:
 
 protected:
 
+	virtual double GetArcLen() { return 0; };
+
 	//! Performs calculation of strain forces for all nodes of immersed body
 	void CalculateStrainForces();
 	//! Performs calculation of bending forces for all nodes of immersed body
@@ -152,66 +154,71 @@ protected:
 
 };
 
+
+// >> Good implementation of immersed bodies
+
+
 //! Immersed in fluid RBC (Red Blood Cell)
 class ImmersedRBC : public ImmersedBody
 {
 public:
 	ImmersedRBC(int domainX, int domainY, int nodesNumber, Point center, double radius);
+
+protected:
+	double GetArcLen() override { return 2.0 * M_PI * radius_ / nodes_num; }
+
+private:
+	Point center_;
+	double radius_;
 };
 
-//! Immersed in fluid Circle
+//! A part of circle in range [startAngle, finishAngle] with center point included, or full circle if [0, 2 pi]
 class ImmersedCircle : public ImmersedBody
 {
 public:
-	ImmersedCircle(int domainX, int domainY, int nodesNumber, Point center, double radius);
-};
+	ImmersedCircle(int domainX, int domainY, int nodesNumber, Point center, double radius, double startAngle, double finishAngle);
 
-//! Immersed in fluid tromb
-class ImmersedBottomTromb : public ImmersedBody
-{
-public:
-	ImmersedBottomTromb(int domainX, int domainY, int nodesNumber, Point center, double radius);
-};
+protected:
+	// œ≈–≈—◊»“¿“‹ ¬ «¿¬»—»ÃŒ—“» Œ“ ”√À¿
+	double GetArcLen() override { return 2.0 * M_PI * radius_ / nodes_num; }
 
-
-//! Immersed in fluid tromb
-class ImmersedTopTromb : public ImmersedBody
-{
-public:
-	ImmersedTopTromb(int domainX, int domainY, int nodesNumber, Point center, double radius);
-};
-
-
-//! Immersed in fluid tromb
-class ImmersedTopRect : public ImmersedBody
-{
-public:
-	ImmersedTopRect(int domainX, int domainY, int nodesNumber, Point center, double width, double height);
-};
-
-
-//! Immersed in fluid tromb
-class ImmersedBottomRect : public ImmersedBody
-{
-public:
-	ImmersedBottomRect(int domainX, int domainY, int nodesNumber, Point center, double width, double height);
+private:
+	Point center_;
+	double radius_;
 };
 
 //
-// A ---- B
-//  \    /
-//   \  /
-//    C
+////! Immersed in fluid tromb
+//class ImmersedBottomTromb : public ImmersedBody
+//{
+//public:
+//	ImmersedBottomTromb(int domainX, int domainY, int nodesNumber, Point center, double radius);
+//};
 
-class Parabola : public ImmersedBody
-{
-public:
-	Parabola(int domainX, int domainY, int nodesNumber, Point A, Point B, Point C) : ImmersedBody(domainX, domainY, nodesNumber, Point(), 0.0)
-	{
-		// ÔÂÂÔËÒ‡Ú¸
-		
-	}
-};
+//
+////! Immersed in fluid tromb
+//class ImmersedTopTromb : public ImmersedBody
+//{
+//public:
+//	ImmersedTopTromb(int domainX, int domainY, int nodesNumber, Point center, double radius);
+//};
+//
+//
+////! Immersed in fluid tromb
+//class ImmersedTopRect : public ImmersedBody
+//{
+//public:
+//	ImmersedTopRect(int domainX, int domainY, int nodesNumber, Point center, double width, double height);
+//};
+//
+//
+////! Immersed in fluid tromb
+//class ImmersedBottomRect : public ImmersedBody
+//{
+//public:
+//	ImmersedBottomRect(int domainX, int domainY, int nodesNumber, Point center, double width, double height);
+//};
+//
 
 
 class Microphone

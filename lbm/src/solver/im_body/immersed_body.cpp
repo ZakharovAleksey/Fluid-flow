@@ -4,13 +4,12 @@
 #define SQ(x) ((x) * (x)) // square function; replaces SQ(x) by ((x) * (x)) in the code
 
 
-ImmersedBody::ImmersedBody() : domain_x_(0), domain_y_(0), nodes_num(0), center_(Point()), radius_(0.0)
+ImmersedBody::ImmersedBody() : domain_x_(0), domain_y_(0), nodes_num(0)
 {
 	body_.resize(nodes_num, IBNode());
 }
 
-ImmersedBody::ImmersedBody(int domainX, int domainY, int nodesNumber, Point center, double radius) :
-	domain_x_(domainX), domain_y_(domainY), nodes_num(nodesNumber), center_(center), radius_(radius)
+ImmersedBody::ImmersedBody(int domainX, int domainY, int nodesNumber) : domain_x_(domainX), domain_y_(domainY), nodes_num(nodesNumber)
 {
 	body_.resize(nodes_num, IBNode());
 }
@@ -24,7 +23,7 @@ void ImmersedBody::CalculateForces()
 		node.Fy_ = 0.0;
 	}
 
-	const double arcLen = 2.0 * M_PI * radius_ / nodes_num;
+	const double arcLen = GetArcLen(); // 2.0 * M_PI * radius_ / nodes_num;
 
 	CalculateStrainForces();
 	CalculateBendingForces();
@@ -113,8 +112,8 @@ void ImmersedBody::SpreadVelocity(Fluid & fluid)
 void ImmersedBody::UpdatePosition()
 {
 	// Reset center position
-	center_.x_ = 0.0;
-	center_.y_ = 0.0;
+	//center_.x_ = 0.0;
+	//center_.y_ = 0.0;
 
 	// Update node and center positions
 
@@ -123,8 +122,8 @@ void ImmersedBody::UpdatePosition()
 		body_.at(i).cur_pos_.x_ += body_.at(i).vx_;
 		body_.at(i).cur_pos_.y_ += body_.at(i).vy_;
 
-		center_.x_ += body_.at(i).cur_pos_.x_ / nodes_num;
-		center_.y_ += body_.at(i).cur_pos_.y_ / nodes_num;
+		//center_.x_ += body_.at(i).cur_pos_.x_ / nodes_num;
+		//center_.y_ += body_.at(i).cur_pos_.y_ / nodes_num;
 	}
 
 	/// Check for periodicity along the x-axis
@@ -373,7 +372,7 @@ void ImmersedBody::CalculateBendingForces()
 
 
 
-ImmersedRBC::ImmersedRBC(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)
+ImmersedRBC::ImmersedRBC(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber), center_(center), radius_(radius_)
 {
 	for (int id = 0; id < nodes_num; ++id)
 	{
@@ -397,212 +396,234 @@ ImmersedRBC::ImmersedRBC(int domainX, int domainY, int nodesNumber, Point center
 	}
 }
 
-ImmersedCircle::ImmersedCircle(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)
+ImmersedCircle::ImmersedCircle(int domainX, int domainY, int nodesNumber, Point center, double radius, double startAngle, double finishAngle) : ImmersedBody(domainX, domainY, nodesNumber), center_(center), radius_(radius)
 {
-	for (int id = 0; id < nodes_num; ++id)
-	{
-		body_.at(id).type_ = IBNodeType::MOVING;
+	assert(startAngle < finishAngle);
+	assert(finishAngle > 2 * M_PI);
 
-		// Parametrization of the circle shape in 2D
-		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ * sin(2.0 * M_PI * (double)id / nodes_num);
-		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
+	// True if user input to plot fill circle, or interval [0, 2 * pi]
+	bool isFullCircle = finishAngle - startAngle == 2.0 * M_PI;
 
-		body_.at(id).cur_pos_.y_ = center_.x_ + radius_ * cos(2.0 * M_PI * (double)id / nodes_num);
-		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.x_;
-	}
-}
-
-ImmersedBottomTromb::ImmersedBottomTromb(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)
-{
-	// Parametrization of the circle shape in 2D (half of circle)
-	double h = radius_ * 4.0 / nodes_num;
-
-	for (int id = 0; id < nodes_num / 2; ++id)
-	{
-		body_.at(id).type_ = IBNodeType::STATIC;
-
-		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ - id * h;
-		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
-
-		body_.at(id).cur_pos_.y_ = center_.y_;
-		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
-	}
-
-	for (int id = nodes_num / 2; id < nodes_num; ++id)
-	{
-		body_.at(id).type_ = IBNodeType::MOVING; // Moveing
-
-		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ * cos(2.0 * M_PI * (double)id / nodes_num);
-		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
-
-		body_.at(id).cur_pos_.y_ = center_.y_ - radius_ * sin(2.0 * M_PI * (double)id / nodes_num);
-		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
-	}
-}
-
-ImmersedTopTromb::ImmersedTopTromb(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)
-{
-	// Parametrization of the circle shape in 2D (half of circle)
-	double h = radius_ * 4.0 / nodes_num;
-
-	for (int id = 0; id < nodes_num / 2; ++id)
-	{
-		body_.at(id).type_ = IBNodeType::STATIC;
-
-		body_.at(id).cur_pos_.x_ = center_.x_ - radius_ + id * h;
-		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
-
-		body_.at(id).cur_pos_.y_ = center_.y_;
-		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
-	}
-
-	for (int id = nodes_num / 2; id < nodes_num; ++id)
-	{
-		body_.at(id).type_ = IBNodeType::MOVING; // Moving
-
-		body_.at(id).cur_pos_.x_ = center_.x_ - radius_ * cos(2.0 * M_PI * (double)id / nodes_num);
-		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
-
-		body_.at(id).cur_pos_.y_ = center_.y_ + radius_ * sin(2.0 * M_PI * (double)id / nodes_num);
-		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
-	}
-
-}
-
-ImmersedTopRect::ImmersedTopRect(int domainX, int domainY, int nodesNumber, Point center, double  width, double height) : ImmersedBody(domainX, domainY, nodesNumber, center, (width + height) / M_PI)
-{
-	double x_start = center.x_ - width / 2;
-	double y_start = center.y_ + height / 2;
-
-	double x_step = width / nodesNumber * 4.0;
-	double y_step = height / nodesNumber * 4.0;
-
-	// TOP
-	int j = 0;
-
-	for (int i = 0; i < nodesNumber / 4; ++i)
-	{
-		body_.at(i).type_ = IBNodeType::STATIC;
-
-		body_.at(i).cur_pos_.x_ = x_start + j * x_step;
-		body_.at(i).ref_pos_.x_ = x_start + j * x_step;
-
-		body_.at(i).cur_pos_.y_ = y_start;
-		body_.at(i).ref_pos_.y_ = y_start;
-		j++;
-	}
-
-	// RIGHT
-	j = 0;
-
-	for (int i = nodesNumber / 4; i < nodesNumber / 2; ++i)
-	{
-		body_.at(i).type_ = IBNodeType::MOVING;
-
-		body_.at(i).cur_pos_.x_ = x_start + width;
-		body_.at(i).ref_pos_.x_ = x_start + width;
-
-		body_.at(i).cur_pos_.y_ = y_start - j * y_step;
-		body_.at(i).ref_pos_.y_ = y_start - j * y_step;
-		j++;
-	}
+	// Obtain one step rotation angle and number of points on circle (in not full - 1 node, because it need to center node add)
+	double angleStep = (!isFullCircle) ? (finishAngle - startAngle) / (nodes_num - 2) : (finishAngle - startAngle) / (nodes_num - 1);
+	double circleNumb = (!isFullCircle) ? nodes_num - 1 : nodes_num;
 	
-	// BOTTOM
-	j = 0;
-
-	for (int i = nodesNumber / 2; i <  3 * nodesNumber / 4; ++i)
+	// Fill circle
+	for (int id = 0; id < circleNumb; ++id)
 	{
-		body_.at(i).type_ = IBNodeType::MOVING;
+		body_.at(id).type_ = IBNodeType::STATIC;
 
-		body_.at(i).cur_pos_.x_ = x_start + width - j * x_step;
-		body_.at(i).ref_pos_.x_ = x_start + width - j * x_step;
+		std::cout << " -> " << startAngle + (double)id * angleStep << std::endl;
+		// Parametrization of the circle shape in 2D
+		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ * cos(startAngle + (double)id * angleStep);
+		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
 
-		body_.at(i).cur_pos_.y_ = y_start - height;
-		body_.at(i).ref_pos_.y_ = y_start - height;
-		j++;
+		body_.at(id).cur_pos_.y_ = center_.y_ + radius_ * sin(startAngle + (double)id * angleStep);
+		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
 	}
 
-	// LEFT
-	j = 0;
-
-	for (int i = 3 * nodesNumber / 4; i < nodesNumber; ++i)
+	// Add additional center node if user input not full circle
+	if (!isFullCircle)
 	{
-		body_.at(i).type_ = IBNodeType::MOVING;
+		body_.at(nodesNumber - 1).cur_pos_.x_ = center.x_;
+		body_.at(nodesNumber - 1).ref_pos_.x_ = center.x_;
 
-		body_.at(i).cur_pos_.x_ = x_start;
-		body_.at(i).ref_pos_.x_ = x_start;
-
-		body_.at(i).cur_pos_.y_ = y_start - height + j * y_step;
-		body_.at(i).ref_pos_.y_ = y_start - height + j * y_step;
-		j++;
+		body_.at(nodesNumber - 1).cur_pos_.y_ = center.y_;
+		body_.at(nodesNumber - 1).ref_pos_.y_ = center.y_;
 	}
 }
 
-ImmersedBottomRect::ImmersedBottomRect(int domainX, int domainY, int nodesNumber, Point center, double width, double height) : ImmersedBody(domainX, domainY, nodesNumber, center, (width + height) / M_PI)
-{
-	double x_start = center.x_ - width / 2;
-	double y_start = center.y_ + height / 2;
-
-	double x_step = width / nodesNumber * 4.0;
-	double y_step = height / nodesNumber * 4.0;
-
-	// TOP
-	int j = 0;
-
-	for (int i = 0; i < nodesNumber / 4; ++i)
-	{
-		body_.at(i).type_ = IBNodeType::MOVING;
-
-		body_.at(i).cur_pos_.x_ = x_start + j * x_step;
-		body_.at(i).ref_pos_.x_ = x_start + j * x_step;
-
-		body_.at(i).cur_pos_.y_ = y_start;
-		body_.at(i).ref_pos_.y_ = y_start;
-		j++;
-	}
-
-	// RIGHT
-	j = 0;
-
-	for (int i = nodesNumber / 4; i < nodesNumber / 2; ++i)
-	{
-		body_.at(i).type_ = IBNodeType::MOVING;
-
-		body_.at(i).cur_pos_.x_ = x_start + width;
-		body_.at(i).ref_pos_.x_ = x_start + width;
-
-		body_.at(i).cur_pos_.y_ = y_start - j * y_step;
-		body_.at(i).ref_pos_.y_ = y_start - j * y_step;
-		j++;
-	}
-
-	// BOTTOM
-	j = 0;
-
-	for (int i = nodesNumber / 2; i < 3 * nodesNumber / 4; ++i)
-	{
-		body_.at(i).type_ = IBNodeType::STATIC;
-
-		body_.at(i).cur_pos_.x_ = x_start + width - j * x_step;
-		body_.at(i).ref_pos_.x_ = x_start + width - j * x_step;
-
-		body_.at(i).cur_pos_.y_ = y_start - height;
-		body_.at(i).ref_pos_.y_ = y_start - height;
-		j++;
-	}
-
-	// LEFT
-	j = 0;
-
-	for (int i = 3 * nodesNumber / 4; i < nodesNumber; ++i)
-	{
-		body_.at(i).type_ = IBNodeType::MOVING;
-
-		body_.at(i).cur_pos_.x_ = x_start;
-		body_.at(i).ref_pos_.x_ = x_start;
-
-		body_.at(i).cur_pos_.y_ = y_start - height + j * y_step;
-		body_.at(i).ref_pos_.y_ = y_start - height + j * y_step;
-		j++;
-	}
-}
+//ImmersedBottomTromb::ImmersedBottomTromb(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)
+//{
+//	// Parametrization of the circle shape in 2D (half of circle)
+//	double h = radius_ * 4.0 / nodes_num;
+//
+//	for (int id = 0; id < nodes_num / 2; ++id)
+//	{
+//		body_.at(id).type_ = IBNodeType::STATIC;
+//
+//		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ - id * h;
+//		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
+//
+//		body_.at(id).cur_pos_.y_ = center_.y_;
+//		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
+//	}
+//
+//	for (int id = nodes_num / 2; id < nodes_num; ++id)
+//	{
+//		body_.at(id).type_ = IBNodeType::MOVING; // Moveing
+//
+//		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ * cos(2.0 * M_PI * (double)id / nodes_num);
+//		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
+//
+//		body_.at(id).cur_pos_.y_ = center_.y_ - radius_ * sin(2.0 * M_PI * (double)id / nodes_num);
+//		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
+//	}
+//}
+//
+//ImmersedTopTromb::ImmersedTopTromb(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)
+//{
+//	// Parametrization of the circle shape in 2D (half of circle)
+//	double h = radius_ * 4.0 / nodes_num;
+//
+//	for (int id = 0; id < nodes_num / 2; ++id)
+//	{
+//		body_.at(id).type_ = IBNodeType::STATIC;
+//
+//		body_.at(id).cur_pos_.x_ = center_.x_ - radius_ + id * h;
+//		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
+//
+//		body_.at(id).cur_pos_.y_ = center_.y_;
+//		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
+//	}
+//
+//	for (int id = nodes_num / 2; id < nodes_num; ++id)
+//	{
+//		body_.at(id).type_ = IBNodeType::MOVING; // Moving
+//
+//		body_.at(id).cur_pos_.x_ = center_.x_ - radius_ * cos(2.0 * M_PI * (double)id / nodes_num);
+//		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
+//
+//		body_.at(id).cur_pos_.y_ = center_.y_ + radius_ * sin(2.0 * M_PI * (double)id / nodes_num);
+//		body_.at(id).ref_pos_.y_ = body_.at(id).cur_pos_.y_;
+//	}
+//
+//}
+//
+//ImmersedTopRect::ImmersedTopRect(int domainX, int domainY, int nodesNumber, Point center, double  width, double height) : ImmersedBody(domainX, domainY, nodesNumber, center, (width + height) / M_PI)
+//{
+//	double x_start = center.x_ - width / 2;
+//	double y_start = center.y_ + height / 2;
+//
+//	double x_step = width / nodesNumber * 4.0;
+//	double y_step = height / nodesNumber * 4.0;
+//
+//	// TOP
+//	int j = 0;
+//
+//	for (int i = 0; i < nodesNumber / 4; ++i)
+//	{
+//		body_.at(i).type_ = IBNodeType::STATIC;
+//
+//		body_.at(i).cur_pos_.x_ = x_start + j * x_step;
+//		body_.at(i).ref_pos_.x_ = x_start + j * x_step;
+//
+//		body_.at(i).cur_pos_.y_ = y_start;
+//		body_.at(i).ref_pos_.y_ = y_start;
+//		j++;
+//	}
+//
+//	// RIGHT
+//	j = 0;
+//
+//	for (int i = nodesNumber / 4; i < nodesNumber / 2; ++i)
+//	{
+//		body_.at(i).type_ = IBNodeType::MOVING;
+//
+//		body_.at(i).cur_pos_.x_ = x_start + width;
+//		body_.at(i).ref_pos_.x_ = x_start + width;
+//
+//		body_.at(i).cur_pos_.y_ = y_start - j * y_step;
+//		body_.at(i).ref_pos_.y_ = y_start - j * y_step;
+//		j++;
+//	}
+//	
+//	// BOTTOM
+//	j = 0;
+//
+//	for (int i = nodesNumber / 2; i <  3 * nodesNumber / 4; ++i)
+//	{
+//		body_.at(i).type_ = IBNodeType::MOVING;
+//
+//		body_.at(i).cur_pos_.x_ = x_start + width - j * x_step;
+//		body_.at(i).ref_pos_.x_ = x_start + width - j * x_step;
+//
+//		body_.at(i).cur_pos_.y_ = y_start - height;
+//		body_.at(i).ref_pos_.y_ = y_start - height;
+//		j++;
+//	}
+//
+//	// LEFT
+//	j = 0;
+//
+//	for (int i = 3 * nodesNumber / 4; i < nodesNumber; ++i)
+//	{
+//		body_.at(i).type_ = IBNodeType::MOVING;
+//
+//		body_.at(i).cur_pos_.x_ = x_start;
+//		body_.at(i).ref_pos_.x_ = x_start;
+//
+//		body_.at(i).cur_pos_.y_ = y_start - height + j * y_step;
+//		body_.at(i).ref_pos_.y_ = y_start - height + j * y_step;
+//		j++;
+//	}
+//}
+//
+//ImmersedBottomRect::ImmersedBottomRect(int domainX, int domainY, int nodesNumber, Point center, double width, double height) : ImmersedBody(domainX, domainY, nodesNumber, center, (width + height) / M_PI)
+//{
+//	double x_start = center.x_ - width / 2;
+//	double y_start = center.y_ + height / 2;
+//
+//	double x_step = width / nodesNumber * 4.0;
+//	double y_step = height / nodesNumber * 4.0;
+//
+//	// TOP
+//	int j = 0;
+//
+//	for (int i = 0; i < nodesNumber / 4; ++i)
+//	{
+//		body_.at(i).type_ = IBNodeType::MOVING;
+//
+//		body_.at(i).cur_pos_.x_ = x_start + j * x_step;
+//		body_.at(i).ref_pos_.x_ = x_start + j * x_step;
+//
+//		body_.at(i).cur_pos_.y_ = y_start;
+//		body_.at(i).ref_pos_.y_ = y_start;
+//		j++;
+//	}
+//
+//	// RIGHT
+//	j = 0;
+//
+//	for (int i = nodesNumber / 4; i < nodesNumber / 2; ++i)
+//	{
+//		body_.at(i).type_ = IBNodeType::MOVING;
+//
+//		body_.at(i).cur_pos_.x_ = x_start + width;
+//		body_.at(i).ref_pos_.x_ = x_start + width;
+//
+//		body_.at(i).cur_pos_.y_ = y_start - j * y_step;
+//		body_.at(i).ref_pos_.y_ = y_start - j * y_step;
+//		j++;
+//	}
+//
+//	// BOTTOM
+//	j = 0;
+//
+//	for (int i = nodesNumber / 2; i < 3 * nodesNumber / 4; ++i)
+//	{
+//		body_.at(i).type_ = IBNodeType::STATIC;
+//
+//		body_.at(i).cur_pos_.x_ = x_start + width - j * x_step;
+//		body_.at(i).ref_pos_.x_ = x_start + width - j * x_step;
+//
+//		body_.at(i).cur_pos_.y_ = y_start - height;
+//		body_.at(i).ref_pos_.y_ = y_start - height;
+//		j++;
+//	}
+//
+//	// LEFT
+//	j = 0;
+//
+//	for (int i = 3 * nodesNumber / 4; i < nodesNumber; ++i)
+//	{
+//		body_.at(i).type_ = IBNodeType::MOVING;
+//
+//		body_.at(i).cur_pos_.x_ = x_start;
+//		body_.at(i).ref_pos_.x_ = x_start;
+//
+//		body_.at(i).cur_pos_.y_ = y_start - height + j * y_step;
+//		body_.at(i).ref_pos_.y_ = y_start - height + j * y_step;
+//		j++;
+//	}
+//}
