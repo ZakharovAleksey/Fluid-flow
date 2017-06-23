@@ -97,14 +97,14 @@ int main()
 
 #pragma region MRT
 
-	//int X{ 250 }; //100
-	//int Y{ 250 };
+	//int X{ 100 }; //100
+	//int Y{ 30 };
 	//Fluid f(Y, X);
 	//Medium m(Y, X);
 
 	//// Start solution
-	//MRTSolver solver(0.5008, m, f); // tau = 0.5008
-	//solver.Solve(25001);
+	//MRTSolver solver(1.0, m, f); // tau = 0.5008
+	//solver.Solve(501);
 
 #pragma endregion
 
@@ -122,9 +122,9 @@ int main()
 
 	//ImmersedBody* body1 (new ImmersedBottomTromb(102, 30, 32, Point(1, 30), 6)); // TROMB (102, 30, 32, Point(1, 30), 6)); // ImmersedCircle(102, 30, 32, Point(15, 15), 6));
 	//ImmersedBody* body2 (new ImmersedTopTromb(102, 30, 32, Point(27, 30), 6));
-	//ImmersedBody* body3(new ImmersedRBC(102, 30, 32, Point(15, 20), 6));
+	ImmersedBody* body2(new ImmersedRBC(102, 30, 32, Point(15, 15), 6));
 
-	ImmersedBody* body2(new ImmersedCircle(102, 30, 32, Point(15,15), 6, 0, 7.0 * M_PI / 4.0));
+	//ImmersedBody* body2(new ImmersedCircle(126, 66, 32, Point(32,32), 3, 0, 2.0 * M_PI));
 
 	//ImmersedBody* body2(new ImmersedTopRect(102, 30, 32, Point(21, 50), 6, 13));
 	//ImmersedBody* body1(new ImmersedBottomRect(102, 30, 32, Point(7, 50), 6, 13));
@@ -136,7 +136,7 @@ int main()
 
 	// Start solution
 	IBSolver s(1.0, f, m, bodies); //std::move(body));
-	s.Solve(501);
+	s.Solve(3001);
 
 #pragma endregion
 

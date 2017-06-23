@@ -13,6 +13,7 @@ enum class BCType {
 	PERIODIC,
 	BOUNCE_BACK,
 	VON_NEUMAN,
+	DIRICHLET,
 };
 
 //! Stores Boundary type index
@@ -57,8 +58,10 @@ public:
 	void PeriodicBC(Boundary const first, Boundary const second);
 	//! Applies bounce back boundary conditions
 	void BounceBackBC(Boundary const first);
-	//! Applies Von-Neumann boundary conditions (constant velocity flow on choosen boundary)
+	//! Applies Von-Neumann boundary conditions
 	void VonNeumannBC(Boundary const first, Fluid & fluid, double const vx, double const vy);
+	//! Applies Dirichlet boundary conditions
+	void DirichletBC(Boundary const first, Fluid & fluid, double const rho_0);
 
 	friend std::ostream & operator<<(std::ostream & os, BCs const & BC);
 
@@ -149,6 +152,11 @@ private:
 	void CalculateVonNeumanBCValues(Boundary const first, const int size, std::map<int, std::vector<double>> & boundary,
 		/* Ids of disr. functions are necessary for calculations: example for top ew need {0,1,3} and {2,5,6} */const std::vector<int> ids_1, const std::vector<int> ids_2,
 		double const vx, double const vy);
+
+	//! Directly calculate all distribution function components for choosen boundary
+	void CalculateDirichletBCValues(Boundary const first, const int size, std::map<int, std::vector<double>> & boundary,
+		/* Ids of disr. functions are necessary for calculations: example for top ew need {0,1,3} and {2,5,6} */const std::vector<int> ids_1, const std::vector<int> ids_2,
+		double const rho_0);
 
 private:
 

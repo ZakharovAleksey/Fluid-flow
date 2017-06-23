@@ -25,7 +25,7 @@ bool BCs::PrepareValuesForSingleBC(Boundary const BC, BCType const bc_type)
 		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK)
 			return WriteBoundaryValues(bc_type, top_boundary_, top_ids_, ptrToFunc);
 		// !! IMPLEMENTED BUT NOT TESTED !!!
-		else if (bc_type == BCType::VON_NEUMAN)
+		else if (bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
 			return WriteVonNeumannBoundaryValues(bc_type, top_boundary_, top_ids_, mid_width_ids_, ptrToFunc);
 		
 		break;
@@ -37,7 +37,7 @@ bool BCs::PrepareValuesForSingleBC(Boundary const BC, BCType const bc_type)
 		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK)
 			return WriteBoundaryValues(bc_type, bottom_boundary_, bottom_ids_, ptrToFunc);
 		// !! IMPLEMENTED BUT NOT TESTED !!!
-		else if (bc_type == BCType::VON_NEUMAN)
+		else if (bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
 			return WriteVonNeumannBoundaryValues(bc_type, bottom_boundary_, bottom_ids_, mid_width_ids_, ptrToFunc);
 
 		break;
@@ -49,7 +49,7 @@ bool BCs::PrepareValuesForSingleBC(Boundary const BC, BCType const bc_type)
 		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK)
 			return WriteBoundaryValues(bc_type, left_boundary_, left_ids_, ptrToFunc);
 		// !! IMPLEMENTED BUT NOT TESTED !!!
-		else if (bc_type == BCType::VON_NEUMAN)
+		else if (bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
 			return WriteVonNeumannBoundaryValues(bc_type, left_boundary_, left_ids_, mid_height_ids_, ptrToFunc);
 
 		break;
@@ -61,7 +61,7 @@ bool BCs::PrepareValuesForSingleBC(Boundary const BC, BCType const bc_type)
 		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK)
 			return WriteBoundaryValues(bc_type, right_boundary_, right_ids_, ptrToFunc);
 		// !! IMPLEMENTED BUT NOT TESTED !!!
-		else if (bc_type == BCType::VON_NEUMAN)
+		else if (bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
 			return WriteVonNeumannBoundaryValues(bc_type, right_boundary_, right_ids_, mid_height_ids_, ptrToFunc);
 
 		break;
@@ -101,7 +101,7 @@ void BCs::RecordValuesOnSingleBC(Boundary const BC, BCType const bc_type)
 			ptrToFunc = &DistributionFunction<double>::setBottomBoundaryValue;
 			RecordBoundaryValues(bc_type, top_boundary_, top_ids_, ptrToFunc);
 		}
-		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN) // !! VON NEUMANN IS NOT TESTED YET !!!
+		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET) // !! VON NEUMANN IS NOT TESTED YET !!!
 		{
 			ptrToFunc = &DistributionFunction<double>::setTopBoundaryValue;
 			RecordBoundaryValues(bc_type, top_boundary_, bottom_ids_, ptrToFunc);
@@ -115,7 +115,7 @@ void BCs::RecordValuesOnSingleBC(Boundary const BC, BCType const bc_type)
 			ptrToFunc = &DistributionFunction<double>::setTopBoundaryValue;
 			RecordBoundaryValues(bc_type, bottom_boundary_, bottom_ids_, ptrToFunc);
 		}
-		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN) // !! VON NEUMANN IS NOT TESTED YET !!!
+		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET) // !! VON NEUMANN IS NOT TESTED YET !!!
 		{
 			ptrToFunc = &DistributionFunction<double>::setBottomBoundaryValue;
 			RecordBoundaryValues(bc_type, bottom_boundary_, top_ids_, ptrToFunc);
@@ -129,7 +129,7 @@ void BCs::RecordValuesOnSingleBC(Boundary const BC, BCType const bc_type)
 			ptrToFunc = &DistributionFunction<double>::setRightBoundaryValue;
 			RecordBoundaryValues(bc_type, left_boundary_, left_ids_, ptrToFunc);
 		}
-		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN)
+		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
 		{
 			ptrToFunc = &DistributionFunction<double>::setLeftBoundaryValue;
 			RecordBoundaryValues(bc_type, left_boundary_, right_ids_, ptrToFunc);
@@ -143,7 +143,7 @@ void BCs::RecordValuesOnSingleBC(Boundary const BC, BCType const bc_type)
 			ptrToFunc = &DistributionFunction<double>::setLeftBoundaryValue;
 			RecordBoundaryValues(bc_type, right_boundary_, right_ids_, ptrToFunc);
 		}
-		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN) // !! VON NEUMANN IS NOT TESTED YET !!!
+		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET) // !! VON NEUMANN IS NOT TESTED YET !!!
 		{
 			ptrToFunc = &DistributionFunction<double>::setRightBoundaryValue;
 			RecordBoundaryValues(bc_type, right_boundary_, left_ids_, ptrToFunc);
@@ -181,7 +181,7 @@ bool BCs::WriteBoundaryValues(BCType const bc_type, std::map<int, std::vector<do
 
 bool BCs::WriteVonNeumannBoundaryValues(BCType const bc_type, std::map<int, std::vector<double>>& bc_boundary, const std::vector<int>& bc_ids_1, const std::vector<int>& bc_ids_2, std::vector<double>(DistributionFunction<double>::* ptrToFunc)(int) const)
 {
-	if (bc_type == BCType::VON_NEUMAN)
+	if (bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
 	{
 		// Idea: Get Values from first and second layers: for example for BOTTOM we need ALL distribution function from MIDDLE and TOP layers
 		// Get appropriate values from probability distribution function (using APPROPRIATE function via ptr. to function) 
@@ -213,7 +213,7 @@ bool BCs::RecordBoundaryValues(BCType const bc_type, std::map<int, std::vector<d
 		}
 		return true;
 	}
-	else if (bc_type == BCType::VON_NEUMAN)
+	else if (bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
 	{
 		// !!! In testing mode
 		for (auto bc_id : bc_ids)
@@ -296,6 +296,33 @@ void BCs::VonNeumannBC(Boundary const first, Fluid & fluid, double const vx, dou
 	}
 }
 
+void BCs::DirichletBC(Boundary const first, Fluid & fluid, double const rho_0)
+{
+	// Choose size of domain depending on boundary type
+	const int x_size = fluid.size().second;
+	const int y_size = fluid.size().first - 2;
+	const int domainSize = (first == Boundary::TOP || first == Boundary::BOTTOM) ? x_size : y_size;
+
+	switch (first)
+	{
+	case Boundary::TOP:
+		CalculateDirichletBCValues(first, domainSize, top_boundary_, mid_width_ids_, top_ids_, rho_0);
+		break;
+	case Boundary::BOTTOM:
+		CalculateDirichletBCValues(first, domainSize, bottom_boundary_, mid_width_ids_, bottom_ids_, rho_0);
+		break;
+	case Boundary::LEFT:
+		CalculateDirichletBCValues(first, domainSize, left_boundary_, mid_height_ids_, left_ids_, rho_0);
+		break;
+	case Boundary::RIGHT:
+		CalculateDirichletBCValues(first, domainSize, right_boundary_, mid_height_ids_, right_ids_, rho_0);
+		break;
+	default:
+		std::cout << "Wrong boundary type while appling Von-Neumann boundary condidtions.\n";
+		break;
+	}
+}
+
 void BCs::CalculateVonNeumanBCValues(Boundary const first, const int size, std::map<int, std::vector<double>> & boundary, 
 	const std::vector<int> ids_1, const std::vector<int> ids_2, 
 	double const vx, double const vy)
@@ -364,6 +391,88 @@ void BCs::CalculateVonNeumanBCValues(Boundary const first, const int size, std::
 
 	for (auto id : ids_2)
 		boundary.erase(id);
+}
+
+void BCs::CalculateDirichletBCValues(Boundary const first, const int size, std::map<int, std::vector<double>>& boundary, const std::vector<int> ids_1, const std::vector<int> ids_2, double const rho_0)
+{
+	// Final vector for density and temp for make calculations below easy to understand
+	std::vector<double> v(size, 0.0);
+	std::vector<double> temp(size, 0.0);
+
+	// Start density calculation
+	for (auto id : ids_1)
+		v = v + boundary.at(id);
+	for (auto id : ids_2)
+		v = v + boundary.at(id) * 2.0;
+
+	// Steps below depends on chosen boundary: 1. final density calculation and 2. necessary distribution function components calclulations
+	switch (first)
+	{
+	case Boundary::TOP:
+		v = v / rho_0 - 1.0;
+
+		// Set the velocity of first and last elements to zero, because this is boundary
+		v.at(0) = 0.0;
+		v.at(size - 1) = 0.0;
+
+		boundary.insert(std::make_pair(4, boundary.at(2) - 2.0 / 3.0 * rho_0 * v));
+
+		temp = (boundary.at(1) - boundary.at(3)) / 2.0;
+
+		boundary.insert(std::make_pair(7, boundary.at(5) + temp - (rho_0 / 6.0) * v));
+		boundary.insert(std::make_pair(8, boundary.at(6) - temp - (rho_0 / 6.0) * v));
+		break;
+	case Boundary::BOTTOM:
+		v =  ( v / rho_0) * -1.0 + 1.0;
+
+		v.at(0) = 0.0;
+		v.at(size - 1) = 0.0;
+
+		boundary.insert(std::make_pair(2, boundary.at(4) + 2.0 / 3.0 * rho_0 * v));
+
+		temp = (boundary.at(1) - boundary.at(3)) / 2.0;
+
+		boundary.insert(std::make_pair(5, boundary.at(7) - temp + (rho_0 / 6.0) * v));
+		boundary.insert(std::make_pair(6, boundary.at(8) + temp + (rho_0 / 6.0) * v));
+		break;
+	case Boundary::LEFT:
+		v = (v / rho_0) * -1.0 + 1.0;
+
+		v.at(0) = 0.0;
+		v.at(size - 1) = 0.0;
+
+		boundary.insert(std::make_pair(1, boundary.at(3) + 2.0 / 3.0 * rho_0 * v));
+
+		temp = (boundary.at(2) - boundary.at(4)) / 2.0;
+
+		boundary.insert(std::make_pair(5, boundary.at(7) - temp + (rho_0 / 6.0) * v));
+		boundary.insert(std::make_pair(8, boundary.at(6) + temp + (rho_0 / 6.0) * v));
+		break;
+	case Boundary::RIGHT:
+		v = v / rho_0 - 1.0;
+
+		v.at(0) = 0.0;
+		v.at(size - 1) = 0.0;
+
+		boundary.insert(std::make_pair(3, boundary.at(1) - 2.0 / 3.0 * rho_0 * v));
+
+		temp = (boundary.at(2) - boundary.at(4)) / 2.0;
+
+		boundary.insert(std::make_pair(6, boundary.at(8) - temp - (rho_0 / 6.0) * v));
+		boundary.insert(std::make_pair(7, boundary.at(5) + temp - (rho_0 / 6.0) * v));
+		break;
+	default:
+		std::cout << "Wrong boundary type while Calculating Von-Neumann boundary condidtions.\n";
+		break;
+	}
+
+	// Clear map from all incoming data, leaving only necessary distribution function components
+	for (auto id : ids_1)
+		boundary.erase(id);
+
+	for (auto id : ids_2)
+		boundary.erase(id);
+
 }
 
 void BCs::SwapId(std::map<int, std::vector<double>> & map, int const from, int const to)

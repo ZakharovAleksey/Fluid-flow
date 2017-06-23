@@ -87,16 +87,16 @@ void MRTSolver::Solve(int iteration_number)
 	for (int iter = 0; iter < iteration_number; ++iter)
 	{
 		Collision();
-		BC.PrepareValuesForAllBC(BCType::VON_NEUMAN, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
+		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET);
 
 		Streaming();
 
-		BC.VonNeumannBC(Boundary::TOP, *fluid_, 0.01, 0.0);
+		BC.BounceBackBC(Boundary::TOP);
 		BC.BounceBackBC(Boundary::BOTTOM);
-		BC.BounceBackBC(Boundary::LEFT);
-		BC.BounceBackBC(Boundary::RIGHT);
+		BC.DirichletBC(Boundary::LEFT, *fluid_, 0.99);
+		BC.DirichletBC(Boundary::RIGHT, *fluid_, 1.00);
 
-		BC.RecordValuesForAllBC(BCType::VON_NEUMAN, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
+		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET);
 
 		Recalculate();
 
@@ -104,11 +104,12 @@ void MRTSolver::Solve(int iteration_number)
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 
-		if (iter % 25 == 0)
+		if (iter % 50 == 0)
 		{
-			Matrix2D<double> v = CalculateModulus(fluid_->vx_, fluid_->vy_);
-			v.WriteFieldToTxt("Data\\mrt_lbm_data\\2d\\fluid_txt", "v", iter);
-			//fluid_->vx_.WriteFieldToTxt("Data\\mrt_lbm_data\\2d\\fluid_txt", "vx", iter);
+			//Matrix2D<double> v = CalculateModulus(fluid_->vx_, fluid_->vy_);
+			//v.WriteFieldToTxt("Data\\mrt_lbm_data\\2d\\fluid_txt", "v", iter);
+			fluid_->vx_.WriteFieldToTxt("Data\\mrt_lbm_data\\2d\\fluid_txt", "vx", iter);
+			fluid_->vy_.WriteFieldToTxt("Data\\mrt_lbm_data\\2d\\fluid_txt", "vy", iter);
 			fluid_->write_fluid_vtk("Data\\mrt_lbm_data\\2d\\fluid_vtk", iter);
 		}
 

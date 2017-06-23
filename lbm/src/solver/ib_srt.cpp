@@ -12,6 +12,7 @@ IBSolver::IBSolver(double tau, Fluid & fluid, Medium & medium, std::unique_ptr<I
 
 	std::cout << " --- Input parameters :\n";
 	std::cout << "nu = " << (tau - 0.5) / 3.0 << std::endl;
+	std::cout << "Re =  " << fluid_->size().second * 0.001 / ((tau - 0.5) / 3.0) << std::endl;
 
 	fluid_ = std::unique_ptr<Fluid>(new Fluid(fluid));
 	medium_ = std::unique_ptr<Medium>(new Medium(medium));
@@ -35,10 +36,9 @@ IBSolver::IBSolver(double tau, Fluid & fluid, Medium & medium, std::vector<Immer
 	CreateDataFolder("Data\\ib_lbm_data\\fluid_txt");
 	CreateDataFolder("Data\\ib_lbm_data\\fluid_vtk");
 
-
 	std::cout << " --- Input parameters :\n";
 	std::cout << "nu = " << (tau - 0.5) / 3.0 << std::endl;
-
+	std::cout << "Re =  " << fluid.size().second * 0.01 / ((tau - 0.5) / 3.0) << std::endl;
 	fluid_ = std::unique_ptr<Fluid>(new Fluid(fluid));
 	medium_ = std::unique_ptr<Medium>(new Medium(medium));
 
@@ -160,7 +160,7 @@ void IBSolver::Solve(int iter_numb)
 		}
 
 		Collision();
-		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::VON_NEUMAN);
+		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET);
 
 		Streaming();
 
@@ -170,12 +170,12 @@ void IBSolver::Solve(int iter_numb)
 		BC.BounceBackBC(Boundary::BOTTOM);
 
 		double vx = 0.001; 
-		BC.VonNeumannBC(Boundary::LEFT, *fluid_, vx, 0.0);
-		BC.VonNeumannBC(Boundary::RIGHT, *fluid_, vx, 0.0);
+		BC.DirichletBC(Boundary::LEFT, *fluid_, 1.0);
+		BC.DirichletBC(Boundary::RIGHT, *fluid_, 0.99);
 
 		//BC.AdditionalBounceBackBCs();
 
-		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET);
 
 		//BC.RecordAdditionalBCs();
 
@@ -191,7 +191,7 @@ void IBSolver::Solve(int iter_numb)
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 
-		if (iter % 25 == 0)
+		if (iter % 50 == 0)
 		{
 			fluid_->write_fluid_vtk("Data\\ib_lbm_data\\fluid_vtk", iter);
 

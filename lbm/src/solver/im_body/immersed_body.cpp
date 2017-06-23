@@ -399,7 +399,7 @@ ImmersedRBC::ImmersedRBC(int domainX, int domainY, int nodesNumber, Point center
 ImmersedCircle::ImmersedCircle(int domainX, int domainY, int nodesNumber, Point center, double radius, double startAngle, double finishAngle) : ImmersedBody(domainX, domainY, nodesNumber), center_(center), radius_(radius)
 {
 	assert(startAngle < finishAngle);
-	assert(finishAngle > 2 * M_PI);
+	assert(finishAngle - startAngle <= 2.0 * M_PI);
 
 	// True if user input to plot fill circle, or interval [0, 2 * pi]
 	bool isFullCircle = finishAngle - startAngle == 2.0 * M_PI;
@@ -431,6 +431,7 @@ ImmersedCircle::ImmersedCircle(int domainX, int domainY, int nodesNumber, Point 
 		body_.at(nodesNumber - 1).cur_pos_.y_ = center.y_;
 		body_.at(nodesNumber - 1).ref_pos_.y_ = center.y_;
 	}
+	int i = body_.size();
 }
 
 //ImmersedBottomTromb::ImmersedBottomTromb(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)

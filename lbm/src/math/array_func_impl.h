@@ -51,6 +51,28 @@ std::vector<T> operator-(std::vector<T> const & left, std::vector<T> const & rig
 }
 
 template <typename T>
+std::vector<T> operator-(std::vector<T> const & left, T const right)
+{
+	std::vector<T> result(left);
+
+	for (int i = 0; i < left.size(); ++i)
+		result.at(i) -= right;
+
+	return result;
+}
+
+template <typename T>
+std::vector<T> operator+(std::vector<T> const & left, T const right)
+{
+	std::vector<T> result(left);
+
+	for (int i = 0; i < left.size(); ++i)
+		result.at(i) += right;
+
+	return result;
+}
+
+template <typename T>
 std::vector<T> operator*(T const left, std::vector<T> const & right)
 {
 	std::vector<T> result(right);
