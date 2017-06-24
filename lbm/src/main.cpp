@@ -122,7 +122,9 @@ int main()
 
 	//ImmersedBody* body1 (new ImmersedBottomTromb(102, 30, 32, Point(1, 30), 6)); // TROMB (102, 30, 32, Point(1, 30), 6)); // ImmersedCircle(102, 30, 32, Point(15, 15), 6));
 	//ImmersedBody* body2 (new ImmersedTopTromb(102, 30, 32, Point(27, 30), 6));
-	ImmersedBody* body2(new ImmersedRBC(102, 30, 32, Point(15, 15), 6));
+	//ImmersedBody* body2(new ImmersedRBC(102, 30, 32, Point(15, 15), 6));
+
+	ImmersedBody* body2(new ImmersedRectangle(102, 30, 32, Point(15, 15), 10, 5));
 
 	//ImmersedBody* body2(new ImmersedCircle(126, 66, 32, Point(32,32), 3, 0, 2.0 * M_PI));
 

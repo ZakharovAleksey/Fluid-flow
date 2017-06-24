@@ -413,7 +413,6 @@ ImmersedCircle::ImmersedCircle(int domainX, int domainY, int nodesNumber, Point 
 	{
 		body_.at(id).type_ = IBNodeType::STATIC;
 
-		std::cout << " -> " << startAngle + (double)id * angleStep << std::endl;
 		// Parametrization of the circle shape in 2D
 		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ * cos(startAngle + (double)id * angleStep);
 		body_.at(id).ref_pos_.x_ = body_.at(id).cur_pos_.x_;
@@ -425,13 +424,61 @@ ImmersedCircle::ImmersedCircle(int domainX, int domainY, int nodesNumber, Point 
 	// Add additional center node if user input not full circle
 	if (!isFullCircle)
 	{
+		body_.at(nodesNumber - 1).type_ = IBNodeType::STATIC;
+
 		body_.at(nodesNumber - 1).cur_pos_.x_ = center.x_;
 		body_.at(nodesNumber - 1).ref_pos_.x_ = center.x_;
 
 		body_.at(nodesNumber - 1).cur_pos_.y_ = center.y_;
 		body_.at(nodesNumber - 1).ref_pos_.y_ = center.y_;
 	}
-	int i = body_.size();
+}
+
+
+ImmersedRectangle::ImmersedRectangle(int domainX, int domainY, int nodesNumber, Point rightTop, double width, double height) : ImmersedBody(domainX, domainY, nodesNumber), rigth_top_(rightTop), width_(width), height_(height)
+{
+	int pointToSide = int(nodes_num / 4.0);
+	const double xStep = width_ / pointToSide;
+	const double yStep = height_ / pointToSide;
+
+	for (int y = 0; y < pointToSide; ++y)
+	{
+		body_.at(y).cur_pos_.x_ = rigth_top_.x_;
+		body_.at(y).cur_pos_.y_ = rigth_top_.y_ - y * yStep;
+
+		body_.at(y).ref_pos_.x_ = rigth_top_.x_;
+		body_.at(y).ref_pos_.y_ = rigth_top_.y_ - y * yStep;
+	}
+
+	for (int x = 0; x < pointToSide; ++x)
+	{
+		body_.at(pointToSide + x).cur_pos_.x_ = rigth_top_.x_ + x * xStep;
+		body_.at(pointToSide + x).cur_pos_.y_ = rigth_top_.y_ - height_;
+
+		body_.at(pointToSide + x).ref_pos_.x_ = rigth_top_.x_ + x * xStep;
+		body_.at(pointToSide + x).ref_pos_.y_ = rigth_top_.y_ - height_;
+	}
+
+	for (int y = 0; y < pointToSide; ++y)
+	{
+		body_.at(2 * pointToSide + y).cur_pos_.x_ = rigth_top_.x_ + width_;
+		body_.at(2 * pointToSide + y).cur_pos_.y_ = rigth_top_.y_ - height_ + y * yStep;
+
+		body_.at(2 * pointToSide + y).ref_pos_.x_ = rigth_top_.x_ + width_;
+		body_.at(2 * pointToSide + y).ref_pos_.y_ = rigth_top_.y_ - height_ + y * yStep;
+	}
+
+	for (int x = 0; x < pointToSide; ++x)
+	{
+		body_.at(3 * pointToSide + x).cur_pos_.x_ = rigth_top_.x_ + width_ - x * xStep;
+		body_.at(3 * pointToSide + x).cur_pos_.y_ = rigth_top_.y_;
+
+		body_.at(3 * pointToSide + x).ref_pos_.x_ = rigth_top_.x_ + width_ - x * xStep;
+		body_.at(3 * pointToSide + x).ref_pos_.y_ = rigth_top_.y_;
+	}
+
+	for (auto & node : body_)
+		node.type_ = IBNodeType::STATIC;
 }
 
 //ImmersedBottomTromb::ImmersedBottomTromb(int domainX, int domainY, int nodesNumber, Point center, double radius) : ImmersedBody(domainX, domainY, nodesNumber, center, radius)

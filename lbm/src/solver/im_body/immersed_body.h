@@ -187,6 +187,22 @@ private:
 	double radius_;
 };
 
+
+class ImmersedRectangle : public ImmersedBody
+{
+public:
+	ImmersedRectangle(int domainX, int domainY, int nodesNumber, Point rightTop, double width, double height);
+
+protected:
+	// оепеявхрюрэ б гюбхяхлнярх нр сцкю
+	double GetArcLen() override { return 2.0 * (width_ + height_) / nodes_num; }
+
+private:
+	Point rigth_top_;
+	double width_;
+	double height_;
+};
+
 //
 ////! Immersed in fluid tromb
 //class ImmersedBottomTromb : public ImmersedBody
