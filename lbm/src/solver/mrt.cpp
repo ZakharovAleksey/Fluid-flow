@@ -69,6 +69,7 @@ void MRTSolver::Collision()
 	dm[7] -= fluid_->rho_.ScalarMultiplication(vxSq - vySq);
 	dm[8] -= fluid_->rho_.ScalarMultiplication(fluid_->vx_.ScalarMultiplication(fluid_->vy_));
 
+
 	// Performs f(x + vdt, t + dt) = f(x, t) - M^{-1}S * dm
 	for (int k = 0; k < kQ; ++k)
 		for (int m = 0; m < kQ; ++m)
@@ -87,16 +88,23 @@ void MRTSolver::Solve(int iteration_number)
 	for (int iter = 0; iter < iteration_number; ++iter)
 	{
 		Collision();
-		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET);
+		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		if (medium_->IsImmersedBodies())
+			BC.PrepareAdditionalBCs(*medium_);
 
 		Streaming();
 
 		BC.BounceBackBC(Boundary::TOP);
 		BC.BounceBackBC(Boundary::BOTTOM);
-		BC.DirichletBC(Boundary::LEFT, *fluid_, 0.99);
-		BC.DirichletBC(Boundary::RIGHT, *fluid_, 1.00);
+		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.001, 0.0);
+		BC.BounceBackBC(Boundary::RIGHT);
 
-		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET);
+		if (medium_->IsImmersedBodies())
+			BC.AdditionalBounceBackBCs();
+
+		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		if (medium_->IsImmersedBodies())
+			BC.RecordAdditionalBCs();
 
 		Recalculate();
 
@@ -110,7 +118,7 @@ void MRTSolver::Solve(int iteration_number)
 			//v.WriteFieldToTxt("Data\\mrt_lbm_data\\2d\\fluid_txt", "v", iter);
 			fluid_->vx_.WriteFieldToTxt("Data\\mrt_lbm_data\\2d\\fluid_txt", "vx", iter);
 			fluid_->vy_.WriteFieldToTxt("Data\\mrt_lbm_data\\2d\\fluid_txt", "vy", iter);
-			fluid_->write_fluid_vtk("Data\\mrt_lbm_data\\2d\\fluid_vtk", iter);
+			fluid_->WriteFluidToVTK("Data\\mrt_lbm_data\\2d\\fluid_vtk", iter);
 		}
 
 	}

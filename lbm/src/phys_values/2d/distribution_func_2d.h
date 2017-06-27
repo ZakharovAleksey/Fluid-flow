@@ -184,6 +184,11 @@ public:
 		std::swap(dfunc_body_.at(q1)(y1, x1), dfunc_body_.at(q2)(y2, x2));
 	}
 
+	const int GetRowsNumber() const;
+	//! Returns number of columns
+	const int GetColumnsNumber() const;
+
+
 #pragma endregion
 
 	template<typename T1>

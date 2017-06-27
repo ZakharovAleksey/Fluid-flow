@@ -72,6 +72,8 @@ public:
 
 
 	void GetProfile(const int chan_numb, const int iter_numb);
+	void GetNFProfile(const MacroscopicParam3D<double> & physVal, const int chan_numb, const int iter_numb);
+
 	//! Implements correct hetmap writing in file ('length' is a number of elements in one line)
 	bool WriteHeatMapInFile(const std::string & file_name, const std::vector<double> & data, const int lenght);
 

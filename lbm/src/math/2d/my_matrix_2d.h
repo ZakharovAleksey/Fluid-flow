@@ -379,34 +379,19 @@ public:
 
 #pragma region Methods
 
-	/// <summary>
-	/// Fills the matrix values with "value" parameter.
-	/// </summary>
-	/// <param name="value"> The value that is filled elements of the the matrix. </param>
+	
+	//! Fills the matrix values with "value" parameter.
 	void FillWith(T const value);
 
-	/// <summary>
-	/// Fills the matrix values withought boundary with "value" parameter. 
-	/// This means, that after this operation all elements besides boundaries of the matrix are equal to "value" parameter.
-	/// </summary>
-	/// 
-	/// <param name="value"> The value that is filled elements of the the matrix. </param>
+	//! Fills the matrix values withought boundary with "value" parameter. 
+	//! This means, that after this operation all elements besides boundaries of the matrix are equal to "value" parameter.
 	void FillWithoughtBoundary(T const value);
 
-	/// <summary>
-	/// Fill "coll_id" column in the matrix with "value" parameter.
-	/// </summary>
-	/// <param name="coll_id"> Ñolumn index in the matrix to be filled with "value" parameter. </param>
-	/// <param name="value"> The value that is filled elements of the the matrix. </param>
+	//! Fill "coll_id" column in the matrix with "value" parameter.
 	void FillColumnWith(int const coll_id, T const value);
 
-	/// <summary>
-	/// Fill "row_id" row in the matrix with "value" parameter.
-	/// </summary>
-	/// <param name="row_id"> Row index in the matrix to be filled with "value" parameter. </param>
-	/// <param name="value"> The value that is filled elements of the the matrix. </param>
+	//! Fill "row_id" row in the matrix with "value" parameter.
 	void FillRowWith(int const row_id, T const value);
-
 
 	void Resize(int new_rows_numb, int new_colls_numb, int new_depth_numb = 0) override;
 

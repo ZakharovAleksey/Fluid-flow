@@ -162,6 +162,8 @@ void BCs::RecordValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCTyp
 	RecordValuesOnSingleBC(Boundary::BOTTOM, bottm_bc);
 	RecordValuesOnSingleBC(Boundary::LEFT, left_bc);
 	RecordValuesOnSingleBC(Boundary::RIGHT, right_bc);
+
+	f_ptr_->fillBoundaries(0.0);
 }
 
 bool BCs::WriteBoundaryValues(BCType const bc_type, std::map<int, std::vector<double>>& bc_boundary, const std::vector<int>& bc_ids, std::vector<double>(DistributionFunction<double>::* ptrToFunc)(int) const)
@@ -810,7 +812,7 @@ void BCs3D::RecordValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCT
 	else
 	{
 		std::cout << "Could not record values for all boundaries.\n";
-		throw;
+		//throw;
 	}
 
 	
@@ -835,51 +837,51 @@ void BCs3D::BounceBackBC(Boundary const first)
 {
 	if (first == Boundary::TOP) 
 	{
-		SwapIds(top_boundary_, 9, 14);
-		SwapIds(top_boundary_, 10, 17);
-		SwapIds(top_boundary_, 11, 18);
-		SwapIds(top_boundary_, 12, 15);
-		SwapIds(top_boundary_, 13, 16);
+		SwapIds(top_boundary_, 4, 5);// 9, 14);
+		SwapIds(top_boundary_, 8, 13);//10, 17);
+		SwapIds(top_boundary_, 14,16);//11, 18);
+		SwapIds(top_boundary_, 12,9);// 12, 15);
+		SwapIds(top_boundary_, 17,15);// 13, 16);
 	}
 	else if (first == Boundary::BOTTOM) 
 	{
-		SwapIds(bottom_boundary_, 14, 9);
-		SwapIds(bottom_boundary_, 15, 12);
-		SwapIds(bottom_boundary_, 16, 13);
-		SwapIds(bottom_boundary_, 17, 10);
-		SwapIds(bottom_boundary_, 18, 11);
+		SwapIds(bottom_boundary_, 5, 4);// 14, 9);
+		SwapIds(bottom_boundary_, 9, 12 );//15, 12);
+		SwapIds(bottom_boundary_, 13, 8 );//16, 13);
+		SwapIds(bottom_boundary_, 16, 14);//17, 10);
+		SwapIds(bottom_boundary_, 15, 17 );//18, 11);
 	}
 	else if (first == Boundary::LEFT) 
 	{
-		SwapIds(left_boundary_, 3, 1);
-		SwapIds(left_boundary_, 6, 8);
-		SwapIds(left_boundary_, 7, 5);
-		SwapIds(left_boundary_, 12, 15);
-		SwapIds(left_boundary_, 17, 10);
+		SwapIds(left_boundary_, 1, 0);// 3, 1);
+		SwapIds(left_boundary_, 10, 7);// 6, 8);
+		SwapIds(left_boundary_, 11, 6);// 7, 5);
+		SwapIds(left_boundary_, 12, 9);// 12, 15);
+		SwapIds(left_boundary_, 13, 8);// 17, 10);
 	}
 	else if (first == Boundary::RIGHT) 
 	{
-		SwapIds(right_boundary_, 1, 3);
-		SwapIds(right_boundary_, 5, 7);
-		SwapIds(right_boundary_, 8, 6);
-		SwapIds(right_boundary_, 10, 17);
-		SwapIds(right_boundary_, 15, 12);
+		SwapIds(right_boundary_, 0, 1);// 1, 3);
+		SwapIds(right_boundary_, 6, 11);// 5, 7);
+		SwapIds(right_boundary_, 7, 10);// 8, 6);
+		SwapIds(right_boundary_, 8, 13);// 10, 17);
+		SwapIds(right_boundary_, 9, 12);//15, 12);
 	}
 	else if (first == Boundary::CLOSE_IN)
 	{
-		SwapIds(near_boundary_, 4, 2);
-		SwapIds(near_boundary_, 7, 5);
-		SwapIds(near_boundary_, 8, 6);
-		SwapIds(near_boundary_, 13, 16);
-		SwapIds(near_boundary_, 18, 11);
+		SwapIds(near_boundary_, 3, 2);//4, 2);
+		SwapIds(near_boundary_, 7, 10);//7, 5);
+		SwapIds(near_boundary_, 11, 6);//8, 6);
+		SwapIds(near_boundary_, 16, 14);//13, 16);
+		SwapIds(near_boundary_, 17, 15);//18, 11);
 	}
 	else if (first == Boundary::FAAR)
 	{
-		SwapIds(far_boundary_, 2, 4);
-		SwapIds(far_boundary_, 5, 7);
-		SwapIds(far_boundary_, 6, 8);
-		SwapIds(far_boundary_, 11, 18);
-		SwapIds(far_boundary_, 16, 13);
+		SwapIds(far_boundary_, 2, 3);//2, 4);
+		SwapIds(far_boundary_, 6, 11);//5, 7);
+		SwapIds(far_boundary_, 10, 7);//6, 8);
+		SwapIds(far_boundary_, 14, 16);//11, 18);
+		SwapIds(far_boundary_, 15, 17);//16, 13);
 	}
 }
 
@@ -895,35 +897,39 @@ void BCs3D::VonNeumannBC(Boundary const first, const double vx, const double vy,
 		// >>> Calculate rho
 		for (auto middleId : middle_layer_ids_)
 			rho = rho + top_boundary_.at(middleId);
-
 		for (auto topId : top_ids_)
-				rho = rho + top_boundary_.at(topId) * 2.0;
+			rho = rho + top_boundary_.at(topId) * 2.0;
 			
-		rho = rho / (1.0 + vz);
+		rho = rho / (1.0 - vz);
+
+		for (auto e : rho)
+			std::cout << e << " ";
+		std::cout << std::endl;
+
 		// >>>
 		
 
 		// >>> Calculate  coefs N
 		std::vector<double> Nxz(size, 0.0);
-		Nxz = 0.5 * (top_boundary_.at(1) + top_boundary_.at(5) + top_boundary_.at(8) - (top_boundary_.at(3) + top_boundary_.at(6) + top_boundary_.at(7))) - 1.0 / 3.0 * rho * vx;
+		Nxz = 0.5 * (top_boundary_.at(0) + top_boundary_.at(7) + top_boundary_.at(6) - (top_boundary_.at(1) + top_boundary_.at(10) + top_boundary_.at(11))) - 1.0 / 3.0 * rho * vx;
 
 		std::vector<double> Nyz(size, 0.0);
-		Nyz = 0.5 * (top_boundary_.at(2) + top_boundary_.at(5) + top_boundary_.at(6) - (top_boundary_.at(4) + top_boundary_.at(7) + top_boundary_.at(8))) - 1.0 / 3.0 * rho * vy;
+		Nyz = 0.5 * (top_boundary_.at(2) + top_boundary_.at(6) + top_boundary_.at(10) - (top_boundary_.at(3) + top_boundary_.at(7) + top_boundary_.at(11))) - 1.0 / 3.0 * rho * vy;
 
 		// >>>
 
-		auto f14 = top_boundary_.at(9) - 1.0 / 3.0 * rho * vz;
-		auto f15 = top_boundary_.at(12) + rho / 6.0 *(-vz + vx) - Nxz;
-		auto f17 = top_boundary_.at(10) + rho / 6.0 *(-vz - vx) + Nxz;
-		auto f16 = top_boundary_.at(13) + rho / 6.0 *(-vz + vx) - Nyz; // May be change signs
-		auto f18 = top_boundary_.at(11) + rho / 6.0 *(-vz - vx) + Nyz; // May be change signs
+		auto f5 = top_boundary_.at(4) - 1.0 / 3.0 * rho * vz;
+		auto f9 = top_boundary_.at(12) + rho / 6.0 * (-vz + vx) - Nxz;
+		auto f13 = top_boundary_.at(8) + rho / 6.0 * (-vz - vx) + Nxz;
+		auto f15 = top_boundary_.at(17) + rho / 6.0 * (-vz + vy) - Nyz; // May be change signs
+		auto f16 = top_boundary_.at(14) + rho / 6.0 * (-vz - vy) + Nyz; // May be change signs
 
 		top_boundary_.clear();
-		top_boundary_.insert(std::make_pair(14, f14));
+		top_boundary_.insert(std::make_pair(5, f5));
+		top_boundary_.insert(std::make_pair(9, f9));
+		top_boundary_.insert(std::make_pair(13, f13));
 		top_boundary_.insert(std::make_pair(15, f15));
 		top_boundary_.insert(std::make_pair(16, f16));
-		top_boundary_.insert(std::make_pair(17, f17));
-		top_boundary_.insert(std::make_pair(18, f18));
 	}
 	else
 	{

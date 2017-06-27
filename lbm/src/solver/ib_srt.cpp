@@ -80,8 +80,8 @@ void IBSolver::Streaming()
 
 		for (unsigned y = 0; y < fluid_->size().first; ++y)
 			for (unsigned x = 0; x < fluid_->size().second; ++x)
-				if (medium_->is_fluid(y, x))
-					fluid_->f_[q](y - kEy[q], x + kEx[q]) = temp(y, x);
+				if (medium_->IsFluid(y, x))
+					fluid_->f_[q](y + kEy[q], x + kEx[q]) = temp(y, x);
 	}
 
 	fluid_->f_.fillBoundaries(0.0);
@@ -193,7 +193,7 @@ void IBSolver::Solve(int iter_numb)
 
 		if (iter % 50 == 0)
 		{
-			fluid_->write_fluid_vtk("Data\\ib_lbm_data\\fluid_vtk", iter);
+			fluid_->WriteFluidToVTK("Data\\ib_lbm_data\\fluid_vtk", iter);
 
 			for (int i = 0; i < im_bodies_.size(); ++i)
 			{

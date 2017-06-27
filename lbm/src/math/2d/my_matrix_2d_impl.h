@@ -314,8 +314,9 @@ std::ostream & operator<<(std::ostream & os, Matrix2D<T1> const & matrix) {
 	os.precision(3);
 	unsigned cur_position{ 1 };
 
-	for (unsigned y = 0; y != matrix.rows_; ++y){
-		for (unsigned x = 0; x != matrix.colls_; ++x)
+	for (int y = matrix.rows_ -1; y >= 0; --y)
+	{
+		for (int x = 0; x < matrix.colls_; ++x)
 			os << std::setw(7) << matrix.body_[x + y * matrix.colls_];
 		os << endl;
 	}

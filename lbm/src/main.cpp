@@ -78,29 +78,30 @@ int main()
 
 #pragma region SRT 
 
-	//int X{ 100 }; //100
-	//int Y{ 70 };
-	//Fluid f(Y, X);
+	//int X{ 72 }; //100
+	//int Y{ 72 };
 	//Medium m(Y, X);
-
-	//// Add additional static boundaries
-	//m.AddCircleTopFalf(20, 1, 15);
-	//m.AddCircleBottomFalf(50, 69, 15);
-	////m.AddCircleInMedium(100, 35, 10);
-	//f.AddImmersedBodies(m);
+	//m.AddCircle(20, 35, 4);
+	//Fluid f(Y, X, m);
 	//
-	//// Start solution
+	// //Start solution
 	//SRTsolver solver(1.0, m, f);
-	//solver.Solve(129);
+	//solver.Solve(501);
 
 #pragma endregion
 
 #pragma region MRT
 
-	//int X{ 100 }; //100
-	//int Y{ 30 };
-	//Fluid f(Y, X);
+	//int X{ 50 }; //100
+	//int Y{ 50 };
 	//Medium m(Y, X);
+	//Fluid f(Y, X, m);
+
+	////m.AddCircle(20, 35, 4);
+
+	////std::cout << m << std::endl;
+	////std::cout << f.rho_ << std::endl;
+
 
 	//// Start solution
 	//MRTSolver solver(1.0, m, f); // tau = 0.5008
@@ -113,8 +114,9 @@ int main()
 
 	int X{ 102 };
 	int Y{ 30 };
-	Fluid f(Y, X);
 	Medium m(Y, X);
+	Fluid f(Y, X, m);
+	
 
 	// Create immersed object
 	//std::unique_ptr<ImmersedBody> body1(new ImmersedCircle(102, 30, 32, Point(15, 15), 6)); // TROMB (102, 30, 32, Point(30, 1), 6));
@@ -122,9 +124,9 @@ int main()
 
 	//ImmersedBody* body1 (new ImmersedBottomTromb(102, 30, 32, Point(1, 30), 6)); // TROMB (102, 30, 32, Point(1, 30), 6)); // ImmersedCircle(102, 30, 32, Point(15, 15), 6));
 	//ImmersedBody* body2 (new ImmersedTopTromb(102, 30, 32, Point(27, 30), 6));
-	//ImmersedBody* body2(new ImmersedRBC(102, 30, 32, Point(15, 15), 6));
+	ImmersedBody* body2(new ImmersedRBC(102, 30, 32, Point(15, 15), 6));
 
-	ImmersedBody* body2(new ImmersedRectangle(102, 30, 32, Point(15, 15), 10, 5));
+	//ImmersedBody* body2(new ImmersedRectangle(102, 30, 32, Point(15, 15), 10, 5));
 
 	//ImmersedBody* body2(new ImmersedCircle(126, 66, 32, Point(32,32), 3, 0, 2.0 * M_PI));
 
@@ -148,17 +150,17 @@ int main()
 
 #pragma region SRT
 
-	//int x{ 10 }; // 10
-	//int y{ 35 }; // 35
-	//int z{ 10 }; // 10
+	//int x{ 12 }; // 10
+	//int y{ 12 }; // 35
+	//int z{ 22 }; // 10
 
-	////MatrixTest();
+	//MatrixTest();
 
 	//Fluid3D f(z, y, x);
 	//Medium3D m(z,y,x);
 
 	//SRT3DSolver srt(1.0, m, f);
-	//srt.Solve(101);
+	//srt.Solve(201);
 
 #pragma endregion
 

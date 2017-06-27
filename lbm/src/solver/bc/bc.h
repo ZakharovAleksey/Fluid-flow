@@ -73,15 +73,34 @@ public:
 		b = a;
 	}
 
-	void PrepareAdditionalBCs(Medium & medium)
+	void PrepareAdditionalBCs(const Medium & medium)
 	{
-		for (int q = 0; q < kQ; ++q)
+		const int ySize = f_ptr_->GetRowsNumber();
+		const int xSize = f_ptr_->GetColumnsNumber();
+
+		for (int q = 1; q < kQ; ++q)
+		{
+			std::vector<ImmersedBodyVal> v;
+			for (int y = 1; y < ySize - 1; ++y)
+			{
+				for (int x = 1; x < xSize - 1; ++x)
+				{
+					if (medium.Get(y + kEy[q], x + kEx[q]) == NodeType::BODY_IN_FLUID && f_ptr_->Get(q,y,x) != 0.0)
+					{
+						v.push_back(ImmersedBodyVal(y, x, f_ptr_->Get(q, y, x)));
+					}
+				}
+			}
+			additionalBCs.insert(std::make_pair(q, v));
+		}
+
+		/*for (int q = 0; q < kQ; ++q)
 		{
 			std::vector<ImmersedBodyVal> v;
 
-			for (int y = 1; y < f_ptr_->size().first - 1; ++y)
+			for (int y = 1; y < ySize - 1; ++y)
 			{
-				for (int x = 1; x < f_ptr_->size().second - 1; ++x)
+				for (int x = 1; x < xSize - 1; ++x)
 				{
 					if (medium.Get(y, x) == NodeType::BODY_IN_FLUID && f_ptr_->Get(q, y, x) != 0.0)
 					{
@@ -90,9 +109,8 @@ public:
 					}
 				}
 			}
-
 			additionalBCs.insert(std::make_pair(q, v));
-		}
+		}*/
 
 		/*for (auto i : additionalBCs)
 		{
@@ -105,11 +123,20 @@ public:
 
 	void AdditionalBounceBackBCs()
 	{
+
+		for (auto i : additionalBCs)
+		{
+			for (auto j : i.second)
+				f_ptr_->Set(i.first, j.y_ + kEy[i.first], j.x_ + kEx[i.first], 0.0);
+			
+		}
+
+		//std::cout << "BBBB\n";
 		std::swap(additionalBCs.at(1), additionalBCs.at(3));
 		std::swap(additionalBCs.at(2), additionalBCs.at(4));
 		std::swap(additionalBCs.at(5), additionalBCs.at(7));
 		std::swap(additionalBCs.at(6), additionalBCs.at(8));
-
+		
 		/*for (auto i : additionalBCs)
 		{
 			std::cout << i.first << " : ";
@@ -124,8 +151,9 @@ public:
 		for (auto row : additionalBCs)
 		{
 			for (auto j : row.second)
-				f_ptr_->Set(row.first, j.y_ + ey[row.first], j.x_ + ex[row.first], j.distrFuncValue_);
+				f_ptr_->Set(row.first, j.y_, j.x_, j.distrFuncValue_);
 		}
+
 		additionalBCs.clear();
 	}
 
@@ -172,6 +200,7 @@ private:
 
 	//! Poiner to Fluid distribution function to work with it's boundaries (Попробовать переделать через ссылку)
 	DistributionFunction<double>* f_ptr_;
+
 
 	//! Store index of probability distribution function and it's values on TOP boundary
 	//!	Example: top_boundary_[1] = { Store values f[1] on top boundary }
@@ -306,15 +335,15 @@ private:
 private:
 
 	//! Indexes of velocity components on appropriate boundaries
-	const std::vector<int> top_ids_{ 9,10,11,12,13 };
-	const std::vector<int> bottom_ids_{ 14,15,16,17,18 };
-	const std::vector<int> left_ids_{ 3,6,7,12,17 };
-	const std::vector<int> right_ids_{ 1,5,8,10,15 };
-	const std::vector<int> near_ids_{ 4,7,8,13,18 };
-	const std::vector<int> far_ids_{ 2,5,6,11,16 };
+	const std::vector<int> top_ids_{ 4,8,12,14,17 };//{ 9,10,11,12,13 };
+	const std::vector<int> bottom_ids_{5,9,13,15,16};//{ 14,15,16,17,18 };
+	const std::vector<int> left_ids_{ 1,10,11,12,13 };//{ 3,6,7,12,17 };
+	const std::vector<int> right_ids_{0,6,7,8,9 };//{ 1,5,8,10,15 };
+	const std::vector<int> near_ids_{3,7,11,16,17 };//{ 4,7,8,13,18 };
+	const std::vector<int> far_ids_{ 2,6,10,14,15 }; //{ 2,5,6,11,16 };
 	
 	// For Von Neumann BC
-	const std::vector<int> middle_layer_ids_{ 0,1,2,3,4,5,6,7,8 };
+	const std::vector<int> middle_layer_ids_{ 0, 1, 2, 3, 6, 7, 10, 11, 18 };
 
 	// !!! Не нужны - их убрать !!!
 

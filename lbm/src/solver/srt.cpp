@@ -43,8 +43,8 @@ void SRTsolver::Streaming()
 
 		for (unsigned y = 0; y < fluid_->size().first; ++y)
 			for (unsigned x = 0; x < fluid_->size().second; ++x)
-				if (medium_->is_fluid(y, x))
-					fluid_->f_[q](y - kEy[q], x + kEx[q]) = temp(y, x);
+				if (medium_->IsFluid(y, x))
+					fluid_->f_[q](y + kEy[q], x + kEx[q]) = temp(y, x);
 	}
 
 	// Очищаем значения попавшие на границу, так как они уже сохранены в BCs
@@ -60,41 +60,51 @@ void SRTsolver::Collision()
 void SRTsolver::Solve(int iter_numb)
 {
 	feqCalculate();
+
 	for (int q = 0; q < kQ; ++q)
 		fluid_->f_[q] = fluid_->feq_[q];
+
+	std::cout << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 
 	BCs BC(fluid_->f_);
 
 	for (int iter = 0; iter < iter_numb; ++iter) 
 	{
 		Collision();
-		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::VON_NEUMAN);
+
+		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::DIRICHLET);
+		if (medium_->IsImmersedBodies())
+			BC.PrepareAdditionalBCs(*medium_);
 
 		Streaming();
 
-		BC.PrepareAdditionalBCs(*medium_);
-
 		BC.BounceBackBC(Boundary::TOP);
 		BC.BounceBackBC(Boundary::BOTTOM);
-		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.01, 0.0);
-		BC.VonNeumannBC(Boundary::RIGHT, *fluid_, 0.01, 0.0);
+		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.001, 0.0);
+		BC.DirichletBC(Boundary::RIGHT, *fluid_, 1.0);
 
-		BC.AdditionalBounceBackBCs();
+		if (medium_->IsImmersedBodies())
+			BC.AdditionalBounceBackBCs();
 
-		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::VON_NEUMAN);
+		
+		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::DIRICHLET);
+		if (medium_->IsImmersedBodies())
+			BC.RecordAdditionalBCs();
 
-		BC.RecordAdditionalBCs();
+		//std::cout << fluid_->f_;
 
+		//std::cout << " Total rho rec = " << fluid_->rho_.GetSum() << std::endl;
 		Recalculate();
-
+		
+	
 		feqCalculate();
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 
-		if (iter % 5 == 0)
+		if (iter % 10 == 0)
 		{
 			fluid_->vx_.WriteFieldToTxt("Data\\srt_lbm_data\\2d\\fluid_txt", "vx", iter);
-			fluid_->write_fluid_vtk("Data\\srt_lbm_data\\2d\\fluid_vtk", iter);
+			fluid_->WriteFluidToVTK("Data\\srt_lbm_data\\2d\\fluid_vtk", iter);
 		}
 
 	}
@@ -200,7 +210,7 @@ void SRT3DSolver::Collision()
 
 void SRT3DSolver::Solve(int iter_numb)
 {
-	fluid_->PoiseuilleIC(0.01);
+	//fluid_->vz_->SetTBLayer(1, std::vector<double>(fluid_->GetColumnsNumber() * fluid_->GetRowsNumber(), 0.01));
 
 	feqCalculate();
 	for (int q = 0; q < kQ; ++q)
@@ -212,26 +222,29 @@ void SRT3DSolver::Solve(int iter_numb)
 	{
 		std::cout << iter << " : ";
 		Collision();
-		bc.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
-		
+		bc.PrepareValuesForAllBC(BCType::VON_NEUMAN, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
+
 		Streaming();
 
-		bc.BounceBackBC(Boundary::TOP);
+		bc.VonNeumannBC(Boundary::TOP, 0.0, 0.0, 0.00);
 		bc.BounceBackBC(Boundary::BOTTOM);
 		bc.BounceBackBC(Boundary::LEFT);
 		bc.BounceBackBC(Boundary::RIGHT);
 		bc.BounceBackBC(Boundary::CLOSE_IN);
 		bc.BounceBackBC(Boundary::FAAR);
 
-		bc.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
+		bc.RecordValuesForAllBC(BCType::VON_NEUMAN, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
 
 		Recalculate();
-		fluid_->vz_->SetTBLayer(1, std::vector<double>(fluid_->GetColumnsNumber() * fluid_->GetRowsNumber(), 0.01));
+
+		//fluid_->vz_->SetTBLayer(1, std::vector<double>(fluid_->GetColumnsNumber() * fluid_->GetRowsNumber(), 0.01));
 
 		feqCalculate();
 
 		if (iter % 10 == 0)
-			GetProfile(15, iter);
+			fluid_->WriteFluidToVTK("Data\\srt_lbm_data\\3d\\fluid_vtk", iter);
+		if(iter % 50 == 0)
+			GetNFProfile(*fluid_->vz_, 5, iter);
 	}
 	
 }
@@ -245,13 +258,30 @@ void SRT3DSolver::GetProfile(const int chan_numb, const int iter_numb)
 
 	
 
-	std::string name = "Data/ex" + std::to_string(iter_numb) + ".txt";
+	std::string name = "Data\\srt_lbm_data\\3d\\fluid_txt\\profile_" + std::to_string(iter_numb) + ".txt";
 	if (WriteHeatMapInFile(name, res, colls - 2))
 	{
 		std::cout << "Data writing complete successfully!\n";
 	}
 	
 	
+}
+
+void SRT3DSolver::GetNFProfile(const MacroscopicParam3D<double> & physVal, const int chan_numb, const int iter_numb)
+{
+	std::vector<double> res = physVal.GetNFLayer(chan_numb);
+
+	int colls = fluid_->GetColumnsNumber();
+	int rows = fluid_->GetRowsNumber();
+	int depth = fluid_->GetDepthNumber();
+
+	std::string name = "Data\\srt_lbm_data\\3d\\fluid_txt\\profile_tb_" + std::to_string(iter_numb) + ".txt";
+	if (WriteHeatMapInFile(name, res, colls - 2))
+	{
+		std::cout << "Data writing complete successfully!\n";
+	}
+
+
 }
 
 bool SRT3DSolver::WriteHeatMapInFile(const std::string & file_name, const std::vector<double>& data, const int lenght)
@@ -294,7 +324,9 @@ void SRT3DSolver::SubStreamingMiddle(const int depth, const int rows, const int 
 {
 	for (int z = 0; z < depth; ++z)
 	{
-		for (int q = 0; q < 9; ++q)
+		const std::vector<int> middle_ids_{ 0,1,2,3,6,7,10,11,18};
+		for (auto q : middle_ids_)
+		//for (int q = 0; q < 9; ++q)
 		{
 			Matrix2D<double> temp = fluid_->GetDistributionFuncLayer(z, q);
 			fluid_->SetDistributionFuncLayerValue(z, q, 0.0);
@@ -309,9 +341,12 @@ void SRT3DSolver::SubStreamingMiddle(const int depth, const int rows, const int 
 
 void SRT3DSolver::SubStreamingTop(const int depth, const int rows, const int colls)
 {
-	for (int z = 0; z < depth - 1; ++z)
+	//for (int z = 1; z < depth; ++z)
+	for (int z = depth - 2; z > 0 ; --z)
 	{
-		for (int q = 9; q < 14; ++q)
+		const std::vector<int> top_ids_{ 4,8,12,14,17 };
+		for(auto q : top_ids_)
+		//for (int q = 9; q < 14; ++q)
 		{
 			Matrix2D<double> temp = fluid_->GetDistributionFuncLayer(z, q);
 			fluid_->SetDistributionFuncLayerValue(z, q, 0.0);
@@ -326,9 +361,12 @@ void SRT3DSolver::SubStreamingTop(const int depth, const int rows, const int col
 
 void SRT3DSolver::SubStreamingBottom(const int depth, const int rows, const int colls)
 {
-	for (int z = depth - 1; z > 0; --z)
+	//for (int z = depth - 1; z > 0; --z)
+	for (int z = 1; z < depth - 1; ++z)
 	{
-		for (int q = 14; q < 19; ++q)
+		const std::vector<int> bottom_ids_{ 5,9,13,15,16}; 
+		for (auto q : bottom_ids_)
+		//for (int q = 14; q < 19; ++q)
 		{
 			Matrix2D<double> temp = fluid_->GetDistributionFuncLayer(z, q);
 			fluid_->SetDistributionFuncLayerValue(z, q, 0.0);
@@ -362,6 +400,7 @@ void SRT3DSolver::CreateDataFolder(std::string folder_name) const
 void SRT3DSolver::Recalculate()
 {
 	fluid_->RecalculateRho();
+	fluid_->rho_->FillTopBottomWalls(0.0);
 	fluid_->RecalculateV();
 
 	std::cout << "Total rho: " << fluid_->TotalRho() << std::endl;

@@ -22,60 +22,35 @@
 #pragma region 2d
 
 
-Medium::Medium() : rows_(0), colls_(0), medium_() {}
+Medium::Medium() : rows_(0), colls_(0), is_immersed_bodies_(false), medium_() {}
 
 
-Medium::Medium(unsigned rows, unsigned colls) :
-	rows_(rows), colls_(colls)
+Medium::Medium(int rows, int colls) : rows_(rows), colls_(colls), is_immersed_bodies_(false)
 {
-	assert(rows_ > 2 && colls_ > 2);
+	assert(rows_ > 2 && colls > 2);
 
 	medium_.Resize(rows_, colls_);
 
-	for (int x = 0; x < colls_; ++x)
-	{
-		medium_(0, x) = NodeType::TOP_BOUNDARY;
-		medium_(rows_ - 1, x) = NodeType::BOTTOM_BOUNDARY;
-	}
-
-	for (int y = 1; y < rows_ - 1; ++y)
-	{
-		medium_(y, 0) = NodeType::LEFT_BOUNDARY;
-		medium_(y, colls_ - 1) = NodeType::RIGHT_BOUNDARY;
-	}
+	FillInitialState();
 }
 
 Medium::~Medium() {}
 
-bool Medium::is_fluid(unsigned y, unsigned x) const
+bool Medium::IsFluid(const int  y, const int x) const
 {
 	assert(y < rows_ && x < colls_);
 	return medium_(y, x) == NodeType::FLUID;
 }
 
-void Medium::resize(unsigned rows, unsigned colls)
+void Medium::Resize(const int  newRows, const int newColls)
 {
-	rows_ = rows;
-	colls_ = colls;
+	assert(newRows > 2 && newColls > 2);
 
+	rows_ = newRows;
+	colls_ = newColls;
 	medium_.Resize(rows_, colls_);
 
-	// Потом выделить это в отдельную функцию и реализовать через нее конструктор и resize()
-	assert(rows_ > 2 && colls_ > 2);
-
-	medium_.Resize(rows_, colls_);
-
-	for (int x = 0; x < colls_; ++x)
-	{
-		medium_(0, x) = NodeType::TOP_BOUNDARY;
-		medium_(rows_ - 1, x) = NodeType::BOTTOM_BOUNDARY;
-	}
-
-	for (int y = 1; y < colls_ - 2; ++y)
-	{
-		medium_(y, 0) = NodeType::LEFT_BOUNDARY;
-		medium_(y, colls_ - 1) = NodeType::RIGHT_BOUNDARY;
-	}
+	FillInitialState();
 }
 
 std::pair<unsigned, unsigned> Medium::size() const
@@ -83,8 +58,24 @@ std::pair<unsigned, unsigned> Medium::size() const
 	return std::make_pair(rows_, colls_);
 }
 
-void Medium::AddCircleInMedium(const int x0, const int y0, const int radius)
+bool Medium::IsImmersedBodies() const
 {
+	return is_immersed_bodies_;
+}
+
+const int Medium::GetRowsNumber() const
+{
+	return rows_;
+}
+
+const int Medium::GetColumnsNumber() const
+{
+	return colls_;
+}
+
+void Medium::AddCircle(const int x0, const int y0, const int radius)
+{
+	is_immersed_bodies_ = true;
 	assert(x0 + radius < colls_ - 1 && x0 - radius > 1);
 	assert(y0 + radius < rows_ - 1 && y0 - radius > 1);
 
@@ -103,6 +94,8 @@ void Medium::AddCircleInMedium(const int x0, const int y0, const int radius)
 
 void Medium::AddCircleTopFalf(const int x0, const int y0, const int radius)
 {
+	is_immersed_bodies_ = true;
+
 	assert(x0 + radius < colls_ - 1 && x0 - radius > 1);
 	assert(y0 < rows_ - 1 && y0 >= 1);
 
@@ -121,6 +114,8 @@ void Medium::AddCircleTopFalf(const int x0, const int y0, const int radius)
 
 void Medium::AddCircleBottomFalf(const int x0, const int y0, const int radius)
 {
+	is_immersed_bodies_ = true;
+
 	assert(x0 + radius < colls_ - 1 && x0 - radius > 1);
 	assert(y0 <= rows_ - 1 && y0 >= 1);
 
@@ -134,6 +129,21 @@ void Medium::AddCircleBottomFalf(const int x0, const int y0, const int radius)
 			if (pow(x - x0, 2) + pow(y - y0, 2) < pow(radius, 2))
 				medium_(y, x) = NodeType::BODY_IN_FLUID;
 		}
+	}
+}
+
+void Medium::FillInitialState()
+{
+	for (int x = 0; x < colls_; ++x)
+	{
+		medium_(0, x) = NodeType::TOP_BOUNDARY;
+		medium_(rows_ - 1, x) = NodeType::BOTTOM_BOUNDARY;
+	}
+
+	for (int y = 1; y < rows_ - 1; ++y)
+	{
+		medium_(y, 0) = NodeType::LEFT_BOUNDARY;
+		medium_(y, colls_ - 1) = NodeType::RIGHT_BOUNDARY;
 	}
 }
 

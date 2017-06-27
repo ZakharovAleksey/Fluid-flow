@@ -406,20 +406,23 @@ std::ostream & operator<<(std::ostream & os, Matrix3D<T1> const & matrix) {
 
 	os.precision(3);
 
-	for (int z = 0; z < matrix.GetDepthNumber(); ++z)
+	os << " Z = " << matrix.GetDepthNumber() - 1 << " TOP\n";
+	for (int z = matrix.GetDepthNumber() - 1; z >= 0; --z)
 	{
 		os << "Depth layer: " << z << endl;
-		for (int y = 0; y < matrix.GetRowsNumber(); ++y)
+		os << " y = " << matrix.GetRowsNumber() - 1 << " TOP\n";
+		for (int y = matrix.GetRowsNumber() - 1; y >= 0; --y)
 		{
 			for (int x = 0; x < matrix.GetCollsNumber(); ++x)
 			{
-				std::cout << std::setw(7) << matrix(z, y, x);
+				os << std::setw(7) << matrix(z, y, x);
 			}
 			os << endl;
 		}
+		os << " y = 0, BOTTOM";
 		os << endl;
 	}
-
+	os << " Z = 0 BOTTOM";
 	os << endl;
 
 	return os;

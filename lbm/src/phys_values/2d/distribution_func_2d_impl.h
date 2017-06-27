@@ -64,29 +64,35 @@ inline void DistributionFunction<T>::fillBoundaries(T const value)
 			dfunc_body_.at(1).FillColumnWith(colls_ - 1, value);
 			break;
 		case 2:
-			dfunc_body_.at(2).FillRowWith(0, value);
+			//dfunc_body_.at(2).FillRowWith(0, value);
+			dfunc_body_.at(2).FillRowWith(rows_ - 1, value);
 			break;
 		case 3:
 			dfunc_body_.at(3).FillColumnWith(0, value);
 			break;
 		case 4:
-			dfunc_body_.at(4).FillRowWith(rows_ - 1, value);
+			//dfunc_body_.at(4).FillRowWith(rows_ - 1, value);
+			dfunc_body_.at(4).FillRowWith(0, value);
 			break;
 		case 5:
 			dfunc_body_.at(5).FillColumnWith(colls_ - 1, value);
-			dfunc_body_.at(5).FillRowWith(0, value);
+			//dfunc_body_.at(5).FillRowWith(0, value);
+			dfunc_body_.at(5).FillRowWith(rows_ - 1, value);
 			break;
 		case 6:
 			dfunc_body_.at(6).FillColumnWith(0, value);
-			dfunc_body_.at(6).FillRowWith(0, value);
+			//dfunc_body_.at(6).FillRowWith(0, value);
+			dfunc_body_.at(6).FillRowWith(rows_ - 1, value);
 			break;
 		case 7:
 			dfunc_body_.at(7).FillColumnWith(0, value);
-			dfunc_body_.at(7).FillRowWith(rows_ - 1, value);
+			//dfunc_body_.at(7).FillRowWith(rows_ - 1, value);
+			dfunc_body_.at(7).FillRowWith(0, value);
 			break;
 		case 8:
 			dfunc_body_.at(8).FillColumnWith(colls_ - 1, value);
-			dfunc_body_.at(8).FillRowWith(rows_ - 1, value);
+			//dfunc_body_.at(8).FillRowWith(rows_ - 1, value);
+			dfunc_body_.at(8).FillRowWith(0, value);
 			break;
 		default:
 			break;
@@ -113,13 +119,15 @@ inline std::pair<unsigned int, unsigned int> DistributionFunction<T>::size() con
 template<typename T>
 inline std::vector<T> DistributionFunction<T>::getTopBoundaryValues(int const q) const
 {
-	return dfunc_body_.at(q).GetRow(1);
+	return dfunc_body_.at(q).GetRow(rows_ - 2);
+	//return dfunc_body_.at(q).GetRow(1);
 }
 
 template<typename T>
 inline std::vector<T> DistributionFunction<T>::getBottomBoundaryValue(int const q) const
 {
-	return dfunc_body_.at(q).GetRow(rows_ - 2);
+	//return dfunc_body_.at(q).GetRow(rows_ - 2);
+	return dfunc_body_.at(q).GetRow(1);
 }
 
 template<typename T>
@@ -137,13 +145,15 @@ inline std::vector<T> DistributionFunction<T>::getRightBoundaryValue(int const q
 template<typename T>
 inline void DistributionFunction<T>::setTopBoundaryValue(int const q, std::vector<T> const & row)
 {
-	dfunc_body_.at(q).SetRow(1, row);
+	//dfunc_body_.at(q).SetRow(1, row);
+	dfunc_body_.at(q).SetRow(rows_ - 2, row);
 }
 
 template<typename T>
 inline void DistributionFunction<T>::setBottomBoundaryValue(int const q, std::vector<T> const & row)
 {
-	dfunc_body_.at(q).SetRow(rows_ - 2, row);
+	dfunc_body_.at(q).SetRow(1, row);
+	//dfunc_body_.at(q).SetRow(rows_ - 2, row);
 }
 
 template<typename T>
@@ -166,6 +176,8 @@ inline MacroscopicParam<T> DistributionFunction<T>::calculateDensity() const
 
 	for (int q = 0; q < kQ; ++q)
 		result += dfunc_body_.at(q);
+
+	//std::cout << result;
 
 	return result;
 }
@@ -200,15 +212,31 @@ inline MacroscopicParam<T> DistributionFunction<T>::calculateVelocity(const doub
 	return result;
 }
 
+template<typename T>
+inline const int DistributionFunction<T>::GetRowsNumber() const
+{
+	return rows_;
+}
+
+template<typename T>
+inline const int DistributionFunction<T>::GetColumnsNumber() const
+{
+	return colls_;
+}
+
 
 
 
 template<typename T1>
-std::ostream & operator<<(std::ostream & os, DistributionFunction<T1> const & dist_func) {
-	unsigned i{ 0 };
-	for (auto matrix : dist_func.dfunc_body_) {
-		os << "Distribution func f[" << i++ << "] ------------------- \n";
+std::ostream & operator<<(std::ostream & os, DistributionFunction<T1> const & dist_func) 
+{	
+	int q = 0;
+	for (auto matrix : dist_func.dfunc_body_) 
+	{
+		os << "Distribution func f[" << q++ << "] ------------------- \n";
+		os << "Y = " << dist_func.GetRowsNumber() << " TOP\n";
 		os << matrix;
+		os << "Y =0 BOTTOM\n";
 	}
 
 	return os;

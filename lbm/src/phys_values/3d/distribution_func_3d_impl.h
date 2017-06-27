@@ -44,13 +44,15 @@ inline void DistributionFunction3D<T>::Swap(DistributionFunction3D<T>& other)
 template<typename T>
 inline std::vector<T> DistributionFunction3D<T>::GetTopBoundaryValues(int const q) const
 {
-	return body_.at(q).GetTBLayer(1);
+	//return body_.at(q).GetTBLayer(1);
+	return body_.at(q).GetTBLayer(depth_ - 2);
 }
 
 template<typename T>
 inline std::vector<T> DistributionFunction3D<T>::GetBottomBoundaryValue(int const q) const
 {
-	return body_.at(q).GetTBLayer(depth_ - 2);
+	//return body_.at(q).GetTBLayer(depth_ - 2);
+	return body_.at(q).GetTBLayer(1);
 }
 
 template<typename T>
@@ -68,25 +70,29 @@ inline std::vector<T> DistributionFunction3D<T>::GetRightBoundaryValue(int const
 template<typename T>
 inline std::vector<T> DistributionFunction3D<T>::GetNearBoundaryValue(int const q) const
 {
-	return body_.at(q).GetNFLayer(rows_ - 2);
+	//return body_.at(q).GetNFLayer(rows_ - 2);
+	return body_.at(q).GetNFLayer(1);
 }
 
 template<typename T>
 inline std::vector<T> DistributionFunction3D<T>::GetFarBoundaryValue(int const q) const
 {
-	return body_.at(q).GetNFLayer(1);
+	//return body_.at(q).GetNFLayer(1);
+	return body_.at(q).GetNFLayer(rows_ - 2);
 }
 
 template<typename T>
 inline void DistributionFunction3D<T>::SetTopBoundaryValue(int const q, std::vector<T> const & layer)
 {
-	body_.at(q).SetTBLayer(1, layer);
+	//body_.at(q).SetTBLayer(1, layer);
+	body_.at(q).SetTBLayer(depth_ - 2, layer);
 }
 
 template<typename T>
 inline void DistributionFunction3D<T>::SetBottomBoundaryValue(int const q, std::vector<T> const & layer)
 {
-	body_.at(q).SetTBLayer(depth_ - 2, layer);
+	//body_.at(q).SetTBLayer(depth_ - 2, layer);
+	body_.at(q).SetTBLayer(1, layer);
 }
 
 template<typename T>
@@ -104,13 +110,15 @@ inline void DistributionFunction3D<T>::SetRightBoundaryValue(int const q, std::v
 template<typename T>
 inline void DistributionFunction3D<T>::SetNearBoundaryValue(int const q, std::vector<T> const & layer)
 {
-	body_.at(q).SetNFLayer(rows_ - 2, layer);
+	//body_.at(q).SetNFLayer(rows_ - 2, layer);
+	body_.at(q).SetNFLayer(1, layer);
 }
 
 template<typename T>
 inline void DistributionFunction3D<T>::SetFarBoundaryValue(int const q, std::vector<T> const & layer)
 {
-	body_.at(q).SetNFLayer(1, layer);
+	//body_.at(q).SetNFLayer(1, layer);
+	body_.at(q).SetNFLayer(rows_ - 2, layer);
 }
 
 template<typename T>
@@ -120,7 +128,7 @@ inline void DistributionFunction3D<T>::ClearBoundaries()
 	{
 		body_.at(q).FillBoundarySideWalls(0.0);
 		// This distribution functions moves across the layers (UP, DOWN), so
-		// on the TOP and BOTTOM boundaries approriate components will stay after
+		// on the TOP and BOTTOM boundaries appropriate components will stay after
 		// their streaming - so we remove them here
 		if (q > 8)
 			body_.at(q).FillTopBottomWalls(0.0);

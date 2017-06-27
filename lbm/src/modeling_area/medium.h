@@ -28,19 +28,28 @@ class Medium
 {
 public:
 	Medium();
-	Medium(unsigned rows, unsigned colls);
+	Medium(int rows, int colls);
 	~Medium();
 
-	bool is_fluid(unsigned y, unsigned x) const;
+	//! Return true, selected node represents fluid
+	bool IsFluid(const int  y, const int x) const;
 
-	
 	//! Resize current Medium with values  !!! DELETE THIS METHOD AND MAKE USING OINTERS LIKE IN 3D
-	void resize(unsigned rows, unsigned colls);
+	void Resize(const int  rows, const int colls);
 
 	// Переписать через метод size() реализованный у класса Matrix<>
 	std::pair<unsigned int, unsigned int> size() const;
 
-	void AddCircleInMedium(const int x0, const int y0, const int radius);
+	//! Returns true if medium has additional immersed bodies in modeling area, but common TOP, BOTTOM, LEFT, RIGTH boundaries
+	bool IsImmersedBodies() const;
+	//! Returns number of rows
+	const int GetRowsNumber() const;
+	//! Returns number of columns
+	const int GetColumnsNumber() const;
+
+
+
+	void AddCircle(const int x0, const int y0, const int radius);
 	void AddCircleTopFalf(const int x0, const int y0, const int radius);
 	void AddCircleBottomFalf(const int x0, const int y0, const int radius);
 
@@ -58,14 +67,19 @@ public:
 	}
 
 private:
+
+	//! Fill modeling ara with inital boundary-fluid parameters: all nodes, but boundaries - fluid, while other
+	//! nodes are left, right, top, bottom boundaries
+	void FillInitialState();
+
 	//! Number of rows in modeling area
-	unsigned rows_;
+	int rows_;
 	//! Number of columns in modeling area
-	unsigned colls_;
+	int colls_;
+
+	bool is_immersed_bodies_;
 
 	Matrix2D<NodeType> medium_;
-
-	//Matrix2D<NodeType> medium_;
 };
 
 #pragma endregion

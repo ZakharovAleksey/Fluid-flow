@@ -22,111 +22,31 @@ class Fluid
 
 public:
 
-	Fluid(unsigned rows, unsigned colls);
+	Fluid(int rows, int colls, const Medium & medium);
 	~Fluid();
-
+	// !!! TRY TO REPLASE EVERYWHERE !!!
 	std::pair<unsigned, unsigned> size() const;
+	//! Returns number of rows
+	const int GetRowsNumber() const;
+	//! Returns number of columns
+	const int GetColumnsNumber() const;
+
+
 	void Poiseuille_IC(double const dvx);
 
-	void AddImmersedBodies(const Medium & medium)
-	{
-		assert(medium.size().first == rows_);
-		assert(medium.size().second == colls_);
-
-		for(int y = 1; y < rows_ - 1; ++y)
-			for (int x = 1; x < colls_ - 1; ++x)
-			{
-				if(medium.Get(y,x) == NodeType::BODY_IN_FLUID)
-				{
-					rho_(y, x) = 0.0;
-					vx_(y, x) = 0.0;
-					vy_(y, x) = 0.0;
-				}
-			}
-	}
-
-
-	void write_fluid_vtk(std::string path,  int time) {
-
-		// Create filename
-
-		path += "/fluid_t" + std::to_string(time) + ".vtk";
-
-		//std::stringstream output_filename;
-		//output_filename << "vtk_fluid/fluid_t" << time << ".vtk";
-		std::ofstream output_file;
-
-		output_file.open(path); //output_filename.str().c_str());
-		if (output_file.is_open())
-		{
-
-			// Write VTK header
-
-			int Nx = size().second;
-			int Ny = size().first;
-
-			output_file << "# vtk DataFile Version 3.0\n";
-			output_file << "fluid_state\n";
-			output_file << "ASCII\n";
-			output_file << "DATASET RECTILINEAR_GRID\n";
-			output_file << "DIMENSIONS " << Nx << " " << Ny - 2 << " 1" << "\n";
-			output_file << "X_COORDINATES " << Nx << " float\n";
-
-			for (int X = 0; X < Nx; ++X)
-				output_file << X + 0.5 << " ";
-
-			output_file << "\n";
-			output_file << "Y_COORDINATES " << Ny - 2 << " float\n";
-
-			for (int Y = 1; Y < Ny - 1; ++Y)
-				output_file << Y - 0.5 << " ";
-
-			output_file << "\n";
-			output_file << "Z_COORDINATES " << 1 << " float\n";
-			output_file << 0 << "\n";
-			output_file << "POINT_DATA " << Nx * (Ny - 2) << "\n";
-
-			output_file << "SCALARS density float 1\n";
-			output_file << "LOOKUP_TABLE default\n";
-
-			for (int Y = 1; Y < Ny - 1; ++Y)
-				for (int X = 0; X < Nx; ++X)
-					output_file << rho_(Y, X) << "\n";
-
-			output_file << "SCALARS vx float 1\n";
-			output_file << "LOOKUP_TABLE default\n";
-
-			for (int Y = 1; Y < Ny - 1; ++Y)
-				for (int X = 0; X < Nx; ++X)
-					output_file << vx_(Y, X) << "\n";
-
-			output_file << "SCALARS vy float 1\n";
-			output_file << "LOOKUP_TABLE default\n";
-
-			for (int Y = 1; Y < Ny - 1; ++Y)
-				for (int X = 0; X < Nx; ++X)
-					output_file << vy_(Y, X) << "\n";
-
-			output_file << "VECTORS velocity float\n";
-
-			for (int Y = 1; Y < Ny - 1; ++Y)
-				for (int X = 0; X < Nx; ++X)
-					output_file << vx_(Y, X) << " " << vy_(Y, X) << " 0\n";
-		}
-		else
-		{
-			std::cout << "Could not open file for fluid vtk writing!\n";
-		}
-		
-		output_file.close();
-	}
+	//!  Writes current density and velocity fields to *.vtk file
+	void WriteFluidToVTK(const std::string path, const int time);
 
 private:
 
-	//! Rows count for fluid modeling area
-	unsigned rows_;
-	//! Columns count for fluid modeling area
-	unsigned colls_;
+	//! Fills initial field for density based on medium (takes into account immersed bodies represented in medium)
+	void FillInitialDensity(const Medium & medium);
+
+private:
+	//! Number of rows in fluid area
+	int rows_;
+	//! Number of columns in fluid area
+	int colls_;
 
 	// ”ЅЅЅЅЅЅ–––јјјјј“№№№№№№№№ - это было просто дл€ тестироани€ чтобы передать f_ ка аргумент дл€ BCs
 public:
@@ -194,6 +114,8 @@ public:
 	void RecalculateV();
 	// Total rho calculation of all fluid domain (For check onlly)
 	long double TotalRho();
+
+	void WriteFluidToVTK(const std::string path, int time);
 
 private:
 
