@@ -91,8 +91,6 @@ void SRTsolver::Solve(int iter_numb)
 		if (medium_->IsImmersedBodies())
 			BC.RecordAdditionalBCs();
 
-		//std::cout << fluid_->f_;
-
 		//std::cout << " Total rho rec = " << fluid_->rho_.GetSum() << std::endl;
 		Recalculate();
 		

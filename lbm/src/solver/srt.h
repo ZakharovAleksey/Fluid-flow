@@ -11,6 +11,9 @@
 #include"..\modeling_area\medium.h"
 #include"bc\bc.h"
 
+
+#include"im_body\immersed_body.h" // Only for Microphone - next to do in separate class
+
 #pragma region 2d
 
 
@@ -47,8 +50,6 @@ protected:
 
 
 #pragma endregion
-
-
 
 
 #pragma region 3d
@@ -102,6 +103,8 @@ private:
 
 
 #pragma endregion
+
+
 
 
 

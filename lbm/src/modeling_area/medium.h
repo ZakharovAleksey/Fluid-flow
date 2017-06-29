@@ -16,8 +16,8 @@ enum class NodeType : int
 	// In case of 3D LBM additional boundaries
 	NEAR_BOUNDARY		= 5,
 	FAR_BOUNDARY		= 6,
-	// Inside body
-	BODY_IN_FLUID		= 7,
+	// Obstacle inside the modeling area
+	OBSTACLE			= 7,
 };
 
 #pragma region 2d
@@ -50,6 +50,9 @@ public:
 
 
 	void AddCircle(const int x0, const int y0, const int radius);
+	void AddSquare(const int leftX, const int leftY, const int width, const int height);
+	void AddBottomAngle(const int leftX, const int leftY, const int radius);
+	void AddTopAngle(const int leftX, const int leftY, const int radius);
 	void AddCircleTopFalf(const int x0, const int y0, const int radius);
 	void AddCircleBottomFalf(const int x0, const int y0, const int radius);
 

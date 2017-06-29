@@ -99,7 +99,7 @@ void BCs::RecordValuesOnSingleBC(Boundary const BC, BCType const bc_type)
 		if (bc_type == BCType::PERIODIC)
 		{
 			ptrToFunc = &DistributionFunction<double>::setBottomBoundaryValue;
-			RecordBoundaryValues(bc_type, top_boundary_, top_ids_, ptrToFunc);
+			RecordBoundaryValues(bc_type, bottom_boundary_, top_ids_, ptrToFunc);
 		}
 		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET) // !! VON NEUMANN IS NOT TESTED YET !!!
 		{
@@ -113,7 +113,7 @@ void BCs::RecordValuesOnSingleBC(Boundary const BC, BCType const bc_type)
 		if (bc_type == BCType::PERIODIC)
 		{
 			ptrToFunc = &DistributionFunction<double>::setTopBoundaryValue;
-			RecordBoundaryValues(bc_type, bottom_boundary_, bottom_ids_, ptrToFunc);
+			RecordBoundaryValues(bc_type, top_boundary_, bottom_ids_, ptrToFunc);
 		}
 		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET) // !! VON NEUMANN IS NOT TESTED YET !!!
 		{
@@ -127,7 +127,7 @@ void BCs::RecordValuesOnSingleBC(Boundary const BC, BCType const bc_type)
 		if (bc_type == BCType::PERIODIC)
 		{
 			ptrToFunc = &DistributionFunction<double>::setRightBoundaryValue;
-			RecordBoundaryValues(bc_type, left_boundary_, left_ids_, ptrToFunc);
+			RecordBoundaryValues(bc_type, right_boundary_, left_ids_, ptrToFunc);
 		}
 		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
 		{
@@ -141,7 +141,7 @@ void BCs::RecordValuesOnSingleBC(Boundary const BC, BCType const bc_type)
 		if (bc_type == BCType::PERIODIC)
 		{
 			ptrToFunc = &DistributionFunction<double>::setLeftBoundaryValue;
-			RecordBoundaryValues(bc_type, right_boundary_, right_ids_, ptrToFunc);
+			RecordBoundaryValues(bc_type, left_boundary_, right_ids_, ptrToFunc);
 		}
 		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET) // !! VON NEUMANN IS NOT TESTED YET !!!
 		{
@@ -239,6 +239,7 @@ void BCs::PeriodicBC(Boundary const first, Boundary const second)
 		left_boundary_.swap(right_boundary_);
 	else if (first == Boundary::TOP && second == Boundary::BOTTOM)
 		top_boundary_.swap(bottom_boundary_);
+
 	else
 		throw;
 }

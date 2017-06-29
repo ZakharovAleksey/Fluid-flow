@@ -85,34 +85,68 @@ void MRTSolver::Solve(int iteration_number)
 
 	BCs BC(fluid_->f_);
 
+	BloodFlowMicrophone mic(Point(40, 100));
+
+	for (int i = 0; i < 6; ++i)
+	{
+		double x = 35 + 20 * sin(i * M_PI / ( 2 * 5 ));
+		double y = 39 - 20 * cos(i * M_PI / (2 * 5));
+		mic.AddMeasurePoint(Point(y, x));
+	}
+
+	for (int i = 1; i < 6; ++i)
+	{
+		double x = 50 + 25 * i;
+		double y = 35;
+		mic.AddMeasurePoint(Point(y, x));
+		y = 30;
+		mic.AddMeasurePoint(Point(y, x));
+	}
+
 	for (int iter = 0; iter < iteration_number; ++iter)
 	{
+		mic.TakeOffParameters(iter, fluid_->vx_, "vx");
+		mic.TakeOffParameters(iter, fluid_->rho_, "rho");
+
 		Collision();
-		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET);
 		if (medium_->IsImmersedBodies())
 			BC.PrepareAdditionalBCs(*medium_);
 
 		Streaming();
 
+		//BC.PeriodicBC(Boundary::TOP, Boundary::BOTTOM);
 		BC.BounceBackBC(Boundary::TOP);
 		BC.BounceBackBC(Boundary::BOTTOM);
-		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.001, 0.0);
-		BC.BounceBackBC(Boundary::RIGHT);
+		BC.DirichletBC(Boundary::LEFT, *fluid_, 1.001);
+		BC.DirichletBC(Boundary::RIGHT, *fluid_, 1.0);
 
 		if (medium_->IsImmersedBodies())
 			BC.AdditionalBounceBackBCs();
 
-		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::BOUNCE_BACK);
+		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET);
 		if (medium_->IsImmersedBodies())
 			BC.RecordAdditionalBCs();
 
 		Recalculate();
 
+
+		for (int y = 0; y < fluid_->GetRowsNumber(); ++y)
+		{
+			for(int x = 0; x < fluid_->GetColumnsNumber(); ++x)
+				if (medium_->Get(y, x) == NodeType::OBSTACLE)
+				{
+					fluid_->vx_(y, x) = 0.0;
+					fluid_->vy_(y, x) = 0.0;
+					fluid_->rho_(y, x) = 0.0;
+				}
+		}
+
 		feqCalculate();
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 
-		if (iter % 50 == 0)
+		if (iter % 100 == 0)
 		{
 			//Matrix2D<double> v = CalculateModulus(fluid_->vx_, fluid_->vy_);
 			//v.WriteFieldToTxt("Data\\mrt_lbm_data\\2d\\fluid_txt", "v", iter);

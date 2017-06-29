@@ -161,6 +161,9 @@ void IBSolver::Solve(int iter_numb)
 
 		Collision();
 		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET);
+		if (medium_->IsImmersedBodies())
+			BC.PrepareAdditionalBCs(*medium_);
+		
 
 		Streaming();
 
@@ -170,13 +173,17 @@ void IBSolver::Solve(int iter_numb)
 		BC.BounceBackBC(Boundary::BOTTOM);
 
 		double vx = 0.001; 
-		BC.DirichletBC(Boundary::LEFT, *fluid_, 1.0);
-		BC.DirichletBC(Boundary::RIGHT, *fluid_, 0.99);
+		BC.DirichletBC(Boundary::LEFT, *fluid_, 1.001);
+		BC.DirichletBC(Boundary::RIGHT, *fluid_, 1.0);
+
+		if (medium_->IsImmersedBodies())
+			BC.AdditionalBounceBackBCs();
 
 		//BC.AdditionalBounceBackBCs();
 
 		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET);
-
+		if (medium_->IsImmersedBodies())
+			BC.RecordAdditionalBCs();
 		//BC.RecordAdditionalBCs();
 
 		Recalculate();

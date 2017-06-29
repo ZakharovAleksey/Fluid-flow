@@ -92,55 +92,89 @@ int main()
 
 #pragma region MRT
 
+	int X{ 200 }; //100
+	int Y{ 40 };
+	Medium m(Y, X);
+	Fluid f(Y, X, m);
+
+	m.AddCircleTopFalf(35, 39, 15);
+	//m.AddCircle(35, 39, 15);
+	//m.AddCircle(X/10, Y/2, Y/10+ 1);
+
+	std::cout << m;
+	//std::cout << m << std::endl;
+	//std::cout << f.rho_ << std::endl;
+
+	// Start solution
+	MRTSolver solver(0.514, m, f); // tau = 0.5008
+	solver.Solve(35501);
+
 	//int X{ 50 }; //100
 	//int Y{ 50 };
 	//Medium m(Y, X);
 	//Fluid f(Y, X, m);
 
-	////m.AddCircle(20, 35, 4);
+	//m.AddSquare(0, Y - 1, X / 3, Y / 3);
+	//m.AddBottomAngle(X/3, Y-1, Y/3);
+	//
+	//m.AddSquare(0, Y / 3, X / 3, Y / 3 + 1);
+	//m.AddTopAngle(X / 3, 0, Y / 3);
 
-	////std::cout << m << std::endl;
-	////std::cout << f.rho_ << std::endl;
-
+	//m.AddSquare(3 * X / 4, Y / 2 + Y / 6, X / 4 + 1, Y / 3);
+	//m.AddCircle(3 * X / 4, Y / 2, Y / 6);
 
 	//// Start solution
 	//MRTSolver solver(1.0, m, f); // tau = 0.5008
-	//solver.Solve(501);
+	//solver.Solve(3501);
 
 #pragma endregion
 
 
 #pragma region IB-LBM
 
-	int X{ 102 };
-	int Y{ 30 };
-	Medium m(Y, X);
-	Fluid f(Y, X, m);
-	
+	//int X{ 50 };
+	//int Y{ 50 };
+	//Medium m(Y, X);
+	//Fluid f(Y, X, m);
+	//
 
-	// Create immersed object
-	//std::unique_ptr<ImmersedBody> body1(new ImmersedCircle(102, 30, 32, Point(15, 15), 6)); // TROMB (102, 30, 32, Point(30, 1), 6));
-	//std::unique_ptr<ImmersedBody> body2(new ImmersedCircle(102, 30, 32, Point(50, 15), 6)); // TROMB (102, 30, 32, Point(30, 1), 6));
+	//// Create immersed object
+	////std::unique_ptr<ImmersedBody> body1(new ImmersedCircle(102, 30, 32, Point(15, 15), 6)); // TROMB (102, 30, 32, Point(30, 1), 6));
+	////std::unique_ptr<ImmersedBody> body2(new ImmersedCircle(102, 30, 32, Point(50, 15), 6)); // TROMB (102, 30, 32, Point(30, 1), 6));
 
-	//ImmersedBody* body1 (new ImmersedBottomTromb(102, 30, 32, Point(1, 30), 6)); // TROMB (102, 30, 32, Point(1, 30), 6)); // ImmersedCircle(102, 30, 32, Point(15, 15), 6));
-	//ImmersedBody* body2 (new ImmersedTopTromb(102, 30, 32, Point(27, 30), 6));
-	ImmersedBody* body2(new ImmersedRBC(102, 30, 32, Point(15, 15), 6));
+	////ImmersedBody* body1 (new ImmersedBottomTromb(102, 30, 32, Point(1, 30), 6)); // TROMB (102, 30, 32, Point(1, 30), 6)); // ImmersedCircle(102, 30, 32, Point(15, 15), 6));
+	////ImmersedBody* body2 (new ImmersedTopTromb(102, 30, 32, Point(27, 30), 6));
+	////ImmersedBody* body2(new ImmersedRBC(102, 30, 32, Point(15, 15), 6));
 
-	//ImmersedBody* body2(new ImmersedRectangle(102, 30, 32, Point(15, 15), 10, 5));
+	////ImmersedBody* bottom_rect(new ImmersedRectangle(X, Y, 64, Point(Y/3, 1), X/3, Y/3));
+	////ImmersedBody* top_rect(new ImmersedRectangle(X, Y, 64, Point(Y-2, 1), X/3, Y/3));
 
-	//ImmersedBody* body2(new ImmersedCircle(126, 66, 32, Point(32,32), 3, 0, 2.0 * M_PI));
+	//ImmersedBody* middle_rect(new ImmersedRectangle(X, Y, 64, Point(2 * Y /3, 2 * X / 3), X / 3, Y / 3));
+	//ImmersedBody* circle(new ImmersedCircle(X, Y, 64, Point(Y / 2, 2 * X / 3), Y / 6, M_PI / 2, 3 * M_PI / 2));
 
-	//ImmersedBody* body2(new ImmersedTopRect(102, 30, 32, Point(21, 50), 6, 13));
-	//ImmersedBody* body1(new ImmersedBottomRect(102, 30, 32, Point(7, 50), 6, 13));
+	//m.AddSquare(0, Y - 1, X / 3, Y / 3);
+	////m.AddBottomAngle(X/3, Y-1, Y/3);
+	//
+	//m.AddSquare(0, Y / 3, X / 3, Y / 3 + 1);
+	////m.AddTopAngle(X / 3, 0, Y / 3);
 
-	std::vector<ImmersedBody*> bodies;
-	bodies.push_back(body2);
-	//bodies.push_back(body1);
-	//bodies.push_back(body3);
+	////ImmersedBody* body2(new ImmersedCircle(126, 66, 32, Point(32,32), 3, 0, 2.0 * M_PI));
 
-	// Start solution
-	IBSolver s(1.0, f, m, bodies); //std::move(body));
-	s.Solve(3001);
+	////ImmersedBody* body2(new ImmersedTopRect(102, 30, 32, Point(21, 50), 6, 13));
+	////ImmersedBody* body1(new ImmersedBottomRect(102, 30, 32, Point(7, 50), 6, 13));
+
+	//std::vector<ImmersedBody*> bodies;
+	////bodies.push_back(bottom_rect);
+	////bodies.push_back(top_rect);
+	//bodies.push_back(middle_rect);
+	//bodies.push_back(circle);
+
+	////bodies.push_back(body1);
+	////bodies.push_back(body3);
+
+	//// Start solution
+	//IBSolver s(1.0, f, m, bodies); //std::move(body));
+	//s.Solve(3501);
 
 #pragma endregion
 

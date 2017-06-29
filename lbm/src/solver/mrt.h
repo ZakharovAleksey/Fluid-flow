@@ -5,7 +5,6 @@
 
 #include"srt.h"
 
-
 #pragma region 2d 
 
 class MRTSolver : SRTsolver

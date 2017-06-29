@@ -75,6 +75,7 @@ public:
 
 	void PrepareAdditionalBCs(const Medium & medium)
 	{
+		// Переписать нормально
 		const int ySize = f_ptr_->GetRowsNumber();
 		const int xSize = f_ptr_->GetColumnsNumber();
 
@@ -85,7 +86,7 @@ public:
 			{
 				for (int x = 1; x < xSize - 1; ++x)
 				{
-					if (medium.Get(y + kEy[q], x + kEx[q]) == NodeType::BODY_IN_FLUID && f_ptr_->Get(q,y,x) != 0.0)
+					if (medium.Get(y + kEy[q], x + kEx[q]) == NodeType::OBSTACLE && f_ptr_->Get(q,y,x) != 0.0)
 					{
 						v.push_back(ImmersedBodyVal(y, x, f_ptr_->Get(q, y, x)));
 					}
@@ -93,37 +94,11 @@ public:
 			}
 			additionalBCs.insert(std::make_pair(q, v));
 		}
-
-		/*for (int q = 0; q < kQ; ++q)
-		{
-			std::vector<ImmersedBodyVal> v;
-
-			for (int y = 1; y < ySize - 1; ++y)
-			{
-				for (int x = 1; x < xSize - 1; ++x)
-				{
-					if (medium.Get(y, x) == NodeType::BODY_IN_FLUID && f_ptr_->Get(q, y, x) != 0.0)
-					{
-						v.push_back(ImmersedBodyVal(y, x, f_ptr_->Get(q, y, x)));
-						f_ptr_->Set(q, y, x, 0.0);
-					}
-				}
-			}
-			additionalBCs.insert(std::make_pair(q, v));
-		}*/
-
-		/*for (auto i : additionalBCs)
-		{
-			std::cout << i.first << " : ";
-			for (auto j : i.second)
-				std::cout << j.distrFuncValue_ << "(" << j.y_ << " , " << j.x_ << ") ";
-			std::cout << std::endl;
-		}*/
 	}
 
 	void AdditionalBounceBackBCs()
 	{
-
+		// Переписать нормально
 		for (auto i : additionalBCs)
 		{
 			for (auto j : i.second)
@@ -131,23 +106,15 @@ public:
 			
 		}
 
-		//std::cout << "BBBB\n";
 		std::swap(additionalBCs.at(1), additionalBCs.at(3));
 		std::swap(additionalBCs.at(2), additionalBCs.at(4));
 		std::swap(additionalBCs.at(5), additionalBCs.at(7));
 		std::swap(additionalBCs.at(6), additionalBCs.at(8));
-		
-		/*for (auto i : additionalBCs)
-		{
-			std::cout << i.first << " : ";
-			for (auto j : i.second)
-				std::cout << j.distrFuncValue_ << "(" << j.y_ << " , " << j.x_ << ") ";
-			std::cout << std::endl;
-		}*/
 	}
 
 	void RecordAdditionalBCs()
 	{
+		// Переписать нормально
 		for (auto row : additionalBCs)
 		{
 			for (auto j : row.second)

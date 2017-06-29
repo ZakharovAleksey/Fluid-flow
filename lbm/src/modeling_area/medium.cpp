@@ -76,8 +76,8 @@ const int Medium::GetColumnsNumber() const
 void Medium::AddCircle(const int x0, const int y0, const int radius)
 {
 	is_immersed_bodies_ = true;
-	assert(x0 + radius < colls_ - 1 && x0 - radius > 1);
-	assert(y0 + radius < rows_ - 1 && y0 - radius > 1);
+	//assert(x0 + radius < colls_ - 1 && x0 - radius > 1);
+	//assert(y0 + radius < rows_ - 1 && y0 - radius > 1);
 
 	int xStart = x0 - radius; int xStop = x0 + radius;
 	int yStart = y0 - radius; int yStop = y0 + radius;
@@ -86,28 +86,84 @@ void Medium::AddCircle(const int x0, const int y0, const int radius)
 	{
 		for (int x = xStart; x < xStop; ++x)
 		{
-			if ( pow(x- x0, 2) + pow(y - y0, 2) < pow(radius, 2))
-				medium_(y, x) = NodeType::BODY_IN_FLUID;
+			if (y >= 0 && y < rows_ && x > 0 && x < colls_)
+				if ( pow(x- x0, 2) + pow(y - y0, 2) < pow(radius, 2))
+					medium_(y, x) = NodeType::OBSTACLE;
 		}
 	}
+}
+
+void Medium::AddSquare(const int leftX, const int leftY, const int width, const int height)
+{
+	is_immersed_bodies_ = true;
+	
+	for(int y = leftY; y > leftY - height; --y)
+		for (int x = leftX; x < leftX + width; ++x)
+		{
+			if( y >= 0 && y < rows_ && x > 0 && x < colls_)
+				medium_(y, x) = NodeType::OBSTACLE;
+		}
+
+
+}
+
+void Medium::AddBottomAngle(const int leftX, const int leftY, const int radius)
+{
+	is_immersed_bodies_ = true;
+	//assert(leftX > 0 && leftX + radius < colls_);
+	//assert(leftY - radius > 0 && leftY < rows_);
+
+	int x0 = leftX + radius;
+	int y0 = leftY - radius;
+	int circleRad = radius - 1;
+
+	for (int y = leftY; y > leftY - radius; --y)
+		for (int x = leftX; x < leftX + radius; ++x)
+		{
+			if (y >= 0 && y < rows_ && x > 0 && x < colls_)
+				if ((x - x0) * (x - x0) + (y - y0) * (y - y0) >= circleRad * circleRad)
+					medium_(y, x) = NodeType::OBSTACLE;
+		}
+
+
+}
+
+void Medium::AddTopAngle(const int leftX, const int leftY, const int radius)
+{
+	is_immersed_bodies_ = true;
+	//assert(leftX > 0 && leftX + radius < colls_);
+	//assert(leftY >= 0 && leftY + radius < rows_);
+
+	int x0 = leftX + radius;
+	int y0 = leftY + radius;
+	int circleRad = radius - 1;
+
+	for (int y = leftY; y < leftY + radius; ++y)
+		for (int x = leftX; x < leftX + radius; ++x)
+		{
+			if (y >= 0 && y < rows_ && x > 0 && x < colls_)
+				if ((x - x0) * (x - x0) + (y - y0) * (y - y0) >= circleRad * circleRad)
+					medium_(y, x) = NodeType::OBSTACLE;
+		}
+
 }
 
 void Medium::AddCircleTopFalf(const int x0, const int y0, const int radius)
 {
 	is_immersed_bodies_ = true;
-
-	assert(x0 + radius < colls_ - 1 && x0 - radius > 1);
-	assert(y0 < rows_ - 1 && y0 >= 1);
+	//assert(x0 + radius < colls_ - 1 && x0 - radius > 1);
+	//assert(y0 + radius < rows_ - 1 && y0 - radius > 1);
 
 	int xStart = x0 - radius; int xStop = x0 + radius;
-	int yStart = y0; int yStop = y0 + radius;
+	int yStart = y0 - radius; int yStop = y0;
 
 	for (int y = yStart; y < yStop; ++y)
 	{
 		for (int x = xStart; x < xStop; ++x)
 		{
-			if (pow(x - x0, 2) + pow(y - y0, 2) < pow(radius, 2))
-				medium_(y, x) = NodeType::BODY_IN_FLUID;
+			if (y >= 0 && y < rows_ && x > 0 && x < colls_)
+				if (pow(x - x0, 2) + pow(y - y0, 2) < pow(radius, 2))
+					medium_(y, x) = NodeType::OBSTACLE;
 		}
 	}
 }
@@ -127,7 +183,7 @@ void Medium::AddCircleBottomFalf(const int x0, const int y0, const int radius)
 		for (int x = xStart; x < xStop; ++x)
 		{
 			if (pow(x - x0, 2) + pow(y - y0, 2) < pow(radius, 2))
-				medium_(y, x) = NodeType::BODY_IN_FLUID;
+				medium_(y, x) = NodeType::OBSTACLE;
 		}
 	}
 }
@@ -136,8 +192,8 @@ void Medium::FillInitialState()
 {
 	for (int x = 0; x < colls_; ++x)
 	{
-		medium_(0, x) = NodeType::TOP_BOUNDARY;
-		medium_(rows_ - 1, x) = NodeType::BOTTOM_BOUNDARY;
+		medium_(rows_ - 1, x) = NodeType::TOP_BOUNDARY;
+		medium_(0, x) = NodeType::BOTTOM_BOUNDARY;
 	}
 
 	for (int y = 1; y < rows_ - 1; ++y)
@@ -150,8 +206,10 @@ void Medium::FillInitialState()
 
 std::ostream & operator<<(std::ostream & os, Medium const & medium) {
 
-	for (int y = 0; y < medium.rows_; ++y) {
-		for (int x = 0; x < medium.colls_; ++x) {
+	for (int y = medium.rows_ - 1; y >= 0; --y) 
+	{
+		for (int x = 0; x < medium.colls_; ++x) 
+		{
 
 			if (medium.medium_(y, x) == NodeType::FLUID)
 				os << std::setw(3) << 0;
@@ -163,7 +221,7 @@ std::ostream & operator<<(std::ostream & os, Medium const & medium) {
 				os << std::setw(3) << 3;
 			else if (medium.medium_(y, x) == NodeType::RIGHT_BOUNDARY)
 				os << std::setw(3) << 4;
-			else if (medium.medium_(y, x) == NodeType::BODY_IN_FLUID)
+			else if (medium.medium_(y, x) == NodeType::OBSTACLE)
 				os << std::setw(3) << 7;
 		}
 		os << std::endl;

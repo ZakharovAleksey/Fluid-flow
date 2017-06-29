@@ -236,6 +236,8 @@ private:
 //};
 //
 
+#pragma region old microphone
+
 
 class Microphone
 {
@@ -355,6 +357,85 @@ private:
 
 };
 
+
+#pragma endregion
+
+
+#pragma region Microphone
+
+class BloodFlowMicrophone
+{
+public:
+	BloodFlowMicrophone(Point ref_point) : receive_point_(ref_point) 
+	{
+		assert(ref_point.x_ >= 0);
+		assert(ref_point.y_ >= 0);
+	}
+
+	~BloodFlowMicrophone() {}
+
+	void AddMeasurePoint(const Point point)
+	{
+		measure_points_.push_back(point);
+	}
+
+	void TakeOffParameters(const int time, const MacroscopicParam<double> & physVal, const std::string physValName)
+	{
+		std::string outputFileName = "Data\\" + physValName + "_measure.txt";
+		std::ofstream outFile;
+
+		// If file open in first time create appropriate header
+		if (time == 0)
+		{
+			outFile.open(outputFileName);
+			if (outFile.is_open())
+			{
+				for (int i = 0; i < measure_points_.size(); ++i)
+					outFile << "t" << std::to_string(i) << "\tval" << std::to_string(i) << "\t";
+				outFile << "\n";
+			}
+			else
+			{
+				outFile.close();
+				std::cout << "Eror! Could not open file " << outputFileName << " for writing data!\n";
+			}
+		}
+		else
+		{
+			// Writes time (lag time is taken into account) and value of measuring physical value
+			outFile.open(outputFileName, std::ios_base::app);
+		}
+
+		for (auto point : measure_points_)
+		{
+			int reciveTime = time + int(LagTime(point, receive_point_));
+			outFile << reciveTime << "\t" << physVal(int(point.y_), int(point.x_)) << "\t";
+		}
+		outFile << "\n";
+		
+		outFile.close();
+	}
+
+private:
+	//! Calculates lag time for signal coming from point of measure to recieve point (microphone position)
+	double LagTime(const Point & first, const Point & second)
+	{
+		// Speed of sound in LBM is 1/sqrt(3), so below we divide path on speed of sound
+		return sqrt(3 * SQ(first.x_ - second.x_) + SQ(first.y_ - second.y_));
+	}
+
+	//! Stores all point from which microphone receives incoming signal 
+	// with chosen macroscopic physical value in this point
+	std::vector<Point> measure_points_;
+	//! This pint is the real position of microphone, which receive all incoming
+	//! signals from the points of measure
+	Point receive_point_;
+};
+
+
+
+
+#pragma endregion
 
 
 #endif // !IMMERSED_BODY_H

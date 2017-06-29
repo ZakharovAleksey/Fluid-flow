@@ -86,7 +86,7 @@ void Fluid::FillInitialDensity(const Medium & medium)
 	for(int y = 1; y < rows_ - 1; ++y)
 		for (int x = 1; x < colls_ - 1; ++x)
 		{
-			rho_(y, x) = (medium.Get(y, x) != NodeType::BODY_IN_FLUID) ? 1.0 : 0.0;
+			rho_(y, x) = (medium.Get(y, x) != NodeType::OBSTACLE) ? 1.0 : 0.0;
 		}
 }
 
