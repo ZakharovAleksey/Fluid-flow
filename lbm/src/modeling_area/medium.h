@@ -53,6 +53,7 @@ public:
 	void AddSquare(const int leftX, const int leftY, const int width, const int height);
 	void AddBottomAngle(const int leftX, const int leftY, const int radius);
 	void AddTopAngle(const int leftX, const int leftY, const int radius);
+	void AddRightAngle(const int leftX, const int leftY, const int radius);
 	void AddCircleTopFalf(const int x0, const int y0, const int radius);
 	void AddCircleBottomFalf(const int x0, const int y0, const int radius);
 

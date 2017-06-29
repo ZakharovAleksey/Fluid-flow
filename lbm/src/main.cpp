@@ -97,11 +97,30 @@ int main()
 	Medium m(Y, X);
 	Fluid f(Y, X, m);
 
-	m.AddCircleTopFalf(35, 39, 15);
-	//m.AddCircle(35, 39, 15);
-	//m.AddCircle(X/10, Y/2, Y/10+ 1);
+	// Y-shape >>
+	/*m.AddSquare(1, Y-2, X/2, Y/4);
+	m.AddTopAngle(X / 2, 1, Y / 4);
+	m.AddSquare(1, Y/4, X/2, Y/4);
+	m.AddBottomAngle(X / 2, Y - 2, Y / 4);
 
-	std::cout << m;
+	m.AddSquare(X / 2 + Y / 2, 3 * Y / 4, X / 2, Y / 2);
+	m.AddCircle(X / 2 + Y / 2, Y / 2, Y / 4);*/
+	// >>
+
+	// >> Tromb
+	//m.AddCircleTopFalf(35, 39, 15);
+	// >>
+	
+	// >> Flow around cylinder
+	//m.AddCircle(X/10, Y/2, Y/10+ 1);
+	// >>
+
+	m.AddSquare(1, 0.25 * Y, X / 2 - Y / 4, 0.25 * Y);
+	m.AddTopAngle(X / 2 - Y / 4, -1, Y / 4);
+	m.AddRightAngle(X / 2, -1, Y / 4);
+	m.AddSquare(X / 2 + Y /4, 0.25 * Y, X / 2 - Y / 4, 0.25 * Y);
+
+	//std::cout << m;
 	//std::cout << m << std::endl;
 	//std::cout << f.rho_ << std::endl;
 

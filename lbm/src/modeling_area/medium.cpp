@@ -100,7 +100,7 @@ void Medium::AddSquare(const int leftX, const int leftY, const int width, const 
 	for(int y = leftY; y > leftY - height; --y)
 		for (int x = leftX; x < leftX + width; ++x)
 		{
-			if( y >= 0 && y < rows_ && x > 0 && x < colls_)
+			if( y > 0 && y < rows_ - 1 && x > 0 && x < colls_ - 1)
 				medium_(y, x) = NodeType::OBSTACLE;
 		}
 
@@ -120,7 +120,7 @@ void Medium::AddBottomAngle(const int leftX, const int leftY, const int radius)
 	for (int y = leftY; y > leftY - radius; --y)
 		for (int x = leftX; x < leftX + radius; ++x)
 		{
-			if (y >= 0 && y < rows_ && x > 0 && x < colls_)
+			if (y > 0 && y < rows_ - 1 && x > 0 && x < colls_ - 1)
 				if ((x - x0) * (x - x0) + (y - y0) * (y - y0) >= circleRad * circleRad)
 					medium_(y, x) = NodeType::OBSTACLE;
 		}
@@ -135,6 +135,26 @@ void Medium::AddTopAngle(const int leftX, const int leftY, const int radius)
 	//assert(leftY >= 0 && leftY + radius < rows_);
 
 	int x0 = leftX + radius;
+	int y0 = leftY + radius;
+	int circleRad = radius - 1;
+
+	for (int y = leftY; y < leftY + radius; ++y)
+		for (int x = leftX; x < leftX + radius; ++x)
+		{
+			if (y > 0 && y < rows_ - 1 && x > 0 && x < colls_ - 1)
+				if ((x - x0) * (x - x0) + (y - y0) * (y - y0) >= circleRad * circleRad)
+					medium_(y, x) = NodeType::OBSTACLE;
+		}
+
+}
+
+void Medium::AddRightAngle(const int leftX, const int leftY, const int radius)
+{
+	is_immersed_bodies_ = true;
+	//assert(leftX > 0 && leftX + radius < colls_);
+	//assert(leftY >= 0 && leftY + radius < rows_);
+
+	int x0 = leftX;
 	int y0 = leftY + radius;
 	int circleRad = radius - 1;
 

@@ -87,7 +87,7 @@ void MRTSolver::Solve(int iteration_number)
 
 	BloodFlowMicrophone mic(Point(40, 100));
 
-	for (int i = 0; i < 6; ++i)
+	/*for (int i = 0; i < 6; ++i)
 	{
 		double x = 35 + 20 * sin(i * M_PI / ( 2 * 5 ));
 		double y = 39 - 20 * cos(i * M_PI / (2 * 5));
@@ -101,7 +101,7 @@ void MRTSolver::Solve(int iteration_number)
 		mic.AddMeasurePoint(Point(y, x));
 		y = 30;
 		mic.AddMeasurePoint(Point(y, x));
-	}
+	}*/
 
 	for (int iter = 0; iter < iteration_number; ++iter)
 	{
