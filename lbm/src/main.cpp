@@ -92,70 +92,62 @@ int main()
 
 #pragma region MRT
 
-	int X{ 200 }; //100
-	int Y{ 40 };
-	Medium m(Y, X);
-	Fluid f(Y, X, m);
+	//int X{ 200 }; //100
+	//int Y{ 40 };
+	//Medium m(Y, X);
+	//Fluid f(Y, X, m);
 
-	// Y-shape >>
-	/*m.AddSquare(1, Y-2, X/2, Y/4);
-	m.AddTopAngle(X / 2, 1, Y / 4);
-	m.AddSquare(1, Y/4, X/2, Y/4);
-	m.AddBottomAngle(X / 2, Y - 2, Y / 4);
+#pragma region obstacles
 
-	m.AddSquare(X / 2 + Y / 2, 3 * Y / 4, X / 2, Y / 2);
-	m.AddCircle(X / 2 + Y / 2, Y / 2, Y / 4);*/
+	// Y-shape channel flow obstacles
+	//m.AddSquare(1, Y-2, X/2, Y/4);
+	//m.AddTopAngle(X / 2, 1, Y / 4);
+	//m.AddSquare(1, Y/4, X/2, Y/4);
+	//m.AddBottomAngle(X / 2, Y - 2, Y / 4);
+	//m.AddSquare(X / 2 + Y / 2, 3 * Y / 4, X / 2, Y / 2);
+	//m.AddCircle(X / 2 + Y / 2, Y / 2, Y / 4);*/
 	// >>
 
-	// >> Tromb
+	// >> Around tromb flow obstacle
 	//m.AddCircleTopFalf(35, 39, 15);
 	// >>
 	
-	// >> Flow around cylinder
+	// >> Flow around cylinder obstacle
 	//m.AddCircle(X/10, Y/2, Y/10+ 1);
 	// >>
 
-	m.AddSquare(1, 0.25 * Y, X / 2 - Y / 4, 0.25 * Y);
-	m.AddTopAngle(X / 2 - Y / 4, -1, Y / 4);
-	m.AddRightAngle(X / 2, -1, Y / 4);
-	m.AddSquare(X / 2 + Y /4, 0.25 * Y, X / 2 - Y / 4, 0.25 * Y);
+	// >> Flow in asterios obstacle
+	//m.AddSquare(1, 0.25 * Y, X / 2 - Y / 4, 0.25 * Y);
+	//m.AddTopAngle(X / 2 - Y / 4, -1, Y / 4);
+	//m.AddRightAngle(X / 2, -1, Y / 4);
+	//m.AddSquare(X / 2 + Y /4, 0.25 * Y, X / 2 - Y / 4, 0.25 * Y);
+	//>>
+
+	// >> Flow between trombs obstacles
+	// m.AddCircle(35, 39, 10);
+	// m.AddCircle(35, 1, 10);
+	// >> 
+
+#pragma endregion
 
 	//std::cout << m;
 	//std::cout << m << std::endl;
 	//std::cout << f.rho_ << std::endl;
 
 	// Start solution
-	MRTSolver solver(0.514, m, f); // tau = 0.5008
-	solver.Solve(35501);
-
-	//int X{ 50 }; //100
-	//int Y{ 50 };
-	//Medium m(Y, X);
-	//Fluid f(Y, X, m);
-
-	//m.AddSquare(0, Y - 1, X / 3, Y / 3);
-	//m.AddBottomAngle(X/3, Y-1, Y/3);
-	//
-	//m.AddSquare(0, Y / 3, X / 3, Y / 3 + 1);
-	//m.AddTopAngle(X / 3, 0, Y / 3);
-
-	//m.AddSquare(3 * X / 4, Y / 2 + Y / 6, X / 4 + 1, Y / 3);
-	//m.AddCircle(3 * X / 4, Y / 2, Y / 6);
-
-	//// Start solution
-	//MRTSolver solver(1.0, m, f); // tau = 0.5008
-	//solver.Solve(3501);
+	//MRTSolver solver(0.514, m, f); // tau = 0.5008
+	//solver.Solve(25001);
 
 #pragma endregion
 
 
 #pragma region IB-LBM
 
-	//int X{ 50 };
-	//int Y{ 50 };
-	//Medium m(Y, X);
-	//Fluid f(Y, X, m);
-	//
+	/*int X{ 102 };
+	int Y{ 30 };
+	Medium m(Y, X);
+	Fluid f(Y, X, m);*/
+	
 
 	//// Create immersed object
 	////std::unique_ptr<ImmersedBody> body1(new ImmersedCircle(102, 30, 32, Point(15, 15), 6)); // TROMB (102, 30, 32, Point(30, 1), 6));
@@ -182,9 +174,14 @@ int main()
 	////ImmersedBody* body2(new ImmersedTopRect(102, 30, 32, Point(21, 50), 6, 13));
 	////ImmersedBody* body1(new ImmersedBottomRect(102, 30, 32, Point(7, 50), 6, 13));
 
+	// ImmersedBody* rbc(new ImmersedRBC(102, 30, 32, Point(15, 15), 6)); Хороший размер для моделирования многих RBC
+	//ImmersedBody* rbc(new ImmersedRBC(X, Y, 32, Point(15, 15), 6));
+	//ImmersedBody* tromb(new ImmersedCircle(X, Y, 64, Point(38, 35), 15, M_PI, 2.0 * M_PI));
 	//std::vector<ImmersedBody*> bodies;
-	////bodies.push_back(bottom_rect);
-	////bodies.push_back(top_rect);
+	//bodies.push_back(rbc);
+
+	//bodies.push_back(bottom_rect);
+	//bodies.push_back(top_rect);
 	//bodies.push_back(middle_rect);
 	//bodies.push_back(circle);
 
@@ -193,7 +190,11 @@ int main()
 
 	//// Start solution
 	//IBSolver s(1.0, f, m, bodies); //std::move(body));
-	//s.Solve(3501);
+	//s.Solve(25001);
+
+
+	/*IBMRTSolver sol(1.0, f, m, bodies);
+	sol.Solve(25001);*/
 
 #pragma endregion
 
@@ -203,17 +204,17 @@ int main()
 
 #pragma region SRT
 
-	//int x{ 12 }; // 10
-	//int y{ 12 }; // 35
-	//int z{ 22 }; // 10
+	int x{ 12 }; // 10
+	int y{ 12 }; // 35
+	int z{ 32 }; // 10
 
 	//MatrixTest();
 
-	//Fluid3D f(z, y, x);
-	//Medium3D m(z,y,x);
+	Fluid3D f(z, y, x);
+	Medium3D m(z,y,x);
 
-	//SRT3DSolver srt(1.0, m, f);
-	//srt.Solve(201);
+	SRT3DSolver srt(1.0, m, f);
+	srt.Solve(51);
 
 #pragma endregion
 

@@ -224,7 +224,8 @@ void SRT3DSolver::Solve(int iter_numb)
 
 		Streaming();
 
-		bc.VonNeumannBC(Boundary::TOP, 0.0, 0.0, 0.00);
+		//bc.BounceBackBC(Boundary::TOP);
+		bc.VonNeumannBC(Boundary::TOP, 0.0, 0.0, 0.001);
 		bc.BounceBackBC(Boundary::BOTTOM);
 		bc.BounceBackBC(Boundary::LEFT);
 		bc.BounceBackBC(Boundary::RIGHT);
@@ -234,8 +235,8 @@ void SRT3DSolver::Solve(int iter_numb)
 		bc.RecordValuesForAllBC(BCType::VON_NEUMAN, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::BOUNCE_BACK);
 
 		Recalculate();
-
 		//fluid_->vz_->SetTBLayer(1, std::vector<double>(fluid_->GetColumnsNumber() * fluid_->GetRowsNumber(), 0.01));
+		
 
 		feqCalculate();
 

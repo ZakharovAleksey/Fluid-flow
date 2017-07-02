@@ -901,11 +901,11 @@ void BCs3D::VonNeumannBC(Boundary const first, const double vx, const double vy,
 		for (auto topId : top_ids_)
 			rho = rho + top_boundary_.at(topId) * 2.0;
 			
-		rho = rho / (1.0 - vz);
+		rho = rho / (1.0 + vz);
 
-		for (auto e : rho)
+		/*for (auto e : rho)
 			std::cout << e << " ";
-		std::cout << std::endl;
+		std::cout << std::endl;*/
 
 		// >>>
 		

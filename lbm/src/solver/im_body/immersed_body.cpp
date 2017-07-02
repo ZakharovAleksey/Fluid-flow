@@ -411,7 +411,7 @@ ImmersedCircle::ImmersedCircle(int domainX, int domainY, int nodesNumber, Point 
 	// Fill circle
 	for (int id = 0; id < circleNumb; ++id)
 	{
-		body_.at(id).type_ = IBNodeType::STATIC;
+		body_.at(id).type_ = IBNodeType::MOVING;
 
 		// Parametrization of the circle shape in 2D
 		body_.at(id).cur_pos_.x_ = center_.x_ + radius_ * cos(startAngle + (double)id * angleStep);
@@ -432,6 +432,10 @@ ImmersedCircle::ImmersedCircle(int domainX, int domainY, int nodesNumber, Point 
 		body_.at(nodesNumber - 1).cur_pos_.y_ = center.y_;
 		body_.at(nodesNumber - 1).ref_pos_.y_ = center.y_;
 	}
+
+	body_.at(0).type_ = IBNodeType::STATIC;
+	body_.at(nodes_num - 2).type_ = IBNodeType::STATIC;
+	body_.at(nodes_num - 1).type_ = IBNodeType::STATIC;
 }
 
 
