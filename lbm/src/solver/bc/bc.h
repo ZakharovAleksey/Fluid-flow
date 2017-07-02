@@ -49,9 +49,9 @@ public:
 	
 	//! Prepare ALL probability distribution function values for BC applying
 	//! Порядок заполнения типа ОБЯЗАТЕЛЬНО (TOR, BOTTOM, LEFT, RIGHT)
-	void PrepareValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
+	void PrepareValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, const Medium & medium);
 	//! Record ALL boundaries with already calculated BC distribution function values 
-	void RecordValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc);
+	void RecordValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, const Medium & medium);
 
 
 	//! Applies periodic boundary conditions
@@ -66,72 +66,21 @@ public:
 	friend std::ostream & operator<<(std::ostream & os, BCs const & BC);
 
 
-	void swap(double& a, double & b)
-	{
-		double temp = a;
-		a = b;
-		b = a;
-	}
-
-	void PrepareAdditionalBCs(const Medium & medium)
-	{
-		// Переписать нормально
-		const int ySize = f_ptr_->GetRowsNumber();
-		const int xSize = f_ptr_->GetColumnsNumber();
-
-		for (int q = 1; q < kQ; ++q)
-		{
-			std::vector<ImmersedBodyVal> v;
-			for (int y = 1; y < ySize - 1; ++y)
-			{
-				for (int x = 1; x < xSize - 1; ++x)
-				{
-					if (medium.Get(y + kEy[q], x + kEx[q]) == NodeType::OBSTACLE && f_ptr_->Get(q,y,x) != 0.0)
-					{
-						v.push_back(ImmersedBodyVal(y, x, f_ptr_->Get(q, y, x)));
-					}
-				}
-			}
-			additionalBCs.insert(std::make_pair(q, v));
-		}
-	}
-
-	void AdditionalBounceBackBCs()
-	{
-		// Переписать нормально
-		for (auto i : additionalBCs)
-		{
-			for (auto j : i.second)
-				f_ptr_->Set(i.first, j.y_ + kEy[i.first], j.x_ + kEx[i.first], 0.0);
-			
-		}
-
-		std::swap(additionalBCs.at(1), additionalBCs.at(3));
-		std::swap(additionalBCs.at(2), additionalBCs.at(4));
-		std::swap(additionalBCs.at(5), additionalBCs.at(7));
-		std::swap(additionalBCs.at(6), additionalBCs.at(8));
-	}
-
-	void RecordAdditionalBCs()
-	{
-		// Переписать нормально
-		for (auto row : additionalBCs)
-		{
-			for (auto j : row.second)
-				f_ptr_->Set(row.first, j.y_, j.x_, j.distrFuncValue_);
-		}
-
-		additionalBCs.clear();
-	}
-
+	//! Prepares values for bounce-back boundary conditions for obstacles in fluid
+	void PrepareValuesForObstacles(const Medium & medium);
+	//! Performs bounce-back boundary conditions for obstacles in fluid
+	void ObstaclesBounceBackBCs();
+	//! Records values for Bounce-back boundary conditions for obstacles in fluid
+	void RecordValuesForObstacles();
 
 private:
 
 	//! Prepare values for CHOOSEN ONE BC BEFORE Streaming
 	bool PrepareValuesForSingleBC(Boundary const BC, BCType const boundary_condition_type);
-	//! Writes a single distribution function components to an appropriate class field
-	bool WriteBoundaryValues(BCType const bc_type, std::map<int, std::vector<double> > & bc_boundary, const std::vector<int> & bc_ids, std::vector<double>(DistributionFunction<double>::*ptrToFunc)(int)const);
-	bool WriteVonNeumannBoundaryValues(BCType const bc_type, std::map<int, std::vector<double> > & bc_boundary, const std::vector<int> & bc_ids_1, const std::vector<int> & bc_ids_2, std::vector<double>(DistributionFunction<double>::*ptrToFunc)(int)const);
+	//! Writes a single distribution function components to an appropriate class field (BC: Periodic, Bounce-Back )
+	bool WriteBoundaryValuesFirstOrder(BCType const bc_type, std::map<int, std::vector<double> > & bc_boundary, const std::vector<int> & bc_ids, std::vector<double>(DistributionFunction<double>::*ptrToFunc)(int)const);
+	//! Writes a single distribution function components to an appropriate class field (BC: Von-Neumann, Dirichle )
+	bool WriteBoundaryValuesSecondOrder(BCType const bc_type, std::map<int, std::vector<double> > & bc_boundary, const std::vector<int> & bc_ids_1, const std::vector<int> & bc_ids_2, std::vector<double>(DistributionFunction<double>::*ptrToFunc)(int)const);
 
 
 	//! Record values for choosen ONE BC AFTER Streaming (BC applying itself)
@@ -168,32 +117,15 @@ private:
 	//! Poiner to Fluid distribution function to work with it's boundaries (Попробовать переделать через ссылку)
 	DistributionFunction<double>* f_ptr_;
 
-
-	//! Store index of probability distribution function and it's values on TOP boundary
+	//! Stores index of probability distribution function and it's values on TOP boundary
 	//!	Example: top_boundary_[1] = { Store values f[1] on top boundary }
 	std::map<int, std::vector<double> > top_boundary_;
 	std::map<int, std::vector<double> > bottom_boundary_;
 	std::map<int, std::vector<double> > left_boundary_;	
 	std::map<int, std::vector<double> > right_boundary_;
 
-
-	// for additional BCs
-
-	struct ImmersedBodyVal
-	{
-		
-		int y_;
-		int x_;
-
-		double distrFuncValue_;
-
-		ImmersedBodyVal(int y, int x, double value) : y_(y), x_(x), distrFuncValue_(value) {}
-	};
-
-	typedef std::map<int, std::vector<ImmersedBodyVal> > VectorOfMap;
-
-	VectorOfMap additionalBCs;
-
+	//! Stores index of probability distribution function and it's values on obstacles nodes
+	std::map<int, std::vector<ObstacleNode>> obstacles_bc_;
 };
 
 #pragma endregion

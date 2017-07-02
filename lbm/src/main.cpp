@@ -78,15 +78,16 @@ int main()
 
 #pragma region SRT 
 
-	//int X{ 72 }; //100
-	//int Y{ 72 };
-	//Medium m(Y, X);
-	//m.AddCircle(20, 35, 4);
-	//Fluid f(Y, X, m);
-	//
-	// //Start solution
-	//SRTsolver solver(1.0, m, f);
-	//solver.Solve(501);
+	int X{ 100 }; //100
+	int Y{ 30 };
+	Medium m(Y, X);
+	m.AddCircle(15, 1, 6);
+
+	Fluid f(Y, X, m);
+	
+	// Start solution
+	SRTsolver solver(1.0, m, f);
+	solver.Solve(4001);
 
 #pragma endregion
 
@@ -130,13 +131,10 @@ int main()
 
 #pragma endregion
 
-	//std::cout << m;
-	//std::cout << m << std::endl;
-	//std::cout << f.rho_ << std::endl;
 
 	// Start solution
-	//MRTSolver solver(0.514, m, f); // tau = 0.5008
-	//solver.Solve(25001);
+	// MRTSolver solver(0.514, m, f); // tau = 0.5008
+	// solver.Solve(15001);
 
 #pragma endregion
 
@@ -204,17 +202,17 @@ int main()
 
 #pragma region SRT
 
-	int x{ 12 }; // 10
-	int y{ 12 }; // 35
-	int z{ 32 }; // 10
+	//int x{ 12 }; // 10
+	//int y{ 12 }; // 35
+	//int z{ 32 }; // 10
 
-	//MatrixTest();
+	////MatrixTest();
 
-	Fluid3D f(z, y, x);
-	Medium3D m(z,y,x);
+	//Fluid3D f(z, y, x);
+	//Medium3D m(z,y,x);
 
-	SRT3DSolver srt(1.0, m, f);
-	srt.Solve(51);
+	//SRT3DSolver srt(1.0, m, f);
+	//srt.Solve(51);
 
 #pragma endregion
 

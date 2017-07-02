@@ -87,31 +87,13 @@ void MRTSolver::Solve(int iteration_number)
 
 	BloodFlowMicrophone mic(Point(40, 100));
 
-	/*for (int i = 0; i < 6; ++i)
-	{
-		double x = 35 + 20 * sin(i * M_PI / ( 2 * 5 ));
-		double y = 39 - 20 * cos(i * M_PI / (2 * 5));
-		mic.AddMeasurePoint(Point(y, x));
-	}
-
-	for (int i = 1; i < 6; ++i)
-	{
-		double x = 50 + 25 * i;
-		double y = 35;
-		mic.AddMeasurePoint(Point(y, x));
-		y = 30;
-		mic.AddMeasurePoint(Point(y, x));
-	}*/
-
 	for (int iter = 0; iter < iteration_number; ++iter)
 	{
 		mic.TakeOffParameters(iter, fluid_->vx_, "vx");
 		mic.TakeOffParameters(iter, fluid_->rho_, "rho");
 
 		Collision();
-		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET);
-		if (medium_->IsImmersedBodies())
-			BC.PrepareAdditionalBCs(*medium_);
+		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET, *medium_);
 
 		Streaming();
 
@@ -121,13 +103,10 @@ void MRTSolver::Solve(int iteration_number)
 		BC.DirichletBC(Boundary::LEFT, *fluid_, 1.001);
 		BC.DirichletBC(Boundary::RIGHT, *fluid_, 1.0);
 
-		if (medium_->IsImmersedBodies())
-			BC.AdditionalBounceBackBCs();
+		if (medium_->IsIncludeObstacles())
+			BC.ObstaclesBounceBackBCs();
 
-		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET);
-		if (medium_->IsImmersedBodies())
-			BC.RecordAdditionalBCs();
-
+		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET, *medium_);
 		Recalculate();
 
 

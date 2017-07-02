@@ -23,10 +23,9 @@ bool BCs::PrepareValuesForSingleBC(Boundary const BC, BCType const bc_type)
 		ptrToFunc = &DistributionFunction<double>::getTopBoundaryValues;
 
 		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK)
-			return WriteBoundaryValues(bc_type, top_boundary_, top_ids_, ptrToFunc);
-		// !! IMPLEMENTED BUT NOT TESTED !!!
+			return WriteBoundaryValuesFirstOrder(bc_type, top_boundary_, top_ids_, ptrToFunc);
 		else if (bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
-			return WriteVonNeumannBoundaryValues(bc_type, top_boundary_, top_ids_, mid_width_ids_, ptrToFunc);
+			return WriteBoundaryValuesSecondOrder(bc_type, top_boundary_, top_ids_, mid_width_ids_, ptrToFunc);
 		
 		break;
 
@@ -35,10 +34,9 @@ bool BCs::PrepareValuesForSingleBC(Boundary const BC, BCType const bc_type)
 		ptrToFunc = &DistributionFunction<double>::getBottomBoundaryValue;
 
 		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK)
-			return WriteBoundaryValues(bc_type, bottom_boundary_, bottom_ids_, ptrToFunc);
-		// !! IMPLEMENTED BUT NOT TESTED !!!
+			return WriteBoundaryValuesFirstOrder(bc_type, bottom_boundary_, bottom_ids_, ptrToFunc);
 		else if (bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
-			return WriteVonNeumannBoundaryValues(bc_type, bottom_boundary_, bottom_ids_, mid_width_ids_, ptrToFunc);
+			return WriteBoundaryValuesSecondOrder(bc_type, bottom_boundary_, bottom_ids_, mid_width_ids_, ptrToFunc);
 
 		break;
 
@@ -47,10 +45,9 @@ bool BCs::PrepareValuesForSingleBC(Boundary const BC, BCType const bc_type)
 		ptrToFunc = &DistributionFunction<double>::getLeftBoundaryValue;
 
 		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK)
-			return WriteBoundaryValues(bc_type, left_boundary_, left_ids_, ptrToFunc);
-		// !! IMPLEMENTED BUT NOT TESTED !!!
+			return WriteBoundaryValuesFirstOrder(bc_type, left_boundary_, left_ids_, ptrToFunc);
 		else if (bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
-			return WriteVonNeumannBoundaryValues(bc_type, left_boundary_, left_ids_, mid_height_ids_, ptrToFunc);
+			return WriteBoundaryValuesSecondOrder(bc_type, left_boundary_, left_ids_, mid_height_ids_, ptrToFunc);
 
 		break;
 
@@ -59,10 +56,9 @@ bool BCs::PrepareValuesForSingleBC(Boundary const BC, BCType const bc_type)
 		ptrToFunc = &DistributionFunction<double>::getRightBoundaryValue;
 
 		if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK)
-			return WriteBoundaryValues(bc_type, right_boundary_, right_ids_, ptrToFunc);
-		// !! IMPLEMENTED BUT NOT TESTED !!!
+			return WriteBoundaryValuesFirstOrder(bc_type, right_boundary_, right_ids_, ptrToFunc);
 		else if (bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
-			return WriteVonNeumannBoundaryValues(bc_type, right_boundary_, right_ids_, mid_height_ids_, ptrToFunc);
+			return WriteBoundaryValuesSecondOrder(bc_type, right_boundary_, right_ids_, mid_height_ids_, ptrToFunc);
 
 		break;
 
@@ -72,14 +68,18 @@ bool BCs::PrepareValuesForSingleBC(Boundary const BC, BCType const bc_type)
 	}
 }
 
-void BCs::PrepareValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc)
+void BCs::PrepareValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, const Medium & medium)
 {
 	if (PrepareValuesForSingleBC(Boundary::TOP, top_bc) &&
 		PrepareValuesForSingleBC(Boundary::BOTTOM, bottm_bc) &&
 		PrepareValuesForSingleBC(Boundary::LEFT, left_bc) &&
 		PrepareValuesForSingleBC(Boundary::RIGHT, right_bc)) 
 	{
-		// Лог что все значения получилось взять
+		// If medium include some obstacles - prepare values to deal with this additional boundary conditions
+		if (medium.IsIncludeObstacles())
+		{
+			PrepareValuesForObstacles(medium);
+		}
 	}
 	else
 	{
@@ -101,7 +101,7 @@ void BCs::RecordValuesOnSingleBC(Boundary const BC, BCType const bc_type)
 			ptrToFunc = &DistributionFunction<double>::setBottomBoundaryValue;
 			RecordBoundaryValues(bc_type, bottom_boundary_, top_ids_, ptrToFunc);
 		}
-		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET) // !! VON NEUMANN IS NOT TESTED YET !!!
+		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
 		{
 			ptrToFunc = &DistributionFunction<double>::setTopBoundaryValue;
 			RecordBoundaryValues(bc_type, top_boundary_, bottom_ids_, ptrToFunc);
@@ -115,7 +115,7 @@ void BCs::RecordValuesOnSingleBC(Boundary const BC, BCType const bc_type)
 			ptrToFunc = &DistributionFunction<double>::setTopBoundaryValue;
 			RecordBoundaryValues(bc_type, top_boundary_, bottom_ids_, ptrToFunc);
 		}
-		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET) // !! VON NEUMANN IS NOT TESTED YET !!!
+		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
 		{
 			ptrToFunc = &DistributionFunction<double>::setBottomBoundaryValue;
 			RecordBoundaryValues(bc_type, bottom_boundary_, top_ids_, ptrToFunc);
@@ -143,7 +143,7 @@ void BCs::RecordValuesOnSingleBC(Boundary const BC, BCType const bc_type)
 			ptrToFunc = &DistributionFunction<double>::setLeftBoundaryValue;
 			RecordBoundaryValues(bc_type, left_boundary_, right_ids_, ptrToFunc);
 		}
-		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET) // !! VON NEUMANN IS NOT TESTED YET !!!
+		else if (bc_type == BCType::BOUNCE_BACK || bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
 		{
 			ptrToFunc = &DistributionFunction<double>::setRightBoundaryValue;
 			RecordBoundaryValues(bc_type, right_boundary_, left_ids_, ptrToFunc);
@@ -156,17 +156,20 @@ void BCs::RecordValuesOnSingleBC(Boundary const BC, BCType const bc_type)
 	}
 }
 
-void BCs::RecordValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc)
+void BCs::RecordValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCType const left_bc, BCType const right_bc, const Medium & medium)
 {
 	RecordValuesOnSingleBC(Boundary::TOP, top_bc);
 	RecordValuesOnSingleBC(Boundary::BOTTOM, bottm_bc);
 	RecordValuesOnSingleBC(Boundary::LEFT, left_bc);
 	RecordValuesOnSingleBC(Boundary::RIGHT, right_bc);
 
+	if (medium.IsIncludeObstacles())
+		RecordValuesForObstacles();
+
 	f_ptr_->fillBoundaries(0.0);
 }
 
-bool BCs::WriteBoundaryValues(BCType const bc_type, std::map<int, std::vector<double>>& bc_boundary, const std::vector<int>& bc_ids, std::vector<double>(DistributionFunction<double>::* ptrToFunc)(int) const)
+bool BCs::WriteBoundaryValuesFirstOrder(BCType const bc_type, std::map<int, std::vector<double>>& bc_boundary, const std::vector<int>& bc_ids, std::vector<double>(DistributionFunction<double>::* ptrToFunc)(int) const)
 {
 	if (bc_type == BCType::PERIODIC || bc_type == BCType::BOUNCE_BACK)
 	{
@@ -181,7 +184,7 @@ bool BCs::WriteBoundaryValues(BCType const bc_type, std::map<int, std::vector<do
 	return false;
 }
 
-bool BCs::WriteVonNeumannBoundaryValues(BCType const bc_type, std::map<int, std::vector<double>>& bc_boundary, const std::vector<int>& bc_ids_1, const std::vector<int>& bc_ids_2, std::vector<double>(DistributionFunction<double>::* ptrToFunc)(int) const)
+bool BCs::WriteBoundaryValuesSecondOrder(BCType const bc_type, std::map<int, std::vector<double>>& bc_boundary, const std::vector<int>& bc_ids_1, const std::vector<int>& bc_ids_2, std::vector<double>(DistributionFunction<double>::* ptrToFunc)(int) const)
 {
 	if (bc_type == BCType::VON_NEUMAN || bc_type == BCType::DIRICHLET)
 	{
@@ -324,6 +327,55 @@ void BCs::DirichletBC(Boundary const first, Fluid & fluid, double const rho_0)
 		std::cout << "Wrong boundary type while appling Von-Neumann boundary condidtions.\n";
 		break;
 	}
+}
+
+void BCs::PrepareValuesForObstacles(const Medium & medium)
+{
+	// Obtain obstacles positions form medium
+	std::vector<ObstacleNode> obstacles = medium.GetObstacles();
+
+	for (int q = 1; q < kQ; ++q)
+	{
+		std::vector<ObstacleNode> v;
+		for (auto node : obstacles)
+		{
+			// Obtain value of distribution function of node from which fluid will stream to chosen obstacle node
+			double f = f_ptr_->Get(q, node.y_ - kEy[q], node.x_ - kEx[q]);
+			// If this value is zero, this node is surrounded by obstacle nodes, on boundary of obstacle otherwise
+			if (f != 0.0)
+				v.push_back(ObstacleNode(node.y_ - kEy[q], node.x_ - kEx[q], f));
+		}
+		obstacles_bc_.insert(std::make_pair(q, v));
+	}
+}
+
+void BCs::ObstaclesBounceBackBCs()
+{
+	// Set values of distribution function in obstacle nodes to be equal to zero
+	for (auto pair : obstacles_bc_)
+	{
+		int q = pair.first;
+		for (auto node : pair.second)
+			f_ptr_->Set(q, node.y_ + kEy[q], node.x_ + kEx[q], 0.0);
+	}
+
+	// Perform bounce-back boundary condition
+	std::swap(obstacles_bc_.at(1), obstacles_bc_.at(3));
+	std::swap(obstacles_bc_.at(2), obstacles_bc_.at(4));
+	std::swap(obstacles_bc_.at(5), obstacles_bc_.at(7));
+	std::swap(obstacles_bc_.at(6), obstacles_bc_.at(8));
+}
+
+void BCs::RecordValuesForObstacles()
+{
+	for (auto pair : obstacles_bc_)
+	{
+		int q = pair.first;
+		for (auto node : pair.second)
+			f_ptr_->Set(q, node.y_, node.x_, node.value_);
+	}
+	// Clear map which contains values of distribution function for obstacles
+	obstacles_bc_.clear();
 }
 
 void BCs::CalculateVonNeumanBCValues(Boundary const first, const int size, std::map<int, std::vector<double>> & boundary, 

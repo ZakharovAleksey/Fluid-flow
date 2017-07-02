@@ -160,14 +160,9 @@ void IBSolver::Solve(int iter_numb)
 		}
 
 		Collision();
-		BC.PrepareValuesForAllBC(BCType::PERIODIC, BCType::PERIODIC, BCType::VON_NEUMAN, BCType::VON_NEUMAN);
-		if (medium_->IsImmersedBodies())
-			BC.PrepareAdditionalBCs(*medium_);
-		
+		BC.PrepareValuesForAllBC(BCType::PERIODIC, BCType::PERIODIC, BCType::VON_NEUMAN, BCType::VON_NEUMAN, *medium_);
 
 		Streaming();
-
-		//BC.PrepareAdditionalBCs(*medium_);
 
 		BC.PeriodicBC(Boundary::TOP, Boundary::BOTTOM);
 		//BC.BounceBackBC(Boundary::TOP);
@@ -177,15 +172,10 @@ void IBSolver::Solve(int iter_numb)
 		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.001, 0.0);
 		BC.VonNeumannBC(Boundary::RIGHT, *fluid_, 0.0, 0.0);
 
-		if (medium_->IsImmersedBodies())
-			BC.AdditionalBounceBackBCs();
+		if (medium_->IsIncludeObstacles())
+			BC.ObstaclesBounceBackBCs();
 
-		//BC.AdditionalBounceBackBCs();
-
-		BC.RecordValuesForAllBC(BCType::PERIODIC, BCType::PERIODIC, BCType::VON_NEUMAN, BCType::VON_NEUMAN);
-		if (medium_->IsImmersedBodies())
-			BC.RecordAdditionalBCs();
-		//BC.RecordAdditionalBCs();
+		BC.RecordValuesForAllBC(BCType::PERIODIC, BCType::PERIODIC, BCType::VON_NEUMAN, BCType::VON_NEUMAN, *medium_);
 
 		Recalculate();
 

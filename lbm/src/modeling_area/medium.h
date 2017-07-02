@@ -20,6 +20,20 @@ enum class NodeType : int
 	OBSTACLE			= 7,
 };
 
+//! Node of obstacle in fluid flow
+struct ObstacleNode
+{
+	//! Obstacles coordinates
+	const int y_;
+	const int x_;
+
+	//! Value which will further store distribution function for given q [1 : kQ]
+	double value_;
+
+	ObstacleNode(const int y, const int x, double val) : y_(y), x_(x), value_(val) {}
+};
+
+
 #pragma region 2d
 
 //! Modeling area implementation class.
@@ -41,7 +55,7 @@ public:
 	std::pair<unsigned int, unsigned int> size() const;
 
 	//! Returns true if medium has additional immersed bodies in modeling area, but common TOP, BOTTOM, LEFT, RIGTH boundaries
-	bool IsImmersedBodies() const;
+	bool IsIncludeObstacles() const;
 	//! Returns number of rows
 	const int GetRowsNumber() const;
 	//! Returns number of columns
@@ -55,20 +69,14 @@ public:
 	void AddTopAngle(const int leftX, const int leftY, const int radius);
 	void AddRightAngle(const int leftX, const int leftY, const int radius);
 	void AddCircleTopFalf(const int x0, const int y0, const int radius);
-	void AddCircleBottomFalf(const int x0, const int y0, const int radius);
 
 
 	friend std::ostream & operator<<(std::ostream & os, Medium const & medium);
+	//! Returns 
+	NodeType Get(const int y, const int x) const;
 
-	NodeType Get(const int y, const int x)
-	{
-		return medium_(y, x);
-	}
-
-	NodeType Get(const int y, const int x) const
-	{
-		return medium_(y, x);
-	}
+	//! Gets array of obstacles
+	std::vector<ObstacleNode> GetObstacles() const;
 
 private:
 
@@ -76,14 +84,20 @@ private:
 	//! nodes are left, right, top, bottom boundaries
 	void FillInitialState();
 
+private:
+
 	//! Number of rows in modeling area
 	int rows_;
 	//! Number of columns in modeling area
 	int colls_;
 
-	bool is_immersed_bodies_;
+	//! Stored array with obstacles nodes in modeling area
+	std::vector<ObstacleNode> obstacles_;
 
 	Matrix2D<NodeType> medium_;
+
+	
+
 };
 
 #pragma endregion

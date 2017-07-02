@@ -22,10 +22,10 @@
 #pragma region 2d
 
 
-Medium::Medium() : rows_(0), colls_(0), is_immersed_bodies_(false), medium_() {}
+Medium::Medium() : rows_(0), colls_(0), medium_() {}
 
 
-Medium::Medium(int rows, int colls) : rows_(rows), colls_(colls), is_immersed_bodies_(false)
+Medium::Medium(int rows, int colls) : rows_(rows), colls_(colls)
 {
 	assert(rows_ > 2 && colls > 2);
 
@@ -58,9 +58,9 @@ std::pair<unsigned, unsigned> Medium::size() const
 	return std::make_pair(rows_, colls_);
 }
 
-bool Medium::IsImmersedBodies() const
+bool Medium::IsIncludeObstacles() const
 {
-	return is_immersed_bodies_;
+	return (obstacles_.empty()) ? false : true;
 }
 
 const int Medium::GetRowsNumber() const
@@ -75,10 +75,6 @@ const int Medium::GetColumnsNumber() const
 
 void Medium::AddCircle(const int x0, const int y0, const int radius)
 {
-	is_immersed_bodies_ = true;
-	//assert(x0 + radius < colls_ - 1 && x0 - radius > 1);
-	//assert(y0 + radius < rows_ - 1 && y0 - radius > 1);
-
 	int xStart = x0 - radius; int xStop = x0 + radius;
 	int yStart = y0 - radius; int yStop = y0 + radius;
 
@@ -86,33 +82,31 @@ void Medium::AddCircle(const int x0, const int y0, const int radius)
 	{
 		for (int x = xStart; x < xStop; ++x)
 		{
-			if (y >= 0 && y < rows_ && x > 0 && x < colls_)
-				if ( pow(x- x0, 2) + pow(y - y0, 2) < pow(radius, 2))
+			if (y > 0 && y < rows_ - 1 && x > 0 && x < colls_ - 1)
+				if (pow(x - x0, 2) + pow(y - y0, 2) < pow(radius, 2))
+				{
 					medium_(y, x) = NodeType::OBSTACLE;
+					obstacles_.push_back(ObstacleNode(y, x, 0.0));
+				}
 		}
 	}
 }
 
 void Medium::AddSquare(const int leftX, const int leftY, const int width, const int height)
 {
-	is_immersed_bodies_ = true;
-	
 	for(int y = leftY; y > leftY - height; --y)
 		for (int x = leftX; x < leftX + width; ++x)
 		{
-			if( y > 0 && y < rows_ - 1 && x > 0 && x < colls_ - 1)
+			if (y > 0 && y < rows_ - 1 && x > 0 && x < colls_ - 1)
+			{
 				medium_(y, x) = NodeType::OBSTACLE;
+				obstacles_.push_back(ObstacleNode(y, x, 0.0));
+			}
 		}
-
-
 }
 
 void Medium::AddBottomAngle(const int leftX, const int leftY, const int radius)
 {
-	is_immersed_bodies_ = true;
-	//assert(leftX > 0 && leftX + radius < colls_);
-	//assert(leftY - radius > 0 && leftY < rows_);
-
 	int x0 = leftX + radius;
 	int y0 = leftY - radius;
 	int circleRad = radius - 1;
@@ -122,18 +116,15 @@ void Medium::AddBottomAngle(const int leftX, const int leftY, const int radius)
 		{
 			if (y > 0 && y < rows_ - 1 && x > 0 && x < colls_ - 1)
 				if ((x - x0) * (x - x0) + (y - y0) * (y - y0) >= circleRad * circleRad)
+				{
 					medium_(y, x) = NodeType::OBSTACLE;
+					obstacles_.push_back(ObstacleNode(y, x, 0.0));
+				}
 		}
-
-
 }
 
 void Medium::AddTopAngle(const int leftX, const int leftY, const int radius)
 {
-	is_immersed_bodies_ = true;
-	//assert(leftX > 0 && leftX + radius < colls_);
-	//assert(leftY >= 0 && leftY + radius < rows_);
-
 	int x0 = leftX + radius;
 	int y0 = leftY + radius;
 	int circleRad = radius - 1;
@@ -143,17 +134,15 @@ void Medium::AddTopAngle(const int leftX, const int leftY, const int radius)
 		{
 			if (y > 0 && y < rows_ - 1 && x > 0 && x < colls_ - 1)
 				if ((x - x0) * (x - x0) + (y - y0) * (y - y0) >= circleRad * circleRad)
+				{
 					medium_(y, x) = NodeType::OBSTACLE;
+					obstacles_.push_back(ObstacleNode(y, x, 0.0));
+				}
 		}
-
 }
 
 void Medium::AddRightAngle(const int leftX, const int leftY, const int radius)
 {
-	is_immersed_bodies_ = true;
-	//assert(leftX > 0 && leftX + radius < colls_);
-	//assert(leftY >= 0 && leftY + radius < rows_);
-
 	int x0 = leftX;
 	int y0 = leftY + radius;
 	int circleRad = radius - 1;
@@ -163,17 +152,15 @@ void Medium::AddRightAngle(const int leftX, const int leftY, const int radius)
 		{
 			if (y >= 0 && y < rows_ && x > 0 && x < colls_)
 				if ((x - x0) * (x - x0) + (y - y0) * (y - y0) >= circleRad * circleRad)
+				{
 					medium_(y, x) = NodeType::OBSTACLE;
+					obstacles_.push_back(ObstacleNode(y, x, 0.0));
+				}
 		}
-
 }
 
 void Medium::AddCircleTopFalf(const int x0, const int y0, const int radius)
 {
-	is_immersed_bodies_ = true;
-	//assert(x0 + radius < colls_ - 1 && x0 - radius > 1);
-	//assert(y0 + radius < rows_ - 1 && y0 - radius > 1);
-
 	int xStart = x0 - radius; int xStop = x0 + radius;
 	int yStart = y0 - radius; int yStop = y0;
 
@@ -183,30 +170,24 @@ void Medium::AddCircleTopFalf(const int x0, const int y0, const int radius)
 		{
 			if (y >= 0 && y < rows_ && x > 0 && x < colls_)
 				if (pow(x - x0, 2) + pow(y - y0, 2) < pow(radius, 2))
+				{
 					medium_(y, x) = NodeType::OBSTACLE;
+					obstacles_.push_back(ObstacleNode(y, x, 0.0));
+				}
 		}
 	}
 }
 
-void Medium::AddCircleBottomFalf(const int x0, const int y0, const int radius)
+NodeType Medium::Get(const int y, const int x) const
 {
-	is_immersed_bodies_ = true;
-
-	assert(x0 + radius < colls_ - 1 && x0 - radius > 1);
-	assert(y0 <= rows_ - 1 && y0 >= 1);
-
-	int xStart = x0 - radius; int xStop = x0 + radius;
-	int yStart = y0 - radius; int yStop = y0;
-
-	for (int y = yStart; y < yStop; ++y)
-	{
-		for (int x = xStart; x < xStop; ++x)
-		{
-			if (pow(x - x0, 2) + pow(y - y0, 2) < pow(radius, 2))
-				medium_(y, x) = NodeType::OBSTACLE;
-		}
-	}
+	return medium_(y, x);
 }
+
+std::vector<ObstacleNode> Medium::GetObstacles() const
+{
+	return obstacles_;
+}
+
 
 void Medium::FillInitialState()
 {

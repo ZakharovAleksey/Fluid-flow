@@ -72,26 +72,21 @@ void SRTsolver::Solve(int iter_numb)
 	{
 		Collision();
 
-		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::DIRICHLET);
-		if (medium_->IsImmersedBodies())
-			BC.PrepareAdditionalBCs(*medium_);
+		BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET, *medium_);
 
 		Streaming();
 
 		BC.BounceBackBC(Boundary::TOP);
 		BC.BounceBackBC(Boundary::BOTTOM);
-		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.001, 0.0);
+		BC.DirichletBC(Boundary::LEFT, *fluid_, 1.001);
 		BC.DirichletBC(Boundary::RIGHT, *fluid_, 1.0);
 
-		if (medium_->IsImmersedBodies())
-			BC.AdditionalBounceBackBCs();
+		if (medium_->IsIncludeObstacles())
+			BC.ObstaclesBounceBackBCs();
 
 		
-		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::VON_NEUMAN, BCType::DIRICHLET);
-		if (medium_->IsImmersedBodies())
-			BC.RecordAdditionalBCs();
+		BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET, *medium_);
 
-		//std::cout << " Total rho rec = " << fluid_->rho_.GetSum() << std::endl;
 		Recalculate();
 		
 	
