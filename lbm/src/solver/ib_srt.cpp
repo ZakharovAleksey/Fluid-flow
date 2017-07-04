@@ -14,7 +14,7 @@ IBSolver::IBSolver(double tau, Fluid & fluid, Medium & medium, std::unique_ptr<I
 	std::cout << "nu = " << (tau - 0.5) / 3.0 << std::endl;
 	std::cout << "Re =  " << fluid_->size().second * 0.001 / ((tau - 0.5) / 3.0) << std::endl;
 
-	fluid_ = std::unique_ptr<Fluid>(new Fluid(fluid));
+	fluid_ = (new Fluid(fluid));
 	medium_ = std::unique_ptr<Medium>(new Medium(medium));
 	body_ = std::move(body);//std::unique_ptr<ImmersedBody>(new ImmersedBody(body));
 
@@ -39,7 +39,7 @@ IBSolver::IBSolver(double tau, Fluid & fluid, Medium & medium, std::vector<Immer
 	std::cout << " --- Input parameters :\n";
 	std::cout << "nu = " << (tau - 0.5) / 3.0 << std::endl;
 	std::cout << "Re =  " << fluid.size().second * 0.01 / ((tau - 0.5) / 3.0) << std::endl;
-	fluid_ = std::unique_ptr<Fluid>(new Fluid(fluid));
+	fluid_ = new Fluid(fluid);
 	medium_ = std::unique_ptr<Medium>(new Medium(medium));
 
 	int i = 0;
@@ -131,14 +131,13 @@ void IBSolver::Solve(int iter_numb)
 		fluid_->f_[q] = fluid_->feq_[q];
 
 	BCs BC(fluid_->f_);
-	Microphone mic;
+	BC.SetPeriodicBC(Boundary::TOP, Boundary::BOTTOM);
+	BC.SetDirichletBC(Boundary::LEFT, 1.001);
+	BC.SetDirichletBC(Boundary::RIGHT, 1.0);
+
 
 	for (int iter = 0; iter < iter_numb; ++iter)
 	{
-		//mic.PerformMeasurements(iter, im_bodies_, fluid_->vx_, "vx");
-		//mic.PerformMeasurements(iter, im_bodies_, fluid_->vx_, "vy");
-		//mic.PerformMeasurements(iter, im_bodies_, fluid_->vx_, "rho");
-
 		// Clean fx, fy fields
 		fx_->FillWith(0.0);
 		fy_->FillWith(0.0);
@@ -160,22 +159,12 @@ void IBSolver::Solve(int iter_numb)
 		}
 
 		Collision();
-		BC.PrepareValuesForAllBC(BCType::PERIODIC, BCType::PERIODIC, BCType::VON_NEUMAN, BCType::VON_NEUMAN, *medium_);
+		BC.PrepareBCValues(*medium_);
 
 		Streaming();
+		BC.PerformBC(fluid_, *medium_);
 
-		BC.PeriodicBC(Boundary::TOP, Boundary::BOTTOM);
-		//BC.BounceBackBC(Boundary::TOP);
-		//BC.BounceBackBC(Boundary::BOTTOM);
-
-		double vx = 0.001; 
-		BC.VonNeumannBC(Boundary::LEFT, *fluid_, 0.001, 0.0);
-		BC.VonNeumannBC(Boundary::RIGHT, *fluid_, 0.0, 0.0);
-
-		if (medium_->IsIncludeObstacles())
-			BC.ObstaclesBounceBackBCs();
-
-		BC.RecordValuesForAllBC(BCType::PERIODIC, BCType::PERIODIC, BCType::VON_NEUMAN, BCType::VON_NEUMAN, *medium_);
+		BC.RecordBCValues(*medium_);
 
 		Recalculate();
 

@@ -41,7 +41,7 @@ protected:
 	const double tau_;
 
 	//! Pointer to fluid class of appropriate modeling area
-	std::unique_ptr<Fluid> fluid_;
+	Fluid* fluid_;
 	//! Pointer to medium class of appropriate modeling area
 	std::unique_ptr<Medium> medium_;
 	//! Pointer to immersed body
@@ -144,6 +144,10 @@ public:
 			fluid_->f_[q] = fluid_->feq_[q];
 
 		BCs BC(fluid_->f_);
+		BC.SetBounceBackBC(Boundary::TOP);
+		BC.SetBounceBackBC(Boundary::BOTTOM);
+		BC.SetDirichletBC(Boundary::LEFT, 1.001);
+		BC.SetDirichletBC(Boundary::RIGHT, 1.0);
 
 		for (int iter = 0; iter < iter_numb; ++iter)
 		{
@@ -168,24 +172,12 @@ public:
 			}
 
 			Collision();
-			BC.PrepareValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET, *medium_);
-			if (medium_->IsIncludeObstacles())
-				BC.PrepareValuesForObstacles(*medium_);
+			BC.PrepareBCValues(*medium_);
 
 			Streaming();
 
-			BC.BounceBackBC(Boundary::TOP);
-			BC.BounceBackBC(Boundary::BOTTOM);
-
-			BC.DirichletBC(Boundary::LEFT, *fluid_, 1.001);
-			BC.DirichletBC(Boundary::RIGHT, *fluid_, 1.0);
-
-			if (medium_->IsIncludeObstacles())
-				BC.ObstaclesBounceBackBCs();
-
-			BC.RecordValuesForAllBC(BCType::BOUNCE_BACK, BCType::BOUNCE_BACK, BCType::DIRICHLET, BCType::DIRICHLET, *medium_);
-			if (medium_->IsIncludeObstacles())
-				BC.RecordValuesForObstacles();
+			BC.PerformBC(fluid_, *medium_);
+			BC.RecordBCValues(*medium_);
 
 			Recalculate();
 

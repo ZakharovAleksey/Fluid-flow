@@ -81,13 +81,13 @@ int main()
 	int X{ 100 }; //100
 	int Y{ 30 };
 	Medium m(Y, X);
-	m.AddCircle(15, 1, 6);
+	m.AddCircle(15, 15, 6);
 
 	Fluid f(Y, X, m);
 	
 	// Start solution
 	SRTsolver solver(1.0, m, f);
-	solver.Solve(4001);
+	solver.Solve(1501);
 
 #pragma endregion
 
@@ -114,7 +114,7 @@ int main()
 	// >>
 	
 	// >> Flow around cylinder obstacle
-	//m.AddCircle(X/10, Y/2, Y/10+ 1);
+	m.AddCircle(X/10, Y/2, Y/10+ 1);
 	// >>
 
 	// >> Flow in asterios obstacle
@@ -132,9 +132,9 @@ int main()
 #pragma endregion
 
 
-	// Start solution
-	// MRTSolver solver(0.514, m, f); // tau = 0.5008
-	// solver.Solve(15001);
+	//// Start solution
+	//MRTSolver solver(0.514, m, f); // tau = 0.5008
+	//solver.Solve(15001);
 
 #pragma endregion
 
@@ -186,9 +186,9 @@ int main()
 	////bodies.push_back(body1);
 	////bodies.push_back(body3);
 
-	//// Start solution
+	// Start solution
 	//IBSolver s(1.0, f, m, bodies); //std::move(body));
-	//s.Solve(25001);
+	//s.Solve(1501);
 
 
 	/*IBMRTSolver sol(1.0, f, m, bodies);

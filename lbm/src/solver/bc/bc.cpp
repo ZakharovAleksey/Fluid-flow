@@ -8,7 +8,7 @@
 #pragma region 2d
 
 
-BCs::BCs(DistributionFunction<double> & dfunc): f_ptr_(&dfunc) { }
+BCs::BCs(DistributionFunction<double> & dfunc): f_ptr_(&dfunc), top_info_(nullptr), bottom_info_(nullptr), right_info_(nullptr), left_info_(nullptr) { }
 
 BCs::~BCs() {}
 
@@ -75,11 +75,11 @@ void BCs::PrepareValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCTy
 		PrepareValuesForSingleBC(Boundary::LEFT, left_bc) &&
 		PrepareValuesForSingleBC(Boundary::RIGHT, right_bc)) 
 	{
-		// If medium include some obstacles - prepare values to deal with this additional boundary conditions
-		if (medium.IsIncludeObstacles())
-		{
-			PrepareValuesForObstacles(medium);
-		}
+		//// If medium include some obstacles - prepare values to deal with this additional boundary conditions
+		//if (medium.IsIncludeObstacles())
+		//{
+		//	PrepareValuesForObstacles(medium);
+		//}
 	}
 	else
 	{
@@ -163,8 +163,8 @@ void BCs::RecordValuesForAllBC(BCType const top_bc, BCType const bottm_bc, BCTyp
 	RecordValuesOnSingleBC(Boundary::LEFT, left_bc);
 	RecordValuesOnSingleBC(Boundary::RIGHT, right_bc);
 
-	if (medium.IsIncludeObstacles())
-		RecordValuesForObstacles();
+	/*if (medium.IsIncludeObstacles())
+		RecordValuesForObstacles();*/
 
 	f_ptr_->fillBoundaries(0.0);
 }
