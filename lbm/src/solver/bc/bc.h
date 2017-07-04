@@ -117,138 +117,21 @@ public:
 	~BCs();
 
 	//! Set periodic boundary conditions to chosen boundaries
-	void SetPeriodicBC(Boundary first, Boundary second)
-	{
-		// Periodic boundary conditions could be applied to [LEFT -> RIGHT] boundaries
-		if (first == Boundary::LEFT && second == Boundary::RIGHT)
-		{
-			left_info_ = std::make_shared<BCInfoPeriodic>(Boundary::LEFT);
-			right_info_ = std::make_shared<BCInfoPeriodic>(Boundary::RIGHT);
-		}
-		// Periodic boundary conditions could be applied to [TOP -> BOTTOM] boundaries
-		else if (first == Boundary::TOP && second == Boundary::BOTTOM)
-		{
-			top_info_ = std::make_shared<BCInfoPeriodic>(Boundary::TOP);
-			bottom_info_ = std::make_shared<BCInfoPeriodic>(Boundary::BOTTOM);
-		}
-		else
-		{
-			std::cout << "You are trying to set periodic boundary conditions to wrong boundaries!\n";
-		}
-	}
+	void SetPeriodicBC(Boundary first, Boundary second);
 	//! Set bounce-back boundary conditions to chosen boundary
-	void SetBounceBackBC(Boundary boundary)
-	{
-		switch (boundary)
-		{
-		case Boundary::TOP:
-			top_info_ = std::make_shared<BCInfoBounceBack>(Boundary::TOP);
-			break;
-		case Boundary::BOTTOM:
-			bottom_info_ = std::make_shared<BCInfoBounceBack>(Boundary::BOTTOM);
-			break;
-		case Boundary::RIGHT:
-			right_info_ = std::make_shared<BCInfoBounceBack>(Boundary::RIGHT);
-			break;
-		case Boundary::LEFT:
-			left_info_ = std::make_shared<BCInfoBounceBack>(Boundary::LEFT);
-			break;
-		default:
-			std::cout << "You are trying to set bounce-back boundary conditions to wrong boundaries!\n";
-			break;
-		}
-	}
+	void SetBounceBackBC(Boundary boundary);
 	//! Set Von-Neumann boundary conditions to chosen boundary
-	void SetVonNeumannBC(Boundary boundary, double vx, double vy)
-	{
-		switch (boundary)
-		{
-		case Boundary::TOP:
-			top_info_ = std::make_shared<BCInfoVonNeumann>(Boundary::TOP, vx, vy);
-			break;
-		case Boundary::BOTTOM:
-			bottom_info_ = std::make_shared<BCInfoVonNeumann>(Boundary::BOTTOM, vx, vy);
-			break;
-		case Boundary::RIGHT:
-			right_info_ = std::make_shared<BCInfoVonNeumann>(Boundary::RIGHT, vx, vy);
-			break;
-		case Boundary::LEFT:
-			left_info_ = std::make_shared<BCInfoVonNeumann>(Boundary::LEFT, vx, vy);
-			break;
-		default:
-			std::cout << "You are trying to set bounce-back boundary conditions to wrong boundaries!\n";
-			break;
-		}
-	}
+	void SetVonNeumannBC(Boundary boundary, double vx, double vy);
 	//! Set Dirichlet boundary conditions to chosen boundary
-	void SetDirichletBC(Boundary boundary, double rho)
-	{
-		switch (boundary)
-		{
-		case Boundary::TOP:
-			top_info_ = std::make_shared<BcInfoDirichlet>(Boundary::TOP, rho);
-			break;
-		case Boundary::BOTTOM:
-			bottom_info_ = std::make_shared<BcInfoDirichlet>(Boundary::BOTTOM, rho);
-			break;
-		case Boundary::RIGHT:
-			right_info_ = std::make_shared<BcInfoDirichlet>(Boundary::RIGHT, rho);
-			break;
-		case Boundary::LEFT:
-			left_info_ = std::make_shared<BcInfoDirichlet>(Boundary::LEFT, rho);
-			break;
-		default:
-			std::cout << "You are trying to set bounce-back boundary conditions to wrong boundaries!\n";
-			break;
-		}
-	}
+	void SetDirichletBC(Boundary boundary, double rho);
 
 	//! Prepares values of distribution function for all boundaries and obstacles, if last takes place
-	void PrepareBCValues(const Medium & medium)
-	{
-		// Prepare values for all BCs
-		PrepareValuesForAllBC(top_info_->GetType(), bottom_info_->GetType(), left_info_->GetType(), right_info_->GetType(), medium);
-		// If medium include some obstacles - prepare values to deal with this additional boundary conditions
-		if (medium.IsIncludeObstacles())
-		{
-			PrepareValuesForObstacles(medium);
-		}
-	}
+	void PrepareBCValues(const Medium & medium);
 	//! Records values of distribution function for all boundaries and obstacles, if last takes place
-	void RecordBCValues(const Medium & medium)
-	{
-		// Record values for all BCs
-		RecordValuesForAllBC(top_info_->GetType(), bottom_info_->GetType(), left_info_->GetType(), right_info_->GetType(), medium);
-		// If medium include some obstacles - record values to deal with this additional boundary conditions
-		if (medium.IsIncludeObstacles())
-		{
-			RecordValuesForObstacles();
-		}
-	}
+	void RecordBCValues(const Medium & medium);
 
 	//! Performs chosen earlier boundary conditions 
-	void PerformBC(Fluid* fluid, const Medium & medium)
-	{
-		// Performs boundary conditions for ONE boundary (Bounce-back, Von-Neumann or Dirichlet)
-		PerformSingleBoundaryBC(top_info_, Boundary::TOP, fluid);
-		PerformSingleBoundaryBC(bottom_info_, Boundary::BOTTOM, fluid);
-		PerformSingleBoundaryBC(left_info_, Boundary::LEFT, fluid);
-		PerformSingleBoundaryBC(right_info_, Boundary::RIGHT, fluid);
-
-		// Perform boundary conditions for TWO boundaries (Periodic)
-		if (top_info_->GetType() == BCType::PERIODIC && bottom_info_->GetType() == BCType::PERIODIC)
-		{
-			PeriodicBC(Boundary::TOP, Boundary::BOTTOM);
-		}
-		if (left_info_->GetType() == BCType::PERIODIC && right_info_->GetType() == BCType::PERIODIC)
-		{
-			PeriodicBC(Boundary::LEFT, Boundary::RIGHT);
-		}
-
-		// If medium include some obstacles - performs boundary conditions for them
-		if (medium.IsIncludeObstacles())
-			ObstaclesBounceBackBCs();
-	}
+	void PerformBC(Fluid* fluid, const Medium & medium);
 
 	friend std::ostream & operator<<(std::ostream & os, BCs const & BC);
 
