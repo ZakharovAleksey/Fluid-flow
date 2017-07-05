@@ -81,13 +81,17 @@ int main()
 	int X{ 100 }; //100
 	int Y{ 30 };
 	Medium m(Y, X);
-	m.AddCircle(15, 15, 6);
-
+	//m.AddCircle(15, 15, 6);
 	Fluid f(Y, X, m);
-	
-	// Start solution
-	SRTsolver solver(1.0, m, f);
-	solver.Solve(1501);
+	BCs bc(f.f_);
+	bc.SetBounceBackBC(Boundary::TOP);
+	bc.SetBounceBackBC(Boundary::BOTTOM);
+	bc.SetDirichletBC(Boundary::LEFT, 1.001);
+	bc.SetDirichletBC(Boundary::RIGHT, 1.0);
+	//
+	//// Start solution
+	//SRTsolver solver(1.0, m, f, &bc);
+	//solver.Solve(1);
 
 #pragma endregion
 
@@ -100,7 +104,7 @@ int main()
 
 #pragma region obstacles
 
-	// Y-shape channel flow obstacles
+	///* Y-shape channel flow obstacles
 	//m.AddSquare(1, Y-2, X/2, Y/4);
 	//m.AddTopAngle(X / 2, 1, Y / 4);
 	//m.AddSquare(1, Y/4, X/2, Y/4);
@@ -109,32 +113,32 @@ int main()
 	//m.AddCircle(X / 2 + Y / 2, Y / 2, Y / 4);*/
 	// >>
 
-	// >> Around tromb flow obstacle
-	//m.AddCircleTopFalf(35, 39, 15);
-	// >>
+	/* >> Around tromb flow obstacle
+	m.AddCircleTopFalf(35, 39, 15);
+	 >>*/
 	
-	// >> Flow around cylinder obstacle
+	/* >> Flow around cylinder obstacle
 	m.AddCircle(X/10, Y/2, Y/10+ 1);
-	// >>
+	 >>*/
 
-	// >> Flow in asterios obstacle
-	//m.AddSquare(1, 0.25 * Y, X / 2 - Y / 4, 0.25 * Y);
-	//m.AddTopAngle(X / 2 - Y / 4, -1, Y / 4);
-	//m.AddRightAngle(X / 2, -1, Y / 4);
-	//m.AddSquare(X / 2 + Y /4, 0.25 * Y, X / 2 - Y / 4, 0.25 * Y);
-	//>>
+	/* >> Flow in asterios obstacle
+	m.AddSquare(1, 0.25 * Y, X / 2 - Y / 4, 0.25 * Y);
+	m.AddTopAngle(X / 2 - Y / 4, -1, Y / 4);
+	m.AddRightAngle(X / 2, -1, Y / 4);
+	m.AddSquare(X / 2 + Y /4, 0.25 * Y, X / 2 - Y / 4, 0.25 * Y);
+	>>*/
 
-	// >> Flow between trombs obstacles
-	// m.AddCircle(35, 39, 10);
-	// m.AddCircle(35, 1, 10);
-	// >> 
+	 /*>> Flow between trombs obstacles
+	 m.AddCircle(35, 39, 10);
+	 m.AddCircle(35, 1, 10);
+	 >> */
 
 #pragma endregion
 
 
-	//// Start solution
-	//MRTSolver solver(0.514, m, f); // tau = 0.5008
-	//solver.Solve(15001);
+	// Start solution
+	//MRTSolver solver(0.514, m, f, &bc); // tau = 0.5008
+	//solver.Solve(1501);
 
 #pragma endregion
 
@@ -173,10 +177,10 @@ int main()
 	////ImmersedBody* body1(new ImmersedBottomRect(102, 30, 32, Point(7, 50), 6, 13));
 
 	// ImmersedBody* rbc(new ImmersedRBC(102, 30, 32, Point(15, 15), 6)); Хороший размер для моделирования многих RBC
-	//ImmersedBody* rbc(new ImmersedRBC(X, Y, 32, Point(15, 15), 6));
+	ImmersedBody* rbc(new ImmersedRBC(X, Y, 32, Point(15, 15), 6));
 	//ImmersedBody* tromb(new ImmersedCircle(X, Y, 64, Point(38, 35), 15, M_PI, 2.0 * M_PI));
-	//std::vector<ImmersedBody*> bodies;
-	//bodies.push_back(rbc);
+	std::vector<ImmersedBody*> bodies;
+	bodies.push_back(rbc);
 
 	//bodies.push_back(bottom_rect);
 	//bodies.push_back(top_rect);
@@ -187,12 +191,12 @@ int main()
 	////bodies.push_back(body3);
 
 	// Start solution
-	//IBSolver s(1.0, f, m, bodies); //std::move(body));
+	//IBSolver s(1.0, f, m, &bc, bodies); //std::move(body));
 	//s.Solve(1501);
 
 
-	/*IBMRTSolver sol(1.0, f, m, bodies);
-	sol.Solve(25001);*/
+	IBMRTSolver sol(0.6, f, m, &bc, bodies);
+	sol.Solve(1501);
 
 #pragma endregion
 

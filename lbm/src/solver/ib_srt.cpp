@@ -27,7 +27,7 @@ IBSolver::IBSolver(double tau, Fluid & fluid, Medium & medium, std::unique_ptr<I
 	force_member_.resize(kQ, 0.0);
 }
 
-IBSolver::IBSolver(double tau, Fluid & fluid, Medium & medium, std::vector<ImmersedBody*> bodies) : tau_(tau)
+IBSolver::IBSolver(double tau, Fluid & fluid, Medium & medium, BCs* bc, std::vector<ImmersedBody*> bodies) : tau_(tau), fluid_(&fluid), bc_(bc)
 {
 	CreateDataFolder("Data");
 	CreateDataFolder("Data\\ib_lbm_data");
@@ -38,8 +38,8 @@ IBSolver::IBSolver(double tau, Fluid & fluid, Medium & medium, std::vector<Immer
 
 	std::cout << " --- Input parameters :\n";
 	std::cout << "nu = " << (tau - 0.5) / 3.0 << std::endl;
-	std::cout << "Re =  " << fluid.size().second * 0.01 / ((tau - 0.5) / 3.0) << std::endl;
-	fluid_ = new Fluid(fluid);
+	std::cout << "Re =  " << fluid_->size().second * 0.01 / ((tau - 0.5) / 3.0) << std::endl;
+	//fluid_ = new Fluid(fluid);
 	medium_ = std::unique_ptr<Medium>(new Medium(medium));
 
 	int i = 0;
@@ -130,12 +130,6 @@ void IBSolver::Solve(int iter_numb)
 	for (int q = 0; q < kQ; ++q)
 		fluid_->f_[q] = fluid_->feq_[q];
 
-	BCs BC(fluid_->f_);
-	BC.SetPeriodicBC(Boundary::TOP, Boundary::BOTTOM);
-	BC.SetDirichletBC(Boundary::LEFT, 1.001);
-	BC.SetDirichletBC(Boundary::RIGHT, 1.0);
-
-
 	for (int iter = 0; iter < iter_numb; ++iter)
 	{
 		// Clean fx, fy fields
@@ -159,12 +153,11 @@ void IBSolver::Solve(int iter_numb)
 		}
 
 		Collision();
-		BC.PrepareBCValues(*medium_);
+		bc_->PrepareBCValues(*medium_);
 
 		Streaming();
-		BC.PerformBC(fluid_, *medium_);
-
-		BC.RecordBCValues(*medium_);
+		bc_->PerformBC(fluid_, *medium_);
+		bc_->RecordBCValues(*medium_);
 
 		Recalculate();
 

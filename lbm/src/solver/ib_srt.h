@@ -17,7 +17,7 @@ class IBSolver : iSolver
 {
 public:
 	IBSolver(double tau, Fluid& fluid, Medium & medium, std::unique_ptr<ImmersedBody> body);
-	IBSolver(double tau, Fluid& fluid, Medium & medium, std::vector<ImmersedBody*> bodies);
+	IBSolver(double tau, Fluid& fluid, Medium & medium, BCs* bc, std::vector<ImmersedBody*> bodies);
 
 	//IBSolver(double tau, Fluid& fluid, Medium & medium, ImmersedBody& body);
 	~IBSolver() {}
@@ -44,6 +44,8 @@ protected:
 	Fluid* fluid_;
 	//! Pointer to medium class of appropriate modeling area
 	std::unique_ptr<Medium> medium_;
+	BCs* bc_;
+
 	//! Pointer to immersed body
 	std::unique_ptr<ImmersedBody> body_;
 
@@ -63,7 +65,7 @@ class IBMRTSolver : IBSolver
 {
 public:
 
-	IBMRTSolver(double tau, Fluid& fluid, Medium & medium, std::vector<ImmersedBody*> bodies) : IBSolver(tau, fluid, medium, bodies) 
+	IBMRTSolver(double tau, Fluid& fluid, Medium & medium, BCs* bc, std::vector<ImmersedBody*> bodies) : IBSolver(tau, fluid, medium, bc, bodies) 
 	{
 		CreateDataFolder("Data");
 		CreateDataFolder("Data\\ib_lbm_data");
@@ -143,12 +145,6 @@ public:
 		for (int q = 0; q < kQ; ++q)
 			fluid_->f_[q] = fluid_->feq_[q];
 
-		BCs BC(fluid_->f_);
-		BC.SetBounceBackBC(Boundary::TOP);
-		BC.SetBounceBackBC(Boundary::BOTTOM);
-		BC.SetDirichletBC(Boundary::LEFT, 1.001);
-		BC.SetDirichletBC(Boundary::RIGHT, 1.0);
-
 		for (int iter = 0; iter < iter_numb; ++iter)
 		{
 			// Clean fx, fy fields when many bodies are in modeling area [not in spread force function]
@@ -172,12 +168,12 @@ public:
 			}
 
 			Collision();
-			BC.PrepareBCValues(*medium_);
+			bc_->PrepareBCValues(*medium_);
 
 			Streaming();
 
-			BC.PerformBC(fluid_, *medium_);
-			BC.RecordBCValues(*medium_);
+			bc_->PerformBC(fluid_, *medium_);
+			bc_->RecordBCValues(*medium_);
 
 			Recalculate();
 

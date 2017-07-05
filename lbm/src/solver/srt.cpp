@@ -6,7 +6,7 @@
 
 #pragma region srt
 
-SRTsolver::SRTsolver(double const tau, Medium & medium, Fluid & fluid) : tau_(tau), medium_(&medium), fluid_(&fluid)
+SRTsolver::SRTsolver(double const tau, Medium & medium, Fluid & fluid, BCs* bc) : tau_(tau), medium_(&medium), fluid_(&fluid), bc_(bc)
 {
 	assert(medium_->size().first == fluid_->size().first);
 	assert(medium_->size().second == fluid_->size().second);
@@ -66,24 +66,14 @@ void SRTsolver::Solve(int iter_numb)
 
 	std::cout << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 
-	BCs BC(fluid_->f_);
-
-	BC.SetVonNeumannBC(Boundary::TOP, 0.001, 0.0);
-	BC.SetVonNeumannBC(Boundary::BOTTOM, -0.001, 0.0);
-	BC.SetVonNeumannBC(Boundary::LEFT, 0.0, 0.001);
-	BC.SetVonNeumannBC(Boundary::RIGHT, 0.0, 0.001);
-	//BC.SetDirichletBC(Boundary::LEFT, 1.001);
-	//BC.SetDirichletBC(Boundary::RIGHT, 1.0);
-
 	for (int iter = 0; iter < iter_numb; ++iter) 
 	{
 		Collision();
 
-		BC.PrepareBCValues(*medium_);
+		bc_->PrepareBCValues(*medium_);
 		Streaming();
-		BC.PerformBC(fluid_, *medium_);
-		BC.RecordBCValues(*medium_);
-
+		bc_->PerformBC(fluid_, *medium_);
+		bc_->RecordBCValues(*medium_);
 
 		Recalculate();
 		

@@ -11,7 +11,7 @@ class MRTSolver : SRTsolver
 {
 public:
 
-	MRTSolver(double const tau, Medium & medium, Fluid & fluid);
+	MRTSolver(double const tau, Medium & medium, Fluid & fluid, BCs* bc);
 	virtual ~MRTSolver() {}
 
 	void Collision() override;

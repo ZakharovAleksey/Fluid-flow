@@ -1,6 +1,6 @@
 #include"mrt.h"
 
-MRTSolver::MRTSolver(double const tau, Medium & medium, Fluid & fluid) : SRTsolver(tau, medium, fluid)
+MRTSolver::MRTSolver(double const tau, Medium & medium, Fluid & fluid, BCs* bc) : SRTsolver(tau, medium, fluid, bc)
 {
 	std::cout << " --- Input parameters :\n";
 	std::cout << "nu = " << (tau - 0.5) / 3.0 << std::endl;
@@ -83,11 +83,11 @@ void MRTSolver::Solve(int iteration_number)
 	for (int q = 0; q < kQ; ++q)
 		fluid_->f_[q] = fluid_->feq_[q];
 
-	BCs BC(fluid_->f_);
+	/*BCs BC(fluid_->f_);
 	BC.SetBounceBackBC(Boundary::TOP);
 	BC.SetBounceBackBC(Boundary::BOTTOM);
 	BC.SetDirichletBC(Boundary::LEFT, 1.001);
-	BC.SetDirichletBC(Boundary::RIGHT, 1.0);
+	BC.SetDirichletBC(Boundary::RIGHT, 1.0);*/
 
 	BloodFlowMicrophone mic(Point(40, 100));
 
@@ -97,12 +97,12 @@ void MRTSolver::Solve(int iteration_number)
 		mic.TakeOffParameters(iter, fluid_->rho_, "rho");
 
 		Collision();
-		BC.PrepareBCValues(*medium_);
+		bc_->PrepareBCValues(*medium_);
 		Streaming();
 
-		BC.PerformBC(fluid_, *medium_);
+		bc_->PerformBC(fluid_, *medium_);
 		
-		BC.RecordBCValues(*medium_);
+		bc_->RecordBCValues(*medium_);
 		Recalculate();
 
 

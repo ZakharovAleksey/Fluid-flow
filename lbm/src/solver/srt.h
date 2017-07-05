@@ -25,7 +25,7 @@ class SRTsolver : iSolver
 {
 public:
 	SRTsolver() : tau_(0.0) {}
-	SRTsolver(double const tau, Medium & medium, Fluid & fluid);
+	SRTsolver(double const tau, Medium & medium, Fluid & fluid, BCs* bc);
 	virtual ~SRTsolver() {}
 
 	virtual void feqCalculate() override;
@@ -46,6 +46,7 @@ protected:
 
 	Medium* medium_;
 	Fluid* fluid_;
+	BCs* bc_;
 };
 
 
