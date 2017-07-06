@@ -39,11 +39,11 @@ public:
 	//! Returns type of boundary condition on chosen wall
 	BCType GetType() const { return type_; }
 	//! Returns x-component velocity value for Von-Neumann boundary condition, 0 otherwise
-	virtual double GetVelocityX() const { return 0.0; };
+	virtual std::vector<double> GetVelocityX() const { return std::vector<double>(); };
 	//! Returns y-component velocity value for Von-Neumann boundary condition, 0 otherwise
-	virtual double GetVelocityY() const { return 0.0; };
+	virtual std::vector<double> GetVelocityY() const { return std::vector<double>();};
 	//! Returns density value for Von-Neumann boundary condition, 0 otherwise
-	virtual double GetDensity() const { return 0.0; };
+	virtual std::vector<double> GetDensity() const { return std::vector<double>(); };
 protected:
 	//! Wall of modeling area (TOP, BOTTOM, LEFT, RIGTH)
 	Boundary wall_;
@@ -72,28 +72,28 @@ public:
 class BCInfoVonNeumann : public BCInfo
 {
 public:
-	BCInfoVonNeumann(Boundary boundary, double vx, double vy) : BCInfo(boundary, BCType::VON_NEUMAN), vx_(vx), vy_(vy) {}
+	BCInfoVonNeumann(Boundary boundary, std::vector<double> vx, std::vector<double> vy) : BCInfo(boundary, BCType::VON_NEUMAN), vx_(vx), vy_(vy) {}
 	~BCInfoVonNeumann() {}
 
-	double GetVelocityX() const override { return vx_; }
-	double GetVelocityY() const override { return vy_; }
+	std::vector<double> GetVelocityX() const override { return vx_; }
+	std::vector<double> GetVelocityY() const override { return vy_; }
 private:
 	//! Velocities along x and y axis respectively for chosen wall
-	double vx_;
-	double vy_;
+	std::vector<double> vx_;
+	std::vector<double> vy_;
 };
 
 //! Contains all information about boundary for Dirichlet boundary condition
 class BcInfoDirichlet : public BCInfo
 {
 public:
-	BcInfoDirichlet(Boundary boundary, double rho) : BCInfo(boundary, BCType::DIRICHLET), rho_(rho) {}
+	BcInfoDirichlet(Boundary boundary, std::vector<double> rho) : BCInfo(boundary, BCType::DIRICHLET), rho_(rho) {}
 	~BcInfoDirichlet() {}
 
-	double GetDensity() const override { return rho_; }
+	std::vector<double> GetDensity() const override { return rho_; }
 private:
 	//! Dencsity for chosen boundary wall
-	double rho_;
+	std::vector<double> rho_;
 };
 
 #pragma endregion
@@ -121,9 +121,9 @@ public:
 	//! Set bounce-back boundary conditions to chosen boundary
 	void SetBounceBackBC(Boundary boundary);
 	//! Set Von-Neumann boundary conditions to chosen boundary
-	void SetVonNeumannBC(Boundary boundary, double vx, double vy);
+	void SetVonNeumannBC(Boundary boundary, std::vector<double> vx, std::vector<double> vy);
 	//! Set Dirichlet boundary conditions to chosen boundary
-	void SetDirichletBC(Boundary boundary, double rho);
+	void SetDirichletBC(Boundary boundary, std::vector<double> rho);
 
 	//! Prepares values of distribution function for all boundaries and obstacles, if last takes place
 	void PrepareBCValues(const Medium & medium);
@@ -155,9 +155,9 @@ private:
 	//! Applies bounce back boundary conditions
 	void BounceBackBC(Boundary const first);
 	//! Applies Von-Neumann boundary conditions
-	void VonNeumannBC(Boundary const first, Fluid & fluid, double const vx, double const vy);
+	void VonNeumannBC(Boundary const first, Fluid & fluid, std::vector<double> const vx, std::vector<double> const vy);
 	//! Applies Dirichlet boundary conditions
-	void DirichletBC(Boundary const first, Fluid & fluid, double const rho_0);
+	void DirichletBC(Boundary const first, Fluid & fluid, std::vector<double> const rho_0);
 
 	//! Prepare values for CHOOSEN ONE BC BEFORE Streaming
 	bool PrepareValuesForSingleBC(Boundary const BC, BCType const boundary_condition_type);
@@ -179,12 +179,12 @@ private:
 	//! Directly calculate all distribution function components for choosen boundary
 	void CalculateVonNeumanBCValues(Boundary const first, const int size, std::map<int, std::vector<double>> & boundary,
 		/* Ids of disr. functions are necessary for calculations: example for top ew need {0,1,3} and {2,5,6} */const std::vector<int> ids_1, const std::vector<int> ids_2,
-		double const vx, double const vy);
+		std::vector<double> const vx, std::vector<double> const vy);
 
 	//! Directly calculate all distribution function components for choosen boundary
 	void CalculateDirichletBCValues(Boundary const first, const int size, std::map<int, std::vector<double>> & boundary,
 		/* Ids of disr. functions are necessary for calculations: example for top ew need {0,1,3} and {2,5,6} */const std::vector<int> ids_1, const std::vector<int> ids_2,
-		double const rho_0);
+		std::vector<double> const rho_0);
 
 private:
 
@@ -225,7 +225,7 @@ private:
 			BounceBackBC(boundary);
 			break;
 		case BCType::VON_NEUMAN:
-			VonNeumannBC(boundary, *fluid, bc_info->GetVelocityX(), top_info_->GetVelocityY());
+			VonNeumannBC(boundary, *fluid, bc_info->GetVelocityX(), bc_info->GetVelocityY());
 			break;
 		case BCType::DIRICHLET:
 			DirichletBC(boundary, *fluid, bc_info->GetDensity());

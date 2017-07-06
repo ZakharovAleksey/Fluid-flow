@@ -81,17 +81,31 @@ int main()
 	int X{ 100 }; //100
 	int Y{ 30 };
 	Medium m(Y, X);
-	//m.AddCircle(15, 15, 6);
+	m.AddCircle(15, 15, 6);
 	Fluid f(Y, X, m);
 	BCs bc(f.f_);
+
 	bc.SetBounceBackBC(Boundary::TOP);
 	bc.SetBounceBackBC(Boundary::BOTTOM);
-	bc.SetDirichletBC(Boundary::LEFT, 1.001);
-	bc.SetDirichletBC(Boundary::RIGHT, 1.0);
-	//
+	
+	// Set vx parabolic profile
+	std::vector<double> vx;
+	for (int i = 1; i < Y - 1; ++i)
+	{
+		double val = 0.001 * sin((i - 1) * M_PI / (Y - 3));
+		vx.push_back(val);
+	}
+	vx.at(vx.size() - 1) = 0.0;
+
+
+	bc.SetVonNeumannBC(Boundary::LEFT, vx, std::vector<double>(vx.size(), 0.0));
+	bc.SetVonNeumannBC(Boundary::RIGHT, std::vector<double>(vx.size(), 0.0), std::vector<double>(vx.size(), 0.0));
+	//bc.SetDirichletBC(Boundary::LEFT, std::vector<double>(Y - 2, 1.001));
+	//bc.SetDirichletBC(Boundary::RIGHT, std::vector<double>(Y -2, 1.0));
+	
 	//// Start solution
-	//SRTsolver solver(1.0, m, f, &bc);
-	//solver.Solve(1);
+	SRTsolver solver(1.0, m, f, &bc);
+	solver.Solve(1501);
 
 #pragma endregion
 
@@ -195,8 +209,8 @@ int main()
 	//s.Solve(1501);
 
 
-	IBMRTSolver sol(0.6, f, m, &bc, bodies);
-	sol.Solve(1501);
+	//IBMRTSolver sol(0.6, f, m, &bc, bodies);
+	//sol.Solve(1501);
 
 #pragma endregion
 

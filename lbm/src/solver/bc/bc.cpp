@@ -54,7 +54,7 @@ void BCs::SetBounceBackBC(Boundary boundary)
 	}
 }
 
-void BCs::SetVonNeumannBC(Boundary boundary, double vx, double vy)
+void BCs::SetVonNeumannBC(Boundary boundary, std::vector<double> vx, std::vector<double> vy)
 {
 	switch (boundary)
 	{
@@ -76,7 +76,7 @@ void BCs::SetVonNeumannBC(Boundary boundary, double vx, double vy)
 	}
 }
 
-void BCs::SetDirichletBC(Boundary boundary, double rho)
+void BCs::SetDirichletBC(Boundary boundary, std::vector<double> rho)
 {
 	switch (boundary)
 	{
@@ -406,7 +406,7 @@ void BCs::BounceBackBC(Boundary const first)
 	}
 }
 
-void BCs::VonNeumannBC(Boundary const first, Fluid & fluid, double const vx, double const vy)
+void BCs::VonNeumannBC(Boundary const first, Fluid & fluid, std::vector<double> const vx, std::vector<double> const vy)
 {
 	// Choose size of domain depending on boundary type
 	const int x_size = fluid.size().second;
@@ -433,7 +433,7 @@ void BCs::VonNeumannBC(Boundary const first, Fluid & fluid, double const vx, dou
 	}
 }
 
-void BCs::DirichletBC(Boundary const first, Fluid & fluid, double const rho_0)
+void BCs::DirichletBC(Boundary const first, Fluid & fluid, std::vector<double> const rho_0)
 {
 	// Choose size of domain depending on boundary type
 	const int x_size = fluid.size().second;
@@ -511,7 +511,7 @@ void BCs::RecordValuesForObstacles()
 
 void BCs::CalculateVonNeumanBCValues(Boundary const first, const int size, std::map<int, std::vector<double>> & boundary, 
 	const std::vector<int> ids_1, const std::vector<int> ids_2, 
-	double const vx, double const vy)
+	std::vector<double> const vx, std::vector<double> const vy)
 {
 	// Final vector for density and temp for make calculations below easy to understand
 	std::vector<double> rho(size, 0.0);
@@ -579,7 +579,7 @@ void BCs::CalculateVonNeumanBCValues(Boundary const first, const int size, std::
 		boundary.erase(id);
 }
 
-void BCs::CalculateDirichletBCValues(Boundary const first, const int size, std::map<int, std::vector<double>>& boundary, const std::vector<int> ids_1, const std::vector<int> ids_2, double const rho_0)
+void BCs::CalculateDirichletBCValues(Boundary const first, const int size, std::map<int, std::vector<double>>& boundary, const std::vector<int> ids_1, const std::vector<int> ids_2, std::vector<double> const rho_0)
 {
 	// Final vector for density and temp for make calculations below easy to understand
 	std::vector<double> v(size, 0.0);

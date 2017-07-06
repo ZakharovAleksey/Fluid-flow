@@ -24,6 +24,28 @@ std::vector<T> operator+(std::vector<T> const & left, std::vector<T> const & rig
 	return result;
 }
 
+template <typename T>
+std::vector<T> operator+(T const & left, std::vector<T> const & right)
+{
+	std::vector<T> result(right);
+
+	for (int i = 0; i < result.size(); ++i)
+		result.at(i) += left;
+
+	return result;
+}
+
+template <typename T>
+std::vector<T> operator-(T const & left, std::vector<T> const & right)
+{
+
+	std::vector<T> result(right.size(), left);
+
+	for (int i = 0; i < result.size(); ++i)
+		result.at(i) -= right.at(i);
+
+	return result;
+}
 
 template<typename T>
 std::vector<T>& operator+=(Matrix3D<T>& left, const Matrix3D<T>& right)
@@ -73,6 +95,16 @@ std::vector<T> operator+(std::vector<T> const & left, T const right)
 }
 
 template <typename T>
+std::vector<T> operator*(std::vector<T> const & left, std::vector<T> const & right)
+{
+	std::vector<T> result(right);
+
+	for (int i = 0; i < right.size(); ++i)
+		result.at(i) *= left.at(i);
+	return result;
+}
+
+template <typename T>
 std::vector<T> operator*(T const left, std::vector<T> const & right)
 {
 	std::vector<T> result(right);
@@ -100,6 +132,16 @@ std::vector<T> operator/(std::vector<T> const & left, T const right)
 
 	for (int i = 0; i < left.size(); ++i)
 		result.at(i) /= right;
+	return result;
+}
+
+template <typename T>
+std::vector<T> operator/(std::vector<T> const & left, std::vector<T> const & right)
+{
+	std::vector<T> result(left);
+
+	for (int i = 0; i < left.size(); ++i)
+		result.at(i) /= right.at(i);
 	return result;
 }
 
