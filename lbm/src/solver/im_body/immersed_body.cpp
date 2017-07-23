@@ -23,7 +23,7 @@ void ImmersedBody::CalculateForces()
 		node.Fy_ = 0.0;
 	}
 
-	const double arcLen = GetArcLen(); // 2.0 * M_PI * radius_ / nodes_num;
+	const double arcLen = GetArcLen();
 
 	CalculateStrainForces();
 	CalculateBendingForces();
@@ -112,8 +112,8 @@ void ImmersedBody::SpreadVelocity(Fluid & fluid)
 void ImmersedBody::UpdatePosition()
 {
 	// Reset center position
-	//center_.x_ = 0.0;
-	//center_.y_ = 0.0;
+	center_.x_ = 0.0;
+	center_.y_ = 0.0;
 
 	// Update node and center positions
 
@@ -122,30 +122,30 @@ void ImmersedBody::UpdatePosition()
 		body_.at(i).cur_pos_.x_ += body_.at(i).vx_;
 		body_.at(i).cur_pos_.y_ += body_.at(i).vy_;
 
-		//center_.x_ += body_.at(i).cur_pos_.x_ / nodes_num;
-		//center_.y_ += body_.at(i).cur_pos_.y_ / nodes_num;
+		center_.x_ += body_.at(i).cur_pos_.x_ / nodes_num;
+		center_.y_ += body_.at(i).cur_pos_.y_ / nodes_num;
 	}
 
 	/// Check for periodicity along the x-axis
 
-	/*if (center_.x_ < 0)
+	if (center_.x_ < 0)
 	{
-	center_.x_ += domain_x_;
+		center_.x_ += domain_x_;
 
-	for (int n = 0; n < nodes_num; ++n)
-	{
-	body_.at(n).cur_pos_.x_ += domain_x_;
-	}
+		for (int n = 0; n < nodes_num; ++n)
+		{
+			body_.at(n).cur_pos_.x_ += domain_x_;
+		}
 	}
 	else if (center_.x_ >= domain_x_)
 	{
-	center_.x_ -= domain_x_;
+		center_.x_ -= domain_x_;
 
-	for (int n = 0; n < nodes_num; ++n)
-	{
-	body_.at(n).cur_pos_.x_ -= domain_x_;
+		for (int n = 0; n < nodes_num; ++n)
+		{
+			body_.at(n).cur_pos_.x_ -= domain_x_;
+		}
 	}
-	}*/
 
 
 }

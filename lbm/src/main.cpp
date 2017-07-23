@@ -78,34 +78,36 @@ int main()
 
 #pragma region SRT 
 
-	int X{ 100 }; //100
-	int Y{ 30 };
+	int X{ 30 }; //100
+	int Y{ 32 };
 	Medium m(Y, X);
-	m.AddCircle(15, 15, 6);
+	//m.AddCircle(15, 15, 6);
 	Fluid f(Y, X, m);
 	BCs bc(f.f_);
 
 	bc.SetBounceBackBC(Boundary::TOP);
 	bc.SetBounceBackBC(Boundary::BOTTOM);
-	
+	bc.SetPeriodicBC(Boundary::LEFT, Boundary::RIGHT);
+
 	// Set vx parabolic profile
 	std::vector<double> vx;
 	for (int i = 1; i < Y - 1; ++i)
 	{
-		double val = 0.001 * sin((i - 1) * M_PI / (Y - 3));
+		double val = 0.01; // *sin((i - 1) * M_PI / (Y - 3));
 		vx.push_back(val);
 	}
 	vx.at(vx.size() - 1) = 0.0;
 
 
-	bc.SetVonNeumannBC(Boundary::LEFT, vx, std::vector<double>(vx.size(), 0.0));
-	bc.SetVonNeumannBC(Boundary::RIGHT, std::vector<double>(vx.size(), 0.0), std::vector<double>(vx.size(), 0.0));
+	//bc.SetVonNeumannBC(Boundary::LEFT, vx, std::vector<double>(vx.size(), 0.0));
+	//bc.SetVonNeumannBC(Boundary::RIGHT, std::vector<double>(vx.size(), 0.0), std::vector<double>(vx.size(), 0.0));
+
 	//bc.SetDirichletBC(Boundary::LEFT, std::vector<double>(Y - 2, 1.001));
 	//bc.SetDirichletBC(Boundary::RIGHT, std::vector<double>(Y -2, 1.0));
 	
 	//// Start solution
-	SRTsolver solver(1.0, m, f, &bc);
-	solver.Solve(1501);
+	//SRTsolver solver(1.0, m, f, &bc);
+	//solver.Solve(15001);
 
 #pragma endregion
 
@@ -152,61 +154,21 @@ int main()
 
 	// Start solution
 	//MRTSolver solver(0.514, m, f, &bc); // tau = 0.5008
-	//solver.Solve(1501);
+	//solver.Solve(100001);
 
 #pragma endregion
 
 
 #pragma region IB-LBM
-
-	/*int X{ 102 };
-	int Y{ 30 };
-	Medium m(Y, X);
-	Fluid f(Y, X, m);*/
 	
-
-	//// Create immersed object
-	////std::unique_ptr<ImmersedBody> body1(new ImmersedCircle(102, 30, 32, Point(15, 15), 6)); // TROMB (102, 30, 32, Point(30, 1), 6));
-	////std::unique_ptr<ImmersedBody> body2(new ImmersedCircle(102, 30, 32, Point(50, 15), 6)); // TROMB (102, 30, 32, Point(30, 1), 6));
-
-	////ImmersedBody* body1 (new ImmersedBottomTromb(102, 30, 32, Point(1, 30), 6)); // TROMB (102, 30, 32, Point(1, 30), 6)); // ImmersedCircle(102, 30, 32, Point(15, 15), 6));
-	////ImmersedBody* body2 (new ImmersedTopTromb(102, 30, 32, Point(27, 30), 6));
-	////ImmersedBody* body2(new ImmersedRBC(102, 30, 32, Point(15, 15), 6));
-
-	////ImmersedBody* bottom_rect(new ImmersedRectangle(X, Y, 64, Point(Y/3, 1), X/3, Y/3));
-	////ImmersedBody* top_rect(new ImmersedRectangle(X, Y, 64, Point(Y-2, 1), X/3, Y/3));
-
-	//ImmersedBody* middle_rect(new ImmersedRectangle(X, Y, 64, Point(2 * Y /3, 2 * X / 3), X / 3, Y / 3));
-	//ImmersedBody* circle(new ImmersedCircle(X, Y, 64, Point(Y / 2, 2 * X / 3), Y / 6, M_PI / 2, 3 * M_PI / 2));
-
-	//m.AddSquare(0, Y - 1, X / 3, Y / 3);
-	////m.AddBottomAngle(X/3, Y-1, Y/3);
-	//
-	//m.AddSquare(0, Y / 3, X / 3, Y / 3 + 1);
-	////m.AddTopAngle(X / 3, 0, Y / 3);
-
-	////ImmersedBody* body2(new ImmersedCircle(126, 66, 32, Point(32,32), 3, 0, 2.0 * M_PI));
-
-	////ImmersedBody* body2(new ImmersedTopRect(102, 30, 32, Point(21, 50), 6, 13));
-	////ImmersedBody* body1(new ImmersedBottomRect(102, 30, 32, Point(7, 50), 6, 13));
-
-	// ImmersedBody* rbc(new ImmersedRBC(102, 30, 32, Point(15, 15), 6)); Хороший размер для моделирования многих RBC
 	ImmersedBody* rbc(new ImmersedRBC(X, Y, 32, Point(15, 15), 6));
 	//ImmersedBody* tromb(new ImmersedCircle(X, Y, 64, Point(38, 35), 15, M_PI, 2.0 * M_PI));
 	std::vector<ImmersedBody*> bodies;
-	bodies.push_back(rbc);
-
-	//bodies.push_back(bottom_rect);
-	//bodies.push_back(top_rect);
-	//bodies.push_back(middle_rect);
-	//bodies.push_back(circle);
-
-	////bodies.push_back(body1);
-	////bodies.push_back(body3);
+	//bodies.push_back(rbc);
 
 	// Start solution
-	//IBSolver s(1.0, f, m, &bc, bodies); //std::move(body));
-	//s.Solve(1501);
+	IBSolver s(1.0, f, m, &bc, bodies);
+	s.Solve(2001);
 
 
 	//IBMRTSolver sol(0.6, f, m, &bc, bodies);

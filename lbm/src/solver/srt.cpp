@@ -81,9 +81,10 @@ void SRTsolver::Solve(int iter_numb)
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 
-		if (iter % 10 == 0)
+		if (iter % 100 == 0)
 		{
 			fluid_->vx_.WriteFieldToTxt("Data\\srt_lbm_data\\2d\\fluid_txt", "vx", iter);
+			fluid_->vy_.WriteFieldToTxt("Data\\srt_lbm_data\\2d\\fluid_txt", "vy", iter);
 			fluid_->WriteFluidToVTK("Data\\srt_lbm_data\\2d\\fluid_vtk", iter);
 		}
 

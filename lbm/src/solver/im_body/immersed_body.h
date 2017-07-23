@@ -140,9 +140,9 @@ protected:
 	//! Number of Lagragian nodes
 	int nodes_num;
 	//! Stiffness modulus 
-	const double stiffness_ = 0.1; // 0.1
+	const double stiffness_ = 0.025;; // 0.1
 	//! Bending modulus
-	const double bending_ = 0.001; // 0.001
+	const double bending_ = 0.025; // 0.001
 
 	//! Radius of body
 	double radius_;

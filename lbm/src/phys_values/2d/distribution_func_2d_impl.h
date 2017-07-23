@@ -201,11 +201,13 @@ inline MacroscopicParam<T> DistributionFunction<T>::calculateVelocity(const doub
 {
 	MacroscopicParam<T> result(rows_, colls_);
 	result.FillWith(0.0);
-
+	double gravity = 0.0;
 	for (int q = 0; q < kQ; ++q)
 		result += (dfunc_body_.at(q) * mas[q]);
 
-	result += 0.5 * f;
+	if(mas[kQ-1] == 1.0)
+		gravity = 0.00002;
+	result += 0.5 * ( f + gravity);
 
 	// Переписать сразу в return, тк лишнее копирование НО выпадает error
 	result.TimesDivide(density);

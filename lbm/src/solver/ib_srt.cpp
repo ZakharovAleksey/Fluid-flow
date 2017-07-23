@@ -89,20 +89,20 @@ void IBSolver::Streaming()
 
 void IBSolver::CalculateForces()
 {
-	double gravity = 0.0;
+	double gravity = 0.00002;
 
 	for (int y = 0; y < fluid_->size().first; ++y)
 		for (int x = 0; x < fluid_->size().second; ++x)
 		{
 			force_member_.at(0) = (1.0 - 0.5 / tau_) * kW[0] * (3.0 * ((-fluid_->vx_(y, x) * ((*fx_)(y, x) + gravity) + -fluid_->vy_(y, x) * (*fy_)(y, x))));
-			force_member_[1] = (1 - 0.5 / tau_) * kW[1] * (3.0 * ((1 - fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (-fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity));
-			force_member_[2] = (1 - 0.5 / tau_) * kW[2] * (3.0* ((-1 - fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (-fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity));
-			force_member_[3] = (1 - 0.5 / tau_) * kW[3] * (3.0 * ((-fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (1 - fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vy_(y, x)) * (*fy_)(y, x));
-			force_member_[4] = (1 - 0.5 / tau_) * kW[4] * (3.0 * ((-fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (-1 - fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vy_(y, x)) * (*fy_)(y, x));
-			force_member_[5] = (1 - 0.5 / tau_) * kW[5] * (3.0 * ((1 - fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (1 - fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vx_(y, x) + fluid_->vy_(y, x)) * ((*fx_)(y, x) + gravity + (*fy_)(y, x)));
-			force_member_[6] = (1 - 0.5 / tau_) * kW[6] * (3.0 * ((-1 - fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (-1 - fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vx_(y, x) + fluid_->vy_(y, x)) * ((*fx_)(y, x) + gravity + (*fy_)(y, x)));
-			force_member_[7] = (1 - 0.5 / tau_) * kW[7] * (3.0 * ((1 - fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (-1 - fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vx_(y, x) - fluid_->vy_(y, x)) * ((*fx_)(y, x) + gravity - (*fy_)(y, x)));
-			force_member_[8] = (1 - 0.5 / tau_) * kW[8] * (3.0 * ((-1 - fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (1 - fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9 * (fluid_->vx_(y, x) - fluid_->vy_(y, x)) * ((*fx_)(y, x) + gravity - (*fy_)(y, x)));
+			force_member_.at(1) = (1 - 0.5 / tau_) * kW[1] * (3.0 * ((1.0 - fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (-fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity));
+			force_member_.at(3) = (1 - 0.5 / tau_) * kW[2] * (3.0* ((-1.0 - fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (-fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity));
+			force_member_.at(2) = (1 - 0.5 / tau_) * kW[3] * (3.0 * ((-fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (1 - fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vy_(y, x)) * (*fy_)(y, x));
+			force_member_.at(4) = (1 - 0.5 / tau_) * kW[4] * (3.0 * ((-fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (-1 - fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vy_(y, x)) * (*fy_)(y, x));
+			force_member_.at(5) = (1 - 0.5 / tau_) * kW[5] * (3.0 * ((1.0 - fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (1 - fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vx_(y, x) + fluid_->vy_(y, x)) * ((*fx_)(y, x) + gravity + (*fy_)(y, x)));
+			force_member_.at(7) = (1 - 0.5 / tau_) * kW[6] * (3.0 * ((-1.0 - fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (-1 - fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vx_(y, x) + fluid_->vy_(y, x)) * ((*fx_)(y, x) + gravity + (*fy_)(y, x)));
+			force_member_.at(8) = (1 - 0.5 / tau_) * kW[7] * (3.0 * ((1.0 - fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (-1 - fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vx_(y, x) - fluid_->vy_(y, x)) * ((*fx_)(y, x) + gravity - (*fy_)(y, x)));
+			force_member_.at(6) = (1 - 0.5 / tau_) * kW[8] * (3.0 * ((-1.0 - fluid_->vx_(y, x)) * ((*fx_)(y, x) + gravity) + (1 - fluid_->vy_(y, x)) * (*fy_)(y, x)) + 9.0 * (fluid_->vx_(y, x) - fluid_->vy_(y, x)) * ((*fx_)(y, x) + gravity - (*fy_)(y, x)));
 		}
 }
 
@@ -181,9 +181,9 @@ void IBSolver::Solve(int iter_numb)
 				im_bodies_.at(i)->WriteBodyFormToVtk("Data\\ib_lbm_data\\body_form_vtk", i, iter);
 			}
 
-			fluid_->vx_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "vx", iter);
-			fluid_->vy_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "vy", iter);
-			fluid_->rho_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "rho", iter);
+			//fluid_->vx_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "vx", iter);
+			//fluid_->vy_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "vy", iter);
+			//fluid_->rho_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "rho", iter);
 		}
 
 	}
