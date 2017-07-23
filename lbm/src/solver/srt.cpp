@@ -8,8 +8,11 @@
 
 SRTsolver::SRTsolver(double const tau, Medium & medium, Fluid & fluid, BCs* bc) : tau_(tau), medium_(&medium), fluid_(&fluid), bc_(bc)
 {
-	assert(medium_->size().first == fluid_->size().first);
-	assert(medium_->size().second == fluid_->size().second);
+	assert(medium_->GetRowsNumber() == fluid_->GetRowsNumber());
+	assert(medium_->GetColumnsNumber() == fluid_->GetColumnsNumber());
+	
+	for (auto & f : force_)
+		f.Resize(medium_->GetRowsNumber(), medium_->GetColumnsNumber());
 
 	CreateDataFolder("Data");
 	CreateDataFolder("Data\\srt_lbm_data");
@@ -54,7 +57,7 @@ void SRTsolver::Streaming()
 void SRTsolver::Collision()
 {
 	for (int q = 0; q < kQ; ++q)
-		fluid_->f_[q] += (fluid_->feq_[q] - fluid_->f_[q]) / tau_;
+		fluid_->f_[q] += (fluid_->feq_[q] - fluid_->f_[q]) / tau_ + force_.at(q);
 }
 
 void SRTsolver::Solve(int iter_numb)
@@ -63,6 +66,9 @@ void SRTsolver::Solve(int iter_numb)
 
 	for (int q = 0; q < kQ; ++q)
 		fluid_->f_[q] = fluid_->feq_[q];
+
+	// !!! Calculate forces here ONLY in case if it is gravity because it is constsnt and nned to be alclulated onse !!!
+	ForceCalculation();
 
 	std::cout << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 
@@ -81,10 +87,10 @@ void SRTsolver::Solve(int iter_numb)
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 
-		if (iter % 100 == 0)
+		if (iter % 50 == 0)
 		{
-			fluid_->vx_.WriteFieldToTxt("Data\\srt_lbm_data\\2d\\fluid_txt", "vx", iter);
-			fluid_->vy_.WriteFieldToTxt("Data\\srt_lbm_data\\2d\\fluid_txt", "vy", iter);
+			//fluid_->vx_.WriteFieldToTxt("Data\\srt_lbm_data\\2d\\fluid_txt", "vx", iter);
+			//fluid_->vy_.WriteFieldToTxt("Data\\srt_lbm_data\\2d\\fluid_txt", "vy", iter);
 			fluid_->WriteFluidToVTK("Data\\srt_lbm_data\\2d\\fluid_vtk", iter);
 		}
 

@@ -38,6 +38,8 @@ set(
 	"solver/bc/bc.cpp"
 	"solver/mrt.h"
 	"solver/mrt.cpp"
+	"solver/bc/bc_new.h"
+	"solver/bc/bc_new.cpp"
 	"main.cpp"
 )
 

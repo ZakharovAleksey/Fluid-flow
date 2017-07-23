@@ -78,8 +78,8 @@ int main()
 
 #pragma region SRT 
 
-	int X{ 30 }; //100
-	int Y{ 32 };
+	int X{ 32 }; //100
+	int Y{ 30 };
 	Medium m(Y, X);
 	//m.AddCircle(15, 15, 6);
 	Fluid f(Y, X, m);
@@ -106,8 +106,8 @@ int main()
 	//bc.SetDirichletBC(Boundary::RIGHT, std::vector<double>(Y -2, 1.0));
 	
 	//// Start solution
-	//SRTsolver solver(1.0, m, f, &bc);
-	//solver.Solve(15001);
+	SRTsolver solver(1.0, m, f, &bc);
+	solver.Solve(501);
 
 #pragma endregion
 
@@ -167,8 +167,8 @@ int main()
 	//bodies.push_back(rbc);
 
 	// Start solution
-	IBSolver s(1.0, f, m, &bc, bodies);
-	s.Solve(2001);
+	//IBSolver s(1.0, f, m, &bc, bodies);
+	//s.Solve(501);
 
 
 	//IBMRTSolver sol(0.6, f, m, &bc, bodies);

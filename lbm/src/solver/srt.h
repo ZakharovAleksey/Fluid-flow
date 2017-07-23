@@ -16,6 +16,18 @@
 
 #pragma region 2d
 
+// Пока тут - но перенести
+
+struct Vector2D
+{
+	double x;
+	double y;
+
+	Vector2D() : x(0), y(0) {}
+	Vector2D(double x, double y) : x(x), y(y) {}
+};
+
+const Vector2D gravity(0.0, 0.0001);
 
 // SRT approach implementation.
 //
@@ -35,6 +47,25 @@ public:
 	virtual void Solve(int iteration_number) override;
 	virtual void Recalculate() override;
 
+	// FOrce
+	void ForceCalculation()
+	{
+		for (int y = 1; y < fluid_->GetRowsNumber(); ++y)
+			for (int x = 1; x < fluid_->GetColumnsNumber(); ++x)
+			{
+				force_.at(0)(y, x) = (1.0 - 0.5 / tau_) * kW[0] * (3.0 * ((-fluid_->vx_(y, x) * (gravity.x) + -fluid_->vy_(y, x) * (gravity.y))));
+				force_.at(1)(y, x) = (1.0 - 0.5 / tau_) * kW[1] * (3.0 * ((1.0 - fluid_->vx_(y, x)) * (gravity.x) + (-fluid_->vy_(y, x)) * (gravity.y)) + 9.0 * (fluid_->vx_(y, x)) * (gravity.x));
+				force_.at(2)(y, x) = (1.0 - 0.5 / tau_) * kW[3] * (3.0 * ((-fluid_->vx_(y, x)) * ( gravity.x) + (1 - fluid_->vy_(y, x)) * (gravity.y)) + 9.0 * (fluid_->vy_(y, x)) * (gravity.y));
+				force_.at(3)(y, x) = (1.0 - 0.5 / tau_) * kW[2] * (3.0* ((-1.0 - fluid_->vx_(y, x)) * (gravity.x) + (-fluid_->vy_(y, x)) * (gravity.y)) + 9.0 * (fluid_->vx_(y, x)) * (gravity.x));
+				force_.at(4)(y, x) = (1.0 - 0.5 / tau_) * kW[4] * (3.0 * ((-fluid_->vx_(y, x)) * (gravity.x) + (-1 - fluid_->vy_(y, x)) * (gravity.y)) + 9.0 * (fluid_->vy_(y, x)) * (gravity.y));
+				force_.at(5)(y, x) = (1.0 - 0.5 / tau_) * kW[5] * (3.0 * ((1.0 - fluid_->vx_(y, x)) * (gravity.x) + (1 - fluid_->vy_(y, x)) * (gravity.y)) + 9.0 * (fluid_->vx_(y, x) + fluid_->vy_(y, x)) * (gravity.x + gravity.y));
+				force_.at(6)(y, x) = (1.0 - 0.5 / tau_) * kW[8] * (3.0 * ((-1.0 - fluid_->vx_(y, x)) * (gravity.x) + (1 - fluid_->vy_(y, x)) * (gravity.y)) + 9.0 * (fluid_->vx_(y, x) - fluid_->vy_(y, x)) * (gravity.x - gravity.y));
+				force_.at(7)(y, x) = (1.0 - 0.5 / tau_) * kW[6] * (3.0 * ((-1.0 - fluid_->vx_(y, x)) * (gravity.x) + (-1 - fluid_->vy_(y, x)) * (gravity.y)) + 9.0 * (fluid_->vx_(y, x) + fluid_->vy_(y, x)) * (gravity.x + gravity.y));
+				force_.at(8)(y, x) = (1.0 - 0.5 / tau_) * kW[7] * (3.0 * ((1.0 - fluid_->vx_(y, x)) * (gravity.x) + (-1 - fluid_->vy_(y, x)) * (gravity.y)) + 9.0 * (fluid_->vx_(y, x) - fluid_->vy_(y, x)) * (gravity.x - gravity.y));
+			}
+	
+	}
+
 protected:
 
 	//! Creates folder for output data if not existed yet
@@ -43,6 +74,8 @@ protected:
 protected:
 	//! Relaxation parameter
 	double tau_;
+
+	std::array<Matrix2D<double>, kQ> force_;
 
 	Medium* medium_;
 	Fluid* fluid_;
