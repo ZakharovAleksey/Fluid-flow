@@ -14,6 +14,9 @@
 
 #include"im_body\immersed_body.h" // Only for Microphone - next to do in separate class
 
+
+#include"bc\bc_new.h"
+
 #pragma region 2d
 
 // Пока тут - но перенести
@@ -27,7 +30,7 @@ struct Vector2D
 	Vector2D(double x, double y) : x(x), y(y) {}
 };
 
-const Vector2D gravity(0.0, 0.0001);
+const Vector2D gravity(0.0, 0.0); // 0.0001
 
 // SRT approach implementation.
 //

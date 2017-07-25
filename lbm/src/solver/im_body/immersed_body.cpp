@@ -45,6 +45,9 @@ void ImmersedBody::SpreadForces(Matrix2D<double>& fx, Matrix2D<double>& fy)
 
 	for (int i = 0; i < nodes_num; ++i)
 	{
+		if (i == 10)
+			std::cout <<"\n POS: " << body_.at(i).cur_pos_.x_ << " , " << body_.at(i).cur_pos_.y_ << std::endl;
+
 		int x_int = (int)(body_.at(i).cur_pos_.x_ - 0.5 + domain_x_) - domain_x_;
 		int y_int = (int)(body_.at(i).cur_pos_.y_ + 0.5);
 
@@ -75,6 +78,10 @@ void ImmersedBody::SpreadVelocity(Fluid & fluid)
 {
 	for (int i = 0; i < nodes_num; ++i)
 	{
+		if (i == 10)
+		{
+			int j = 0;
+		}
 		// Reset node velocity first since '+=' is used.
 		body_.at(i).vx_ = 0.0;
 		body_.at(i).vy_ = 0.0;
@@ -116,7 +123,6 @@ void ImmersedBody::UpdatePosition()
 	center_.y_ = 0.0;
 
 	// Update node and center positions
-
 	for (int i = 0; i < nodes_num; ++i)
 	{
 		body_.at(i).cur_pos_.x_ += body_.at(i).vx_;
@@ -127,6 +133,17 @@ void ImmersedBody::UpdatePosition()
 	}
 
 	/// Check for periodicity along the x-axis
+	// Obtain IBNode with extreame right position
+	auto rightIt = std::max_element(body_.begin(), body_.end(), [](IBNode & left, IBNode & right)
+	{
+		return (left.cur_pos_.x_ < right.cur_pos_.x_) ? true : false;
+	});
+
+	// Obtain IBNode with extreame left position
+	auto leftIt = std::max_element(body_.begin(), body_.end(), [](IBNode & left, IBNode & right)
+	{
+		return (left.cur_pos_.x_ > right.cur_pos_.x_) ? true : false;
+	});
 
 	if (center_.x_ < 0)
 	{
@@ -137,17 +154,19 @@ void ImmersedBody::UpdatePosition()
 			body_.at(n).cur_pos_.x_ += domain_x_;
 		}
 	}
-	else if (center_.x_ >= domain_x_)
+	// If extreame right position is bigger then domain size - move all positions of immersed boundary to the left boundary
+	else if (rightIt->cur_pos_.x_ >= domain_x_ - 1)
 	{
-		center_.x_ -= domain_x_;
+		// Distance to move: -1.0 because fluid starts from 1
+		double offsetDist = leftIt->cur_pos_.x_ - 1.0;
+		center_.x_ -= offsetDist;
 
-		for (int n = 0; n < nodes_num; ++n)
-		{
-			body_.at(n).cur_pos_.x_ -= domain_x_;
-		}
+		for (auto & node : body_)
+			node.cur_pos_.x_ -= offsetDist;
 	}
 
 
+	std::cout << "After update: " << body_.at(10).cur_pos_.x_ << " , " << body_.at(10).cur_pos_.x_ << std::endl;
 }
 
 void ImmersedBody::WriteBodyFormToTxt(const int time, const int body_id)

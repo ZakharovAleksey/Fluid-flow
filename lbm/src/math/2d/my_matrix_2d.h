@@ -21,54 +21,25 @@
 #endif // !TEST_INCLUDE
 
 
-/// <summary>
-/// The template class of 2D matrix.
-/// </summary>
-/// <remarks>
-/// Basic class for LBM project.
-/// All physical values (density, velocity, distribution function) will be implemented as derived clases from Matrx class.
-/// Overloading implemetation only for operations witch we need in LBM implementation.
-/// </remarks>
+// Basic class for LBM project.
+// All physical values (density, velocity, distribution function) will be implemented as derived clases from Matrx class.
+// Overloading implemetation only for operations witch we need in LBM implementation.
 template<typename T>
 class Matrix2D : public iMatrix<T>
 {
 public:
 
-#pragma region Constructor
-
-	/// <summary>
-	/// Allocates an uninitialized matrix that holds zero elements.
-	/// </summary>
 	Matrix2D();
 
-	/// <summary>
-	/// Allocates an matrix with rows number is equal to "rows" and column number is equal to "cells", which is filled with zeros.
-	/// </summary>
-	/// <param name="rows"> Number of rows in matrix. </param>
-	/// <param name="colls"> Number of columns in matrix.</param>
 	Matrix2D(unsigned rows, unsigned colls);
 
 	virtual ~Matrix2D();
 
-	/// <summary>
-	/// Allocates an matrix with rows number is equal to the "other" matrix rows and column number is equal to the "other" matrix cells, which is filled with 
-	/// the "other" matrix values.
-	/// </summary>
 	Matrix2D(Matrix2D<T> const & other);	// Проверить все ли хорошо при вызове функции отсюда
 
-	/// <summary>
-	/// Swap current matrix (Swap includes rows number, columns number and all elements) with the "other" matrix.
-	/// </summary>
-	/// <param name="other"> The matrix which is swapped with the current </param>
 	void Swap(Matrix2D<T> & other);
 
-#pragma endregion
 
-	/// <summary>
-	/// The assignment operator.
-	/// </summary>
-	/// <param name="other"> Matirix from the rigth side of the assigment operator. </param>
-	/// <returns> New assigment matrix. </returns>
 	Matrix2D<T> & operator=(Matrix2D<T> const & other) 
 	{
 		// Check that rows or colls number of right and left matrix are equal
@@ -311,23 +282,11 @@ public:
 
 #pragma region Properties (Get/Set methods)
 
-	/// <summary>
-	/// Get element at choosen row and column respectively
-	/// </summary>
-	/// <param name="y"> Row index </param>
-	/// <param name="x"> Column index </param>
-	/// <returns> Value in matrix at [y][x] position</returns>
 	T & operator()(unsigned y, unsigned x) 
 	{
 		return body_.at(y * colls_ + x);
 	}
 
-	/// <summary>
-	/// Get element at choosen row and column respectively as a constant
-	/// </summary>
-	/// <param name="y"> Row index </param>
-	/// <param name="x"> Column index </param>
-	/// <returns></returns>
 	T const operator()(unsigned y, unsigned x) const 
 	{
 		return body_.at(y * colls_ + x);
@@ -353,6 +312,95 @@ public:
 	/// <param name="y"> Index of row </param>
 	/// <returns> vector with values from choosen row </returns>
 	std::vector<T> GetRow(unsigned const y) const;
+
+	// >> new bc
+	std::vector<T> GetRowLeft(const int y) const
+	{
+		assert(y < rows_);
+		std::vector<T> result(colls_ - 2, T());
+
+		for (int x = 0; x < colls_ - 2; ++x)
+			result.at(x) = this->operator()(y, x);
+
+		return result;
+	}
+
+	std::vector<T> GetRowMid(const int y) const
+	{
+		assert(y < rows_);
+		std::vector<T> result(colls_ - 2, T());
+
+		for (int x = 1; x < colls_ -1; ++x)
+			result.at(x - 1) = this->operator()(y, x);
+
+		return result;
+	}
+
+	std::vector<T> GetRowRight(const int y) const
+	{
+		assert(y < rows_);
+		std::vector<T> result(colls_ - 2, T());
+
+		for (int x = 2; x < colls_; ++x)
+			result.at(x - 2) = this->operator()(y, x);
+
+		return result;
+	}
+
+	void SetRowNew(const int y, const std::vector<T> & row)
+	{
+		assert(y < rows_);
+
+		for (int x = 0; x < colls_ - 2; ++x)
+			this->operator()(y, x + 1) = row.at(x);
+	}
+
+
+	std::vector<T> GetColumnTop(const int x) const
+	{
+		assert(x < colls_);
+		std::vector<T> result(rows_ - 3, T());
+
+		for (int y = 2; y < rows_ - 1; ++y)
+			result.at(y - 2) = this->operator()(y, x);
+
+		return result;
+	}
+
+	std::vector<T> GetColumnMid(const int x) const
+	{
+		assert(x < colls_);
+		std::vector<T> result(rows_ - 2, T());
+
+		for (int y = 1; y < rows_ - 1; ++y)
+			result.at(y - 1) = this->operator()(y, x);
+
+		return result;
+	}
+
+
+	std::vector<T> GetColumnBot(const int x) const
+	{
+		assert(x < colls_);
+		std::vector<T> result(rows_ - 3, T());
+
+		for (int y = 1; y < rows_ - 2; ++y)
+			result.at(y - 1) = this->operator()(y, x);
+
+		return result;
+	}
+
+	void SetColumnNew(const int x, const std::vector<T> & coll, const int q)
+	{
+		assert(x < colls_);
+
+		int y = (q == 5 || q == 6) ? 2 : 1;
+		for (const auto & i : coll)
+			this->operator()(y++, x) = i;
+	}
+
+
+	// >>
 
 	/// <summary>
 	/// Set elements of "y" row in the current matrix equal to values from std::vector "row"

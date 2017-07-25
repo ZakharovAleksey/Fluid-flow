@@ -47,16 +47,16 @@ std::vector<T> operator-(T const & left, std::vector<T> const & right)
 	return result;
 }
 
-template<typename T>
-std::vector<T>& operator+=(Matrix3D<T>& left, const Matrix3D<T>& right)
-{
-	assert(left.size() == right.size());
-
-	for (int i = 0; i < result.size(); ++i)
-		left.at(i) += right.at(i);
-
-	return left;
-}
+//template<typename T>
+//std::vector<T>& operator+=(Matrix3D<T>& left, const Matrix3D<T>& right)
+//{
+//	assert(left.size() == right.size());
+//
+//	for (int i = 0; i < result.size(); ++i)
+//		left.at(i) += right.at(i);
+//
+//	return left;
+//}
 
 
 template <typename T>

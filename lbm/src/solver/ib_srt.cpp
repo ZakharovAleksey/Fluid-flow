@@ -84,7 +84,7 @@ void IBSolver::Streaming()
 					fluid_->f_[q](y + kEy[q], x + kEx[q]) = temp(y, x);
 	}
 
-	fluid_->f_.fillBoundaries(0.0);
+	//fluid_->f_.fillBoundaries(0.0);
 }
 
 void IBSolver::CalculateForces()
@@ -130,8 +130,20 @@ void IBSolver::Solve(int iter_numb)
 	for (int q = 0; q < kQ; ++q)
 		fluid_->f_[q] = fluid_->feq_[q];
 
+	MyBCs* top = new PeriodicBCs(Boundary::TOP, fluid_, *medium_);
+	MyBCs* bottom = new PeriodicBCs(Boundary::BOTTOM, fluid_, *medium_);
+
+	MyBCs* right = new PeriodicBCs(Boundary::RIGHT, fluid_, *medium_);
+	MyBCs* left = new PeriodicBCs(Boundary::LEFT, fluid_, *medium_);
+
 	for (int iter = 0; iter < iter_numb; ++iter)
 	{
+		if (iter >= 1675)
+		{
+			int i = 0;
+			fluid_->vx_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "vx", iter);
+			fluid_->vy_.WriteFieldToTxt("Data\\ib_lbm_data\\fluid_txt", "vy", iter);
+		}
 		// Clean fx, fy fields
 		fx_->FillWith(0.0);
 		fy_->FillWith(0.0);
@@ -153,11 +165,18 @@ void IBSolver::Solve(int iter_numb)
 		}
 
 		Collision();
-		bc_->PrepareBCValues(*medium_);
+		//bc_->PrepareBCValues(*medium_);
 
-		Streaming();
-		bc_->PerformBC(fluid_, *medium_);
-		bc_->RecordBCValues(*medium_);
+		Streaming();	// Fill boundaries inside - change if nesessary
+		top->ApplyBCs();
+		bottom->ApplyBCs();
+		right->ApplyBCs();
+		left->ApplyBCs();
+		
+
+		fluid_->f_.fillBoundaries(0.0);
+		//bc_->PerformBC(fluid_, *medium_);
+		//bc_->RecordBCValues(*medium_);
 
 		Recalculate();
 

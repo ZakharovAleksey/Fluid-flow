@@ -79,15 +79,19 @@ int main()
 #pragma region SRT 
 
 	int X{ 32 }; //100
-	int Y{ 30 };
+	int Y{ 32 };
 	Medium m(Y, X);
 	//m.AddCircle(15, 15, 6);
 	Fluid f(Y, X, m);
 	BCs bc(f.f_);
 
+	std::vector<double> vx2(Y - 2, 0.0);
+	std::vector<double> vy2(Y - 2, 0.001);
+
 	bc.SetBounceBackBC(Boundary::TOP);
 	bc.SetBounceBackBC(Boundary::BOTTOM);
-	bc.SetPeriodicBC(Boundary::LEFT, Boundary::RIGHT);
+	bc.SetDirichletBC(Boundary::LEFT, std::vector<double> (Y -2, 1.01));
+	bc.SetDirichletBC(Boundary::RIGHT, std::vector<double>(Y - 2, 1.0));
 
 	// Set vx parabolic profile
 	std::vector<double> vx;
@@ -97,17 +101,10 @@ int main()
 		vx.push_back(val);
 	}
 	vx.at(vx.size() - 1) = 0.0;
-
-
-	//bc.SetVonNeumannBC(Boundary::LEFT, vx, std::vector<double>(vx.size(), 0.0));
-	//bc.SetVonNeumannBC(Boundary::RIGHT, std::vector<double>(vx.size(), 0.0), std::vector<double>(vx.size(), 0.0));
-
-	//bc.SetDirichletBC(Boundary::LEFT, std::vector<double>(Y - 2, 1.001));
-	//bc.SetDirichletBC(Boundary::RIGHT, std::vector<double>(Y -2, 1.0));
 	
 	//// Start solution
 	SRTsolver solver(1.0, m, f, &bc);
-	solver.Solve(501);
+	solver.Solve(3001);
 
 #pragma endregion
 
@@ -164,11 +161,11 @@ int main()
 	ImmersedBody* rbc(new ImmersedRBC(X, Y, 32, Point(15, 15), 6));
 	//ImmersedBody* tromb(new ImmersedCircle(X, Y, 64, Point(38, 35), 15, M_PI, 2.0 * M_PI));
 	std::vector<ImmersedBody*> bodies;
-	//bodies.push_back(rbc);
+	bodies.push_back(rbc);
 
 	// Start solution
 	//IBSolver s(1.0, f, m, &bc, bodies);
-	//s.Solve(501);
+	//s.Solve(5001);
 
 
 	//IBMRTSolver sol(0.6, f, m, &bc, bodies);

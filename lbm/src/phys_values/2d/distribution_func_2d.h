@@ -34,15 +34,186 @@ class DistributionFunction
 {
 public:
 
-#pragma region Constructor
-
 	DistributionFunction();
 	DistributionFunction(unsigned rows, unsigned colls);
 	~DistributionFunction();
 	
 	DistributionFunction(DistributionFunction<T> const & other);
 
-#pragma endregion
+
+	// >> New BCs attempt 
+
+	std::vector<T> GetTopValues(const int q) const
+	{
+		switch (q)
+		{
+		case 2:
+			return dfunc_body_.at(q).GetRowMid(rows_ - 1);
+			break;
+		case 5:
+			return dfunc_body_.at(q).GetRowRight(rows_ - 1);
+			break;
+		case 6:
+			return dfunc_body_.at(q).GetRowLeft(rows_ - 1);
+			break;
+		default:
+			break;
+		}
+	}
+
+	// 1 - index for von-neumann bcs
+	std::vector<T> GetTopValues1(const int q) const
+	{
+		switch (q)
+		{
+		case 2:
+			return dfunc_body_.at(q).GetRowMid(rows_ - 2);
+			break;
+		case 5:
+			return dfunc_body_.at(q).GetRowRight(rows_ - 2);
+			break;
+		case 6:
+			return dfunc_body_.at(q).GetRowLeft(rows_ - 2);
+			break;
+			// For von neuman mid values
+		case 0:
+			return dfunc_body_.at(q).GetRowMid(rows_ - 2);
+			break;
+		case 1:
+			return dfunc_body_.at(q).GetRowMid(rows_ - 2);
+			break;
+		case 3:
+			return dfunc_body_.at(q).GetRowMid(rows_ - 2);
+			break;
+		default:
+			break;
+		}
+	}
+
+	std::vector<T> GetTopValues2(const int q) const
+	{
+		return dfunc_body_.at(q).GetRowMid(rows_ - 2);
+	}
+
+
+
+	std::vector<T> GetBottomValues(const int q) const
+	{
+		switch (q)
+		{
+		case 4:
+			return dfunc_body_.at(q).GetRowMid(0);
+			break;
+		case 8:
+			return dfunc_body_.at(q).GetRowRight(0);
+			break;
+		case 7:
+			return dfunc_body_.at(q).GetRowLeft(0);
+			break;
+		default:
+			break;
+		}
+	}
+
+	std::vector<T> GetBottomValues1(const int q) const
+	{
+		switch (q)
+		{
+		case 4:
+			return dfunc_body_.at(q).GetRowMid(1);
+			break;
+		case 8:
+			return dfunc_body_.at(q).GetRowRight(1);
+			break;
+		case 7:
+			return dfunc_body_.at(q).GetRowLeft(1);
+			break;
+		case 0:
+			return dfunc_body_.at(q).GetRowMid(1);
+			break;
+		case 1:
+			return dfunc_body_.at(q).GetRowMid(1);
+			break;
+		case 3:
+			return dfunc_body_.at(q).GetRowMid(1);
+			break;
+		default:
+			break;
+		}
+	}
+
+	
+	std::vector<T> GetLeftValues(const int q) const
+	{
+		//return dfunc_body_.at(q).GetColumn(0);
+
+		switch (q)
+		{
+		case 3:
+			return dfunc_body_.at(q).GetColumnMid(0);
+			break;
+		case 6:
+			return dfunc_body_.at(q).GetColumnTop(0);
+			break;
+		case 7:
+			return dfunc_body_.at(q).GetColumnBot(0);
+			break;
+		default:
+			break;
+		}
+	}
+
+	std::vector<T> GetLeftValues1(const int q) const
+	{
+		//return dfunc_body_.at(q).GetColumn(colls_ - 1);
+		return dfunc_body_.at(q).GetColumnMid(1);
+	}
+	
+
+	std::vector<T> GetRightValues(const int q) const
+	{
+		//return dfunc_body_.at(q).GetColumn(colls_ - 1);
+		switch (q)
+		{
+		case 1:
+			return dfunc_body_.at(q).GetColumnMid(colls_ - 1);
+			break;
+		case 5:
+			return dfunc_body_.at(q).GetColumnTop(colls_ - 1);
+			break;
+		case 8:
+			return dfunc_body_.at(q).GetColumnBot(colls_ - 1);
+			break;
+		default:
+			break;
+		}
+	}
+
+	std::vector<T> GetRightValues1(const int q) const
+	{
+		//return dfunc_body_.at(q).GetColumn(colls_ - 1);
+		return dfunc_body_.at(q).GetColumnMid(colls_ - 2);
+	}
+
+
+	void SetTopValues(int const q, std::vector<T> const & row)
+	{
+		dfunc_body_.at(q).SetRowNew(rows_ - 2, row);
+	}
+	void SetBottomValues(int const q, std::vector<T> const & row)
+	{
+		dfunc_body_.at(q).SetRowNew(1, row);
+	}
+	void SetLeftValues(int const q, std::vector<T> const & coll)
+	{
+		dfunc_body_.at(q).SetColumnNew(1, coll, q);
+	}
+	void SetRightValues(int const q, std::vector<T> const & coll)
+	{
+		dfunc_body_.at(q).SetColumnNew(colls_ - 2, coll, q);
+	}
+	// >>
+
 
 #pragma region Overload operators
 
@@ -124,8 +295,6 @@ public:
 
 #pragma endregion
 
-#pragma region Proprerties (Get/Set)
-
 	// Gets 'q'-component of probability distribution function
 	Matrix2D<T> & operator[](unsigned q);
 	
@@ -146,7 +315,6 @@ public:
 	void setLeftBoundaryValue(int const q, std::vector<T> const & coll);
 	void setRightBoundaryValue(int const q, std::vector<T> const & coll);
 
-#pragma endregion
 
 #pragma region Methods
 

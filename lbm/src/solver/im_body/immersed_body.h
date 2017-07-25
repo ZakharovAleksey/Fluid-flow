@@ -203,40 +203,6 @@ private:
 	double height_;
 };
 
-//
-////! Immersed in fluid tromb
-//class ImmersedBottomTromb : public ImmersedBody
-//{
-//public:
-//	ImmersedBottomTromb(int domainX, int domainY, int nodesNumber, Point center, double radius);
-//};
-
-//
-////! Immersed in fluid tromb
-//class ImmersedTopTromb : public ImmersedBody
-//{
-//public:
-//	ImmersedTopTromb(int domainX, int domainY, int nodesNumber, Point center, double radius);
-//};
-//
-//
-////! Immersed in fluid tromb
-//class ImmersedTopRect : public ImmersedBody
-//{
-//public:
-//	ImmersedTopRect(int domainX, int domainY, int nodesNumber, Point center, double width, double height);
-//};
-//
-//
-////! Immersed in fluid tromb
-//class ImmersedBottomRect : public ImmersedBody
-//{
-//public:
-//	ImmersedBottomRect(int domainX, int domainY, int nodesNumber, Point center, double width, double height);
-//};
-//
-
-
 
 #pragma region Microphone
 

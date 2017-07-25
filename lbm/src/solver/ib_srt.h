@@ -10,6 +10,8 @@
 #include"im_body\immersed_body.h"
 #include"bc\bc.h"
 
+#include"bc\bc_new.h"
+
 #pragma region 2d
 
 

@@ -51,7 +51,7 @@ void SRTsolver::Streaming()
 	}
 
 	// Очищаем значения попавшие на границу, так как они уже сохранены в BCs
-	fluid_->f_.fillBoundaries(0.0);
+	//fluid_->f_.fillBoundaries(0.0);
 }
 
 void SRTsolver::Collision()
@@ -72,17 +72,44 @@ void SRTsolver::Solve(int iter_numb)
 
 	std::cout << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
 
+	std::vector<double> vx(fluid_->GetColumnsNumber() - 2, 0.001);
+	std::vector<double> vx1(fluid_->GetColumnsNumber() - 2, -0.001);
+	std::vector<double> vy(fluid_->GetColumnsNumber() - 2, 0.0);
+
+
+	//
+	std::vector<double> vx2(fluid_->GetRowsNumber() - 2, 0.0);
+	std::vector<double> vy2(fluid_->GetRowsNumber() - 2, 0.001);
+
+	MyBCs* top = new VonNeumannBCs(Boundary::TOP, fluid_, *medium_, vx, vy);
+	MyBCs* bottom = new BounceBackBCs(Boundary::BOTTOM, fluid_, *medium_);
+
+	MyBCs* right = new BounceBackBCs(Boundary::RIGHT, fluid_, *medium_);
+	MyBCs* left = new BounceBackBCs(Boundary::LEFT, fluid_, *medium_);
+
 	for (int iter = 0; iter < iter_numb; ++iter) 
 	{
 		Collision();
 
-		bc_->PrepareBCValues(*medium_);
+		//bc_->PrepareBCValues(*medium_);
 		Streaming();
-		bc_->PerformBC(fluid_, *medium_);
-		bc_->RecordBCValues(*medium_);
+
+		bottom->ApplyBCs();
+		right->ApplyBCs();
+		left->ApplyBCs();
+		top->ApplyBCs();
+		
+		fluid_->f_.fillBoundaries(0.0);
+
+		//std::cout << fluid_->f_;
+
+		//std::cout << fluid_->f_;
+		//bc_->PerformBC(fluid_, *medium_);
+		//bc_->RecordBCValues(*medium_);
 
 		Recalculate();
-		
+	
+
 		feqCalculate();
 
 		std::cout << iter << " Total rho = " << fluid_->rho_.GetSum() << std::endl;
@@ -192,7 +219,7 @@ void SRT3DSolver::Streaming()
 void SRT3DSolver::Collision()
 {
 	for (int q = 0; q < kQ3d; ++q)
-		(*fluid_->f_)[q] += ((*fluid_->feq_)[q] - (*fluid_->f_)[q]) / tau_;
+		(*fluid_->f_)[q]  += ((*fluid_->feq_)[q] - (*fluid_->f_)[q]) / tau_;
 }
 
 void SRT3DSolver::Solve(int iter_numb)
