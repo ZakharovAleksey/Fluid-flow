@@ -1,7 +1,7 @@
 # LBM
 ## Introduction
 
-In current repository author represent code for Lattice Boltzmann Method (LBM) algorithm implementation. 
+In current repository author represent fluid flow simulator. 
 
 
 ### Prerequisities
